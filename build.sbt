@@ -9,7 +9,9 @@ scalaVersion := "2.11.6"
 libraryDependencies ++= Seq(
   javaJdbc,
   cache,
-  javaWs
+  javaWs,
+  "org.apache.commons" % "commons-vfs2" % "2.0",
+  "commons-io" % "commons-io" % "2.4"
 )
 
 // Play provides two styles of routers, one expects its actions to be injected, the
