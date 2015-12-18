@@ -79,8 +79,21 @@ public class vfs extends Application {
         return ok(result);
     }
 
-    public Result readdir(String account, String absPath, String dept) {
-        int dirDept = Integer.parseInt(dept);
+    public Result readdir(String path, String depth) {
+        String[] pathArray = path.split("/");
+        String account = null;
+        String absPath = null;
+
+        if (pathArray.length < 1) {
+            return notFound();
+        } else if (pathArray.length == 2) {
+            account = pathArray[0];
+            absPath = pathArray[1];
+        } else {
+            account = pathArray[0];
+        }
+
+        int dirDepth = Integer.parseInt(depth);
         String default_ws = "workspace";
         List<FileObject> fileObjects = new ArrayList<FileObject>();
 
@@ -91,13 +104,11 @@ public class vfs extends Application {
             fsManager.init();
 
             File file = new File(default_ws);
-            String path = "file://" + file.getAbsolutePath() + "/" + account + "/" + absPath;
+            String full_path = "file://" + file.getAbsolutePath() + "/" + account + ( absPath != null ? "/" + absPath : "");
 
-            FileObject fileObject = fsManager.resolveFile(path);
+            FileObject fileObject = fsManager.resolveFile(full_path);
 
             if (fileObject.getType() == FileType.FOLDER) {
-                fileObjects.add(fileObject);
-
                 Queue<FileObject> dirs = new LinkedList<>();
                 Collections.addAll(dirs, fileObject.getChildren());
 
@@ -105,7 +116,7 @@ public class vfs extends Application {
                 while (!dirs.isEmpty()) {
                     FileObject fo = dirs.remove();
                     fileObjects.add(fo);
-                    if (fo.getType() == FileType.FOLDER && dirDept > deptCount) {
+                    if (fo.getType() == FileType.FOLDER && dirDepth > deptCount) {
                         deptCount++;
                         Collections.addAll(dirs, fo.getChildren());
                     }

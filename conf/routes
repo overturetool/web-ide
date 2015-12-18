@@ -6,7 +6,8 @@
 GET     /                                                           controllers.Application.index()
 PUT     /vfs/:account/*absPath                                      controllers.vfs.appendFile(account, absPath)
 GET     /vfs/:account/$absPath<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>   controllers.vfs.readFile(account, absPath)
-GET     /vfs/:account/$absPath<[a-zA-Z0-9/_-]+>                     controllers.vfs.readdir(account, absPath, dept ?= "0")
+#GET     /vfs/:account/$absPath<[a-zA-Z0-9/_-]+>                     controllers.vfs.readdir(account, absPath, dept ?= "0")
+GET     /vfs/$path<[a-zA-Z0-9/_-]+>                                 controllers.vfs.readdir(path, depth ?= "0")
 POST    /vfs/:account/*absPath                                      controllers.vfs.writeFile(account, absPath)
 
 #Web Socket management
