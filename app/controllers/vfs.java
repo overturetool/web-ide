@@ -79,25 +79,6 @@ public class vfs extends Application {
         return ok(result);
     }
 
-    private ObjectNode mapToJson(FileObject fileObject) throws FileSystemException {
-        ObjectNode jsonObject = Json.newObject();
-
-        long size = 0;
-        if (fileObject.getType() == FileType.FILE)
-            size = fileObject.getContent().getSize();
-        else
-            size = fileObject.getChildren().length;
-
-        jsonObject.put("url", fileObject.getURL().toString());
-        jsonObject.put("name", fileObject.getName().getBaseName());
-        jsonObject.put("extension", fileObject.getName().getExtension());
-        jsonObject.put("friendly_uri", fileObject.getName().getFriendlyURI());
-        jsonObject.put("size", size);
-        jsonObject.put("type", fileObject.getType().toString());
-
-        return jsonObject;
-    }
-
     public Result readdir(String account, String absPath, String dept) {
         int dirDept = Integer.parseInt(dept);
         String default_ws = "workspace";
@@ -179,5 +160,24 @@ public class vfs extends Application {
 
 
         return ok();
+    }
+
+    private ObjectNode mapToJson(FileObject fileObject) throws FileSystemException {
+        ObjectNode jsonObject = Json.newObject();
+
+        long size = 0;
+        if (fileObject.getType() == FileType.FILE)
+            size = fileObject.getContent().getSize();
+        else
+            size = fileObject.getChildren().length;
+
+        jsonObject.put("url", fileObject.getURL().toString());
+        jsonObject.put("name", fileObject.getName().getBaseName());
+        jsonObject.put("extension", fileObject.getName().getExtension());
+        jsonObject.put("friendly_uri", fileObject.getName().getFriendlyURI());
+        jsonObject.put("size", size);
+        jsonObject.put("type", fileObject.getType().toString());
+
+        return jsonObject;
     }
 }
