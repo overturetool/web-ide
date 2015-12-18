@@ -4,6 +4,12 @@
 
 # Home page
 GET     /                           controllers.Application.index()
+PUT     /vfs/:account/*absPath      controllers.vfs.appendFile(account, absPath)
+GET     /vfs/:account/$absPath<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+> controllers.vfs.readFile(account, absPath)
+GET     /vfs/:account/$absPath<[a-zA-Z0-9/_-]+> controllers.vfs.readdir(account, absPath, dept ?= "0")
+POST    /vfs/:account/*absPath      controllers.vfs.writeFile(account, absPath)
+
+#Web Socket management
 GET     /hello                      controllers.Application.hello()
 
 # Map static resources from the /public folder to the /assets URL path
