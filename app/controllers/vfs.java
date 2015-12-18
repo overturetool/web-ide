@@ -81,8 +81,20 @@ public class vfs extends Application {
 
     private ObjectNode mapToJson(FileObject fileObject) throws FileSystemException {
         ObjectNode jsonObject = Json.newObject();
-        jsonObject.put("name", fileObject.getName().toString());
-        jsonObject.put("size", fileObject.getContent().getSize());
+
+        long size = 0;
+        if (fileObject.getType() == FileType.FILE)
+            size = fileObject.getContent().getSize();
+        else
+            size = fileObject.getChildren().length;
+
+        jsonObject.put("url", fileObject.getURL().toString());
+        jsonObject.put("name", fileObject.getName().getBaseName());
+        jsonObject.put("extension", fileObject.getName().getExtension());
+        jsonObject.put("friendly_uri", fileObject.getName().getFriendlyURI());
+        jsonObject.put("size", size);
+        jsonObject.put("type", fileObject.getType().toString());
+
         return jsonObject;
     }
 
@@ -91,7 +103,7 @@ public class vfs extends Application {
         String default_ws = "workspace";
         List<FileObject> fileObjects = new ArrayList<FileObject>();
 
-//        List<ObjectNode> jsonList = new ArrayList<>();
+        List<ObjectNode> jsonList = new ArrayList<>();
 
         try {
             StandardFileSystemManager fsManager = new StandardFileSystemManager();
@@ -105,8 +117,6 @@ public class vfs extends Application {
             if (fileObject.getType() == FileType.FOLDER) {
                 fileObjects.add(fileObject);
 
-//                jsonList.add(mapToJson(fileObject));
-
                 Queue<FileObject> dirs = new LinkedList<>();
                 Collections.addAll(dirs, fileObject.getChildren());
 
@@ -114,18 +124,21 @@ public class vfs extends Application {
                 while (!dirs.isEmpty()) {
                     FileObject fo = dirs.remove();
                     fileObjects.add(fo);
-//                    jsonList.add(mapToJson(fileObject));
                     if (fo.getType() == FileType.FOLDER && dirDept > deptCount) {
                         deptCount++;
                         Collections.addAll(dirs, fo.getChildren());
                     }
                 }
             }
+
+            for (FileObject fo : fileObjects) {
+                jsonList.add(mapToJson(fo));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return ok(fileObjects.toString());
+        return ok(jsonList.toString());
     }
 
     public Result writeFile(String account, String absPath) {
