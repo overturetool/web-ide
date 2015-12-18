@@ -13,31 +13,45 @@ public class vfs extends Application {
     public Result appendFile(String account, String absPath) {
         Http.RequestBody body = request().body();
         String path = basePath + "/" + account + "/" + absPath;
+
         CommonsVFS fileSystem = new CommonsVFS();
-        fileSystem.appendFile(path, body.asText());
+        boolean success = fileSystem.appendFile(path, body.asText());
+
+        if (!success)
+            return status(422);
+
         return ok();
     }
 
     public Result readFile(String account, String absPath) {
         String path = basePath + "/" + account + "/" + absPath;
+
         CommonsVFS fileSystem = new CommonsVFS();
         String result = fileSystem.readFile(path);
+
         return ok(result);
     }
 
     public Result readdir(String path, String depth) {
         int dirDepth = Integer.parseInt(depth);
         String full_path = basePath + "/" + path;
+
         CommonsVFS fileSystem = new CommonsVFS();
         List<ObjectNode> jsonList = fileSystem.readdir(full_path, dirDepth);
+
         return ok(jsonList.toString());
     }
 
     public Result writeFile(String account, String absPath) {
         Http.RequestBody body = request().body();
         String path = basePath + "/" + account + "/" + absPath;
+
         CommonsVFS fileSystem = new CommonsVFS();
-        fileSystem.writeFile(path, body.asText());
+        boolean success = fileSystem.writeFile(path, body.asText());
+
+        if (!success)
+            return status(422);
+
         return ok();
     }
 }

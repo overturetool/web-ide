@@ -14,6 +14,7 @@ import java.util.*;
 public class CommonsVFS implements IVFS {
     @Override
     public boolean appendFile(String path, String content) {
+        boolean success = false;
         StandardFileSystemManager fsManager;
         PrintWriter pw = null;
         OutputStream out;
@@ -35,14 +36,17 @@ public class CommonsVFS implements IVFS {
 
             fileObject.close();
             fsManager.close();
+
+            success = true;
         } catch (FileSystemException e) {
             e.printStackTrace();
         } finally {
-            if (pw != null)
+            if (pw != null) {
                 pw.close();
+            }
         }
 
-        return false;
+        return success;
     }
 
     @Override
@@ -108,6 +112,7 @@ public class CommonsVFS implements IVFS {
 
     @Override
     public boolean writeFile(String path, String content) {
+        boolean success = false;
         StandardFileSystemManager fsManager;
         PrintWriter pw = null;
         OutputStream out;
@@ -130,6 +135,8 @@ public class CommonsVFS implements IVFS {
 
             fileObject.close();
             fsManager.close();
+
+            success = true;
         } catch (FileSystemException e) {
             e.printStackTrace();
         } finally {
@@ -137,7 +144,7 @@ public class CommonsVFS implements IVFS {
                 pw.close();
         }
 
-        return false;
+        return success;
     }
 
     private ObjectNode mapToJson(FileObject fileObject) throws FileSystemException {
