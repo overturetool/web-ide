@@ -147,6 +147,32 @@ public class CommonsVFS implements IVFS {
         return success;
     }
 
+    public boolean exists(String rel_path) {
+        return getFileObject(rel_path) != null;
+    }
+
+    public String getExtension(String rel_path) {
+        FileObject fileObject = getFileObject(rel_path);
+
+        if (fileObject == null)
+            return null;
+
+        return fileObject.getName().getExtension();
+    }
+
+    private FileObject getFileObject(String rel_path) {
+        try {
+            StandardFileSystemManager fsManager = new StandardFileSystemManager();
+            fsManager.init();
+            String full_path = FSSchemes.File + "://" + new File(rel_path).getAbsolutePath();
+            return fsManager.resolveFile(full_path);
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
     private ObjectNode mapToJson(FileObject fileObject) throws FileSystemException {
         ObjectNode jsonObject = Json.newObject();
 

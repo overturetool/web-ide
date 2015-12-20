@@ -11,7 +11,8 @@ libraryDependencies ++= Seq(
   cache,
   javaWs,
   "org.apache.commons" % "commons-vfs2" % "2.0",
-  "commons-io" % "commons-io" % "2.4"
+  "commons-io" % "commons-io" % "2.4",
+  "org.overturetool.core" % "interpreter" % "2.3.0"
 )
 
 // Play provides two styles of routers, one expects its actions to be injected, the

@@ -12,4 +12,8 @@ public interface IVFS {
     List<ObjectNode> readdir(String path, int depth);
 
     boolean writeFile(String path, String content);
+
+    boolean exists(String rel_path);
+
+    String getExtension(String rel_path);
 }
