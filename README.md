@@ -7,10 +7,21 @@
 ## Endpoints
 #### readFile
 `
-host/vfs/<account>/<path>*/file.extension
+localhost:9000/vfs/<account>/<path>*/file.extension
 `
 
 #### readdir
 `
-host/vfs/<account>/<path>*
+localhost:9000/vfs/<account>/<path>*
+`
+
+#### debug
+`
+ws://localhost:9000/debug/kdsaaby/kds_ws/bom.vdmsl?entry=UGFydHMoMSwgYm9tKQ==
+`
+
+where:
+
+`
+Base64.decode(UGFydHMoMSwgYm9tKQ==) = "Parts(1, bom)"
 `
