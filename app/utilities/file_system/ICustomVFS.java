@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.List;
 
-public interface IVFS {
+public interface ICustomVFS {
     boolean appendFile(String path, String content);
 
     String readFile(String path);

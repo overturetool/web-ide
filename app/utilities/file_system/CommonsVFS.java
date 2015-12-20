@@ -11,7 +11,7 @@ import play.libs.Json;
 import java.io.*;
 import java.util.*;
 
-public class CommonsVFS implements IVFS {
+public class CommonsVFS implements ICustomVFS {
     @Override
     public boolean appendFile(String path, String content) {
         boolean success = false;
