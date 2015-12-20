@@ -1,4 +1,4 @@
-package utilities.file_system;
+package utilities.file_system.commons_vfs2;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.io.IOUtils;
@@ -7,6 +7,8 @@ import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileType;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import play.libs.Json;
+import utilities.file_system.FSSchemes;
+import utilities.file_system.ICustomVFS;
 
 import java.io.*;
 import java.util.*;

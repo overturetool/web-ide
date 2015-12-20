@@ -1,5 +1,7 @@
 package utilities.debug;
 
+import utilities.file_system.ICustomVF;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,15 +15,19 @@ public class DBGPReaderConnector {
     private BufferedReader in;
     private PrintWriter out;
 
+    private String entry;
     private String extension;
-    private String entryPoint;
-    private String rel_path;
+    private String absolutePath;
 
-    public DBGPReaderConnector(int port, String extension, String entryPoint, String rel_path) {
+    public DBGPReaderConnector(int port, String entry, ICustomVF file) {
+        this(port, entry, file.getExtension(), file.getAbsolutePath());
+    }
+
+    public DBGPReaderConnector(int port, String entry, String extension, String absolutePath) {
         this.port = port;
+        this.entry = entry;
         this.extension = extension;
-        this.entryPoint = entryPoint;
-        this.rel_path = rel_path;
+        this.absolutePath = absolutePath;
     }
 
     public void connect() {
@@ -39,7 +45,7 @@ public class DBGPReaderConnector {
         try {
             System.out.println("Ready to connect");
 
-            DBGPReaderServer overture = new DBGPReaderServer(extension, "localhost", port, "webIDE", entryPoint, "file://" + new File(rel_path).getAbsolutePath());
+            DBGPReaderServer overture = new DBGPReaderServer("-" + extension, "localhost", port, "webIDE", entry, absolutePath);
             overture.start();
 
             client = server.accept();

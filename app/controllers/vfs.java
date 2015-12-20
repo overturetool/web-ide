@@ -3,7 +3,7 @@ package controllers;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import play.mvc.Http;
 import play.mvc.Result;
-import utilities.file_system.CommonsVFS;
+import utilities.file_system.commons_vfs2.CommonsVFS;
 
 import java.util.List;
 

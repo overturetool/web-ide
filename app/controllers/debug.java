@@ -4,8 +4,8 @@ import org.apache.commons.codec.binary.StringUtils;
 import play.libs.F;
 import play.mvc.WebSocket;
 import utilities.debug.DBGPReaderConnector;
-import utilities.file_system.CommonsVFS;
-import utilities.file_system.ICustomVFS;
+import utilities.file_system.commons_vfs2.CommonsVF;
+import utilities.file_system.ICustomVF;
 
 import java.util.Base64;
 
@@ -13,14 +13,14 @@ public class debug extends Application {
     private final String basePath = "workspace";
 
     public WebSocket<String> ws(String path) {
-        String entry = request().getQueryString("entry");
-        String entryPoint = StringUtils.newStringUtf8(Base64.getDecoder().decode(entry));
+        String entryEncoded = request().getQueryString("entry");
+        String entryDecoded = StringUtils.newStringUtf8(Base64.getDecoder().decode(entryEncoded));
 
         int port = 9223;
-        String rel_path = basePath + "/" + path;
+        String relativePath = basePath + "/" + path;
+        ICustomVF file = new CommonsVF(relativePath);
 
-        ICustomVFS vfs = new CommonsVFS();
-        if (!vfs.exists(rel_path))
+        if (!file.exists())
             return new WebSocket<String>() {
                 @Override
                 public void onReady(In<String> in, Out<String> out) {
@@ -29,9 +29,7 @@ public class debug extends Application {
                 }
             };
 
-        String extension = "-" + vfs.getExtension(rel_path);
-
-        DBGPReaderConnector connector = new DBGPReaderConnector(port, extension, entryPoint, rel_path);
+        DBGPReaderConnector connector = new DBGPReaderConnector(port, entryDecoded, file);
         connector.connect();
 
         return new WebSocket<String>() {
