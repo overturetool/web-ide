@@ -24,10 +24,6 @@ public class DBGPReaderConnector {
         this.rel_path = rel_path;
     }
 
-    public DBGPReaderConnector(int port) {
-        this.port = port;
-    }
-
     public void connect() {
         try {
             server = new ServerSocket(port);
@@ -60,7 +56,7 @@ public class DBGPReaderConnector {
             out = new PrintWriter(client.getOutputStream(), true);
         }
         catch (IOException e) {
-            System.out.println("Read failed");
+            System.out.println("Exception thrown while initiating input and output streams");
             e.printStackTrace();
         }
     }
