@@ -6,7 +6,7 @@ import play.mvc.WebSocket;
 import utilities.DBGPReaderConnector;
 import utilities.DBGPReaderServer;
 import utilities.file_system.CommonsVFS;
-import utilities.file_system.IVFS;
+import utilities.file_system.ICustomVFS;
 
 import java.io.File;
 import java.util.Base64;
@@ -22,7 +22,7 @@ public class debug extends Application {
         int port = 37123;
         String rel_path = basePath + "/" + path;
 
-        IVFS vfs = new CommonsVFS();
+        ICustomVFS vfs = new CommonsVFS();
         if (!vfs.exists(rel_path))
             return new WebSocket<String>() {
                 @Override
