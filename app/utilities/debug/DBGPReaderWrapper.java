@@ -1,4 +1,4 @@
-package utilities;
+package utilities.debug;
 
 import org.overture.interpreter.debug.DBGPReaderV2;
 import org.overture.interpreter.runtime.Interpreter;

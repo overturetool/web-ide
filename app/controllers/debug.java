@@ -3,14 +3,11 @@ package controllers;
 import org.apache.commons.codec.binary.StringUtils;
 import play.libs.F;
 import play.mvc.WebSocket;
-import utilities.DBGPReaderConnector;
-import utilities.DBGPReaderServer;
+import utilities.debug.DBGPReaderConnector;
 import utilities.file_system.CommonsVFS;
 import utilities.file_system.ICustomVFS;
 
-import java.io.File;
 import java.util.Base64;
-import java.util.concurrent.TimeUnit;
 
 public class debug extends Application {
     private final String basePath = "workspace";
@@ -19,7 +16,7 @@ public class debug extends Application {
         String entry = request().getQueryString("entry");
         String entryPoint = StringUtils.newStringUtf8(Base64.getDecoder().decode(entry));
 
-        int port = 37123;
+        int port = 9223;
         String rel_path = basePath + "/" + path;
 
         ICustomVFS vfs = new CommonsVFS();
@@ -34,23 +31,8 @@ public class debug extends Application {
 
         String extension = "-" + vfs.getExtension(rel_path);
 
-        DBGPReaderConnector connector = new DBGPReaderConnector(port);
-        connector.start();
-
-        try {
-            TimeUnit.MILLISECONDS.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        DBGPReaderServer overture = new DBGPReaderServer(extension, "localhost", port, "webIDE", entryPoint, "file://" + new File(rel_path).getAbsolutePath());
-        overture.start();
-
-        try {
-            TimeUnit.MILLISECONDS.sleep(500);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        DBGPReaderConnector connector = new DBGPReaderConnector(port, extension, entryPoint, rel_path);
+        connector.connect();
 
         return new WebSocket<String>() {
             // Called when the Websocket Handshake is done.

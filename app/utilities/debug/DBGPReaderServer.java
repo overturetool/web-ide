@@ -1,9 +1,8 @@
-package utilities;
+package utilities.debug;
 
 import org.overture.interpreter.debug.DBGPReaderV2;
 
-public class DBGPReaderServer implements Runnable {
-    private Thread t;
+public class DBGPReaderServer extends Thread {
     private String[] args;
 
     public DBGPReaderServer(String type, String host, int port, String key, String entry, String file) {
@@ -20,12 +19,5 @@ public class DBGPReaderServer implements Runnable {
     @Override
     public void run() {
         DBGPReaderV2.main(args);
-    }
-
-    public void start () {
-        if (t == null) {
-            t = new Thread (this, this.getClass().toString());
-            t.start();
-        }
     }
 }
