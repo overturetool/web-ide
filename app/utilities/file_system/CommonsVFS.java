@@ -148,22 +148,34 @@ public class CommonsVFS implements IVFS {
     }
 
     public boolean exists(String rel_path) {
-        return getFileObject(rel_path) != null;
+        try {
+            FileObject fileObject = getFileObject(rel_path);
+            return fileObject != null && fileObject.exists();
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
     public String getExtension(String rel_path) {
         FileObject fileObject = getFileObject(rel_path);
 
-        if (fileObject == null)
-            return null;
+        try {
+            if (fileObject != null && fileObject.exists())
+                return fileObject.getName().getExtension();
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+        }
 
-        return fileObject.getName().getExtension();
+        return null;
     }
 
     private FileObject getFileObject(String rel_path) {
         try {
             StandardFileSystemManager fsManager = new StandardFileSystemManager();
             fsManager.init();
+
             String full_path = FSSchemes.File + "://" + new File(rel_path).getAbsolutePath();
             return fsManager.resolveFile(full_path);
         } catch (FileSystemException e) {
