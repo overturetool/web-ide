@@ -3,6 +3,7 @@ package controllers;
 import org.apache.commons.codec.binary.StringUtils;
 import play.libs.F;
 import play.mvc.WebSocket;
+import utilities.ServerConfigurations;
 import utilities.debug.DBGPReaderConnector;
 import utilities.file_system.commons_vfs2.CommonsVF;
 import utilities.file_system.ICustomVF;
@@ -10,15 +11,13 @@ import utilities.file_system.ICustomVF;
 import java.util.Base64;
 
 public class debug extends Application {
-    private final String basePath = "workspace";
-
     public WebSocket<String> ws(String path) {
         String type = request().getQueryString("type");
         String entryEncoded = request().getQueryString("entry");
         String entryDecoded = StringUtils.newStringUtf8(Base64.getDecoder().decode(entryEncoded));
 
         int port = 9223;
-        String relativePath = basePath + "/" + path;
+        String relativePath = ServerConfigurations.basePath + "/" + path;
 
         ICustomVF file = new CommonsVF(relativePath);
 
