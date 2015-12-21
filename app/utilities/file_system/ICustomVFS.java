@@ -1,14 +1,13 @@
 package utilities.file_system;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.util.List;
 
-public interface ICustomVFS {
+public interface ICustomVFS<T> {
     boolean appendFile(String path, String content);
 
     String readFile(String path);
 
-    ArrayNode readdir(String path, int depth);
+    List<T> readdir(String path, int depth);
 
     boolean writeFile(String path, String content);
 

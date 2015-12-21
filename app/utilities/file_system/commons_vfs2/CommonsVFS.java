@@ -1,20 +1,17 @@
 package utilities.file_system.commons_vfs2;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileType;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
-import play.libs.Json;
 import utilities.file_system.FSSchemes;
 import utilities.file_system.ICustomVFS;
 
 import java.io.*;
 import java.util.*;
 
-public class CommonsVFS implements ICustomVFS {
+public class CommonsVFS implements ICustomVFS<FileObject> {
     @Override
     public boolean appendFile(String path, String content) {
         boolean success = false;
@@ -77,29 +74,36 @@ public class CommonsVFS implements ICustomVFS {
     }
 
     @Override
-    public ArrayNode readdir(String path, int depth) {
-        ArrayNode dir = Json.newArray();
+    public List<FileObject> readdir(String path, int depth) {
+        List<FileObject> fileObjects = new ArrayList<>();
 
-        File root = new File(path);
-        File[] list = root.listFiles();
+        try {
+            StandardFileSystemManager fsManager = new StandardFileSystemManager();
+            fsManager.init();
 
-        if (list == null) return dir;
+            String full_path = FSSchemes.File + "://" + new File(path).getAbsolutePath();
+            FileObject fileObject = fsManager.resolveFile(full_path);
 
-        for (File file: list) {
-            ObjectNode node = Json.newObject();
+            if (fileObject.getType() == FileType.FOLDER) {
+                Queue<FileObject> dirs = new LinkedList<>();
+                Collections.addAll(dirs, fileObject.getChildren());
 
-            node.put("name", file.getName());
-            node.put("path", file.getPath());
-            node.put("type", file.isDirectory() ? "directory" : "file");
-
-            if (file.isDirectory() && depth > 1) {
-                node.set("children", readdir(file.getAbsolutePath(), depth-1));
+                int deptCount = 0;
+                while (!dirs.isEmpty()) {
+                    FileObject fo = dirs.remove();
+                    fileObjects.add(fo);
+                    if (fo.getType() == FileType.FOLDER && depth > deptCount) {
+                        deptCount++;
+                        Collections.addAll(dirs, fo.getChildren());
+                    }
+                }
             }
 
-            dir.add(node);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        return dir;
+        return fileObjects;
     }
 
     @Override
