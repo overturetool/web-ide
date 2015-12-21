@@ -1,5 +1,7 @@
 package utilities.file_system;
 
+import java.io.File;
+
 public interface ICustomVF<T> {
     T getFile();
 
@@ -10,4 +12,6 @@ public interface ICustomVF<T> {
     String getAbsolutePath();
 
     boolean isDirectory();
+
+    File getIOFile();
 }

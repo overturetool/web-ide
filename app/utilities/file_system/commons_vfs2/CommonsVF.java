@@ -11,14 +11,17 @@ import java.io.File;
 
 public class CommonsVF implements ICustomVF<FileObject> {
     private FileObject file;
+    private File IOFile;
 
-    public CommonsVF(String rel_path) {
+    public CommonsVF(String relativePath) {
+        IOFile = new File(relativePath);
+
         try {
             StandardFileSystemManager fsManager = new StandardFileSystemManager();
             fsManager.init();
 
-            String full_path = FSSchemes.File + "://" + new File(rel_path).getAbsolutePath();
-            this.file =  fsManager.resolveFile(full_path);
+            String absolutePath = FSSchemes.File + "://" + IOFile.getAbsolutePath();
+            this.file =  fsManager.resolveFile(absolutePath);
         } catch (FileSystemException e) {
             e.printStackTrace();
         }
@@ -56,6 +59,7 @@ public class CommonsVF implements ICustomVF<FileObject> {
         return null;
     }
 
+    @Override
     public boolean isDirectory() {
         try {
             return file.getType() == FileType.FOLDER;
@@ -64,5 +68,10 @@ public class CommonsVF implements ICustomVF<FileObject> {
         }
 
         return false;
+    }
+
+    @Override
+    public File getIOFile() {
+        return IOFile;
     }
 }

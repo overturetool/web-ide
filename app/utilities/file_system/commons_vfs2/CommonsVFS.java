@@ -1,19 +1,17 @@
 package utilities.file_system.commons_vfs2;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileType;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
-import play.libs.Json;
 import utilities.file_system.FSSchemes;
 import utilities.file_system.ICustomVFS;
 
 import java.io.*;
 import java.util.*;
 
-public class CommonsVFS implements ICustomVFS {
+public class CommonsVFS implements ICustomVFS<FileObject> {
     @Override
     public boolean appendFile(String path, String content) {
         boolean success = false;
@@ -76,9 +74,8 @@ public class CommonsVFS implements ICustomVFS {
     }
 
     @Override
-    public List<ObjectNode> readdir(String path, int depth) {
+    public List<FileObject> readdir(String path, int depth) {
         List<FileObject> fileObjects = new ArrayList<>();
-        List<ObjectNode> jsonList = new ArrayList<>();
 
         try {
             StandardFileSystemManager fsManager = new StandardFileSystemManager();
@@ -102,14 +99,11 @@ public class CommonsVFS implements ICustomVFS {
                 }
             }
 
-            for (FileObject fo : fileObjects) {
-                jsonList.add(mapToJson(fo));
-            }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return jsonList;
+        return fileObjects;
     }
 
     @Override
@@ -185,24 +179,5 @@ public class CommonsVFS implements ICustomVFS {
         }
 
         return null;
-    }
-
-    private ObjectNode mapToJson(FileObject fileObject) throws FileSystemException {
-        ObjectNode jsonObject = Json.newObject();
-
-        long size = 0;
-        if (fileObject.getType() == FileType.FILE)
-            size = fileObject.getContent().getSize();
-        else
-            size = fileObject.getChildren().length;
-
-        jsonObject.put("url", fileObject.getURL().toString());
-        jsonObject.put("name", fileObject.getName().getBaseName());
-        jsonObject.put("extension", fileObject.getName().getExtension());
-        jsonObject.put("friendly_uri", fileObject.getName().getFriendlyURI());
-        jsonObject.put("size", size);
-        jsonObject.put("type", fileObject.getType().toString());
-
-        return jsonObject;
     }
 }
