@@ -1,5 +1,6 @@
 package utilities.file_system.commons_vfs2;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.FileObject;
@@ -76,40 +77,29 @@ public class CommonsVFS implements ICustomVFS {
     }
 
     @Override
-    public List<ObjectNode> readdir(String path, int depth) {
-        List<FileObject> fileObjects = new ArrayList<>();
-        List<ObjectNode> jsonList = new ArrayList<>();
+    public ArrayNode readdir(String path, int depth) {
+        ArrayNode dir = Json.newArray();
 
-        try {
-            StandardFileSystemManager fsManager = new StandardFileSystemManager();
-            fsManager.init();
+        File root = new File(path);
+        File[] list = root.listFiles();
 
-            String full_path = FSSchemes.File + "://" + new File(path).getAbsolutePath();
-            FileObject fileObject = fsManager.resolveFile(full_path);
+        if (list == null) return dir;
 
-            if (fileObject.getType() == FileType.FOLDER) {
-                Queue<FileObject> dirs = new LinkedList<>();
-                Collections.addAll(dirs, fileObject.getChildren());
+        for (File file: list) {
+            ObjectNode node = Json.newObject();
 
-                int deptCount = 0;
-                while (!dirs.isEmpty()) {
-                    FileObject fo = dirs.remove();
-                    fileObjects.add(fo);
-                    if (fo.getType() == FileType.FOLDER && depth > deptCount) {
-                        deptCount++;
-                        Collections.addAll(dirs, fo.getChildren());
-                    }
-                }
+            node.put("name", file.getName());
+            node.put("path", file.getPath());
+            node.put("type", file.isDirectory() ? "directory" : "file");
+
+            if (file.isDirectory() && depth > 1) {
+                node.set("children", readdir(file.getAbsolutePath(), depth-1));
             }
 
-            for (FileObject fo : fileObjects) {
-                jsonList.add(mapToJson(fo));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+            dir.add(node);
         }
 
-        return jsonList;
+        return dir;
     }
 
     @Override
@@ -185,24 +175,5 @@ public class CommonsVFS implements ICustomVFS {
         }
 
         return null;
-    }
-
-    private ObjectNode mapToJson(FileObject fileObject) throws FileSystemException {
-        ObjectNode jsonObject = Json.newObject();
-
-        long size = 0;
-        if (fileObject.getType() == FileType.FILE)
-            size = fileObject.getContent().getSize();
-        else
-            size = fileObject.getChildren().length;
-
-        jsonObject.put("url", fileObject.getURL().toString());
-        jsonObject.put("name", fileObject.getName().getBaseName());
-        jsonObject.put("extension", fileObject.getName().getExtension());
-        jsonObject.put("friendly_uri", fileObject.getName().getFriendlyURI());
-        jsonObject.put("size", size);
-        jsonObject.put("type", fileObject.getType().toString());
-
-        return jsonObject;
     }
 }

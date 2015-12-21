@@ -1,7 +1,6 @@
 package utilities.file_system;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.util.List;
 
 public interface ICustomVFS {
@@ -9,7 +8,7 @@ public interface ICustomVFS {
 
     String readFile(String path);
 
-    List<ObjectNode> readdir(String path, int depth);
+    ArrayNode readdir(String path, int depth);
 
     boolean writeFile(String path, String content);
 

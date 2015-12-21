@@ -1,5 +1,6 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -36,9 +37,9 @@ public class vfs extends Application {
         String full_path = ServerConfigurations.basePath + "/" + path;
 
         CommonsVFS fileSystem = new CommonsVFS();
-        List<ObjectNode> jsonList = fileSystem.readdir(full_path, dirDepth);
+        ArrayNode dir = fileSystem.readdir(full_path, dirDepth);
 
-        return ok(jsonList.toString());
+        return ok(dir.toString());
     }
 
     public Result writeFile(String account, String absPath) {
