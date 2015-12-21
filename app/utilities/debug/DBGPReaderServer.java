@@ -7,7 +7,7 @@ public class DBGPReaderServer extends Thread {
 
     public DBGPReaderServer(String type, String host, int port, String key, String entry, String file) {
         this.args = new String[]{
-            type,
+            "-" + type,
             "-h", host,
             "-p", Integer.toString(port),
             "-k", key,

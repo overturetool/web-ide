@@ -8,4 +8,6 @@ public interface ICustomVF<T> {
     String getExtension();
 
     String getAbsolutePath();
+
+    boolean isDirectory();
 }

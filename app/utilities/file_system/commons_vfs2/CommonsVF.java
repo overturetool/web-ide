@@ -2,6 +2,7 @@ package utilities.file_system.commons_vfs2;
 
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
+import org.apache.commons.vfs2.FileType;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import utilities.file_system.FSSchemes;
 import utilities.file_system.ICustomVF;
@@ -53,5 +54,15 @@ public class CommonsVF implements ICustomVF<FileObject> {
         }
 
         return null;
+    }
+
+    public boolean isDirectory() {
+        try {
+            return file.getType() == FileType.FOLDER;
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 }

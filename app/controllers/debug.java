@@ -13,11 +13,13 @@ public class debug extends Application {
     private final String basePath = "workspace";
 
     public WebSocket<String> ws(String path) {
+        String type = request().getQueryString("type");
         String entryEncoded = request().getQueryString("entry");
         String entryDecoded = StringUtils.newStringUtf8(Base64.getDecoder().decode(entryEncoded));
 
         int port = 9223;
         String relativePath = basePath + "/" + path;
+
         ICustomVF file = new CommonsVF(relativePath);
 
         if (!file.exists())
@@ -29,7 +31,13 @@ public class debug extends Application {
                 }
             };
 
-        DBGPReaderConnector connector = new DBGPReaderConnector(port, entryDecoded, file);
+        DBGPReaderConnector connector;
+
+        if (file.isDirectory())
+            connector = new DBGPReaderConnector(port, entryDecoded, type, file);
+        else
+            connector = new DBGPReaderConnector(port, entryDecoded, file);
+
         connector.connect();
 
         return new WebSocket<String>() {

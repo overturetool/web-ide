@@ -16,17 +16,21 @@ public class DBGPReaderConnector {
     private PrintWriter out;
 
     private String entry;
-    private String extension;
+    private String type;
     private String absolutePath;
 
     public DBGPReaderConnector(int port, String entry, ICustomVF file) {
         this(port, entry, file.getExtension(), file.getAbsolutePath());
     }
 
-    public DBGPReaderConnector(int port, String entry, String extension, String absolutePath) {
+    public DBGPReaderConnector(int port, String entry, String type, ICustomVF dir) {
+        this(port, entry, type, dir.getAbsolutePath());
+    }
+
+    public DBGPReaderConnector(int port, String entry, String type, String absolutePath) {
         this.port = port;
         this.entry = entry;
-        this.extension = extension;
+        this.type = type;
         this.absolutePath = absolutePath;
     }
 
@@ -45,7 +49,7 @@ public class DBGPReaderConnector {
         try {
             System.out.println("Ready to connect");
 
-            DBGPReaderServer overture = new DBGPReaderServer("-" + extension, "localhost", port, "webIDE", entry, absolutePath);
+            DBGPReaderServer overture = new DBGPReaderServer(type, "localhost", port, "webIDE", entry, absolutePath);
             overture.start();
 
             client = server.accept();

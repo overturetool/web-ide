@@ -13,7 +13,7 @@ GET     /vfs/$path<[a-zA-Z0-9/_-]+>                                 controllers.
 POST    /vfs/:account/*absPath                                      controllers.vfs.writeFile(account, absPath)
 
 #Web Socket management
-GET     /debug/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>             controllers.debug.ws(path)
+GET     /debug/$path<[a-zA-Z0-9/_-]+.*>                               controllers.debug.ws(path)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

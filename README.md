@@ -25,3 +25,11 @@ where:
 `
 Base64.decode(UGFydHMoMSwgYm9tKQ==) = "Parts(1, bom)"
 `
+
+#### debug project
+
+Give path to the base directory, AND specify type of project as query string parameter.
+
+`
+ws://localhost:9000/debug/kdsaaby/kds_ws/barSL?entry=VGVzdEJhZ0FsbCgp&type=vdmsl
+`
