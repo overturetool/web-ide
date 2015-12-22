@@ -1,10 +1,12 @@
 package utilities.file_system.commons_vfs2;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileType;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
+import play.libs.Json;
 import utilities.file_system.FSSchemes;
 import utilities.file_system.IVFS;
 
@@ -89,7 +91,7 @@ public class CommonsVFS implements IVFS<FileObject> {
                 fileObjects.add(subFileObject);
 
                 if (subFileObject.getType() == FileType.FOLDER) {
-                    String subPath = path + subFileObject.getName().getBaseName();
+                    String subPath = subFileObject.getURL().getPath();
 
                     if (depth == -1)
                         fileObjects.addAll(readdir(subPath, depth));
@@ -103,6 +105,41 @@ public class CommonsVFS implements IVFS<FileObject> {
         }
 
         return fileObjects;
+    }
+
+    public List<ObjectNode> readDirectoryAsJSONTree(String path, int depth) {
+        List<ObjectNode> nodes = new ArrayList<>();
+
+        try {
+            StandardFileSystemManager fsManager = new StandardFileSystemManager();
+            fsManager.init();
+
+            String absolutePath = FSSchemes.File + "://" + new File(path).getAbsolutePath();
+            FileObject fileObject = fsManager.resolveFile(absolutePath);
+
+            for (FileObject subFileObject : fileObject.getChildren()) {
+                ObjectNode jsonObject = Json.newObject();
+                jsonObject.put("name", subFileObject.getName().getBaseName());
+                jsonObject.put("type", subFileObject.getType() == FileType.FOLDER ? "directory" : "file");
+
+                if (subFileObject.getType() == FileType.FOLDER) {
+                    String subPath = path + "/" + subFileObject.getName().getBaseName();
+
+                    if (depth == -1) {
+                        jsonObject.putPOJO("children", readDirectoryAsJSONTree(subPath, -1));
+                    }
+                    else if (depth > 0) {
+                        jsonObject.putPOJO("children", readDirectoryAsJSONTree(subPath, depth - 1));
+                    }
+                }
+
+                nodes.add(jsonObject);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return nodes;
     }
 
     @Override

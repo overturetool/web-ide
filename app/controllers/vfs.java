@@ -1,12 +1,9 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.commons.vfs2.FileObject;
 import play.mvc.Http;
 import play.mvc.Result;
 import utilities.ServerConfigurations;
-import utilities.file_system.IVFMapper;
-import utilities.file_system.commons_vfs2.CommonsVFMapper;
 import utilities.file_system.commons_vfs2.CommonsVFS;
 
 import java.util.List;
@@ -39,12 +36,12 @@ public class vfs extends Application {
         String full_path = ServerConfigurations.basePath + "/" + path;
 
         CommonsVFS fileSystem = new CommonsVFS();
-        List<FileObject> fileObjects = fileSystem.readdir(full_path, dirDepth);
+        List<ObjectNode> fileObjects = fileSystem.readDirectoryAsJSONTree(full_path, dirDepth);
 
-        IVFMapper<FileObject> mapper = new CommonsVFMapper();
-        List<ObjectNode> jsonList = mapper.toJSONTree(fileObjects, dirDepth);
+//        IVFMapper<FileObject> mapper = new CommonsVFMapper();
+//        List<ObjectNode> jsonList = mapper.toJSONTree(fileObjects, dirDepth);
 
-        return ok(jsonList.toString());
+        return ok(fileObjects.toString());
     }
 
     public Result writeFile(String account, String absPath) {
