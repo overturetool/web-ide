@@ -5,11 +5,11 @@ import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileType;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import utilities.file_system.FSSchemes;
-import utilities.file_system.ICustomVF;
+import utilities.file_system.IVF;
 
 import java.io.File;
 
-public class CommonsVF implements ICustomVF<FileObject> {
+public class CommonsVF implements IVF<FileObject> {
     private FileObject file;
     private File IOFile;
 

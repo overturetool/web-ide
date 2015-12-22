@@ -6,12 +6,12 @@ import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileType;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import utilities.file_system.FSSchemes;
-import utilities.file_system.ICustomVFS;
+import utilities.file_system.IVFS;
 
 import java.io.*;
 import java.util.*;
 
-public class CommonsVFS implements ICustomVFS<FileObject> {
+public class CommonsVFS implements IVFS<FileObject> {
     @Override
     public boolean appendFile(String path, String content) {
         boolean success = false;
@@ -81,20 +81,24 @@ public class CommonsVFS implements ICustomVFS<FileObject> {
             StandardFileSystemManager fsManager = new StandardFileSystemManager();
             fsManager.init();
 
-            String full_path = FSSchemes.File + "://" + new File(path).getAbsolutePath();
-            FileObject fileObject = fsManager.resolveFile(full_path);
+            String absolutePath = FSSchemes.File + "://" + new File(path).getAbsolutePath();
+            FileObject fileObject = fsManager.resolveFile(absolutePath);
 
             if (fileObject.getType() == FileType.FOLDER) {
                 Queue<FileObject> dirs = new LinkedList<>();
                 Collections.addAll(dirs, fileObject.getChildren());
 
-                int deptCount = 0;
                 while (!dirs.isEmpty()) {
                     FileObject fo = dirs.remove();
                     fileObjects.add(fo);
-                    if (fo.getType() == FileType.FOLDER && depth > deptCount) {
-                        deptCount++;
-                        Collections.addAll(dirs, fo.getChildren());
+
+                    if (fo.getType() == FileType.FOLDER) {
+                        if (depth == -1)
+                            Collections.addAll(dirs, fo.getChildren());
+                        else if (depth > 0) {
+                            Collections.addAll(dirs, fo.getChildren());
+                            depth = depth - 1;
+                        }
                     }
                 }
             }

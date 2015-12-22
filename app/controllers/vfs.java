@@ -5,7 +5,7 @@ import org.apache.commons.vfs2.FileObject;
 import play.mvc.Http;
 import play.mvc.Result;
 import utilities.ServerConfigurations;
-import utilities.file_system.ICustomVFMapper;
+import utilities.file_system.IVFMapper;
 import utilities.file_system.commons_vfs2.CommonsVFMapper;
 import utilities.file_system.commons_vfs2.CommonsVFS;
 
@@ -41,8 +41,8 @@ public class vfs extends Application {
         CommonsVFS fileSystem = new CommonsVFS();
         List<FileObject> fileObjects = fileSystem.readdir(full_path, dirDepth);
 
-        ICustomVFMapper<FileObject> mapper = new CommonsVFMapper();
-        List<ObjectNode> jsonList = mapper.toJSONTree(fileObjects);
+        IVFMapper<FileObject> mapper = new CommonsVFMapper();
+        List<ObjectNode> jsonList = mapper.toJSONTree(fileObjects, dirDepth);
 
         return ok(jsonList.toString());
     }

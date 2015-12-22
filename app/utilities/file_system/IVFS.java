@@ -2,7 +2,7 @@ package utilities.file_system;
 
 import java.util.List;
 
-public interface ICustomVFS<T> {
+public interface IVFS<T> {
     boolean appendFile(String path, String content);
 
     String readFile(String path);
