@@ -6,6 +6,8 @@ import java.io.File;
 import java.util.List;
 
 public interface ICustomVFMapper<T> {
+    List<ObjectNode> toJSONTree(List<T> fileObjects);
+
     List<ObjectNode> toJSONList(List<T> fileObjects);
 
     File toIOFile(T file);

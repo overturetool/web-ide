@@ -8,10 +8,37 @@ import play.libs.Json;
 import utilities.file_system.ICustomVFMapper;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class CommonsVFMapper implements ICustomVFMapper<FileObject> {
+
+    @Override
+    public List<ObjectNode> toJSONTree(List<FileObject> fileObjects) {
+        List<ObjectNode> jsonList = new ArrayList<>();
+
+        for (FileObject fileObject : fileObjects) {
+            try {
+                ObjectNode jsonObject = Json.newObject();
+                jsonObject.put("name", fileObject.getName().getBaseName());
+                jsonObject.put("type", fileObject.getType() == FileType.FOLDER ? "directory" : "file");
+
+                if (fileObject.getType() == FileType.FOLDER) {
+
+                    FileObject[] childrenArray = fileObject.getChildren();
+                    List<FileObject> children = new ArrayList<>();
+                    Collections.addAll(children, childrenArray);
+
+                    jsonObject.putPOJO("children", toJSONTree(children));
+                }
+
+                jsonList.add(jsonObject);
+            } catch (FileSystemException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return jsonList;
+    }
 
     @Override
     public List<ObjectNode> toJSONList(List<FileObject> fileObjects) {
