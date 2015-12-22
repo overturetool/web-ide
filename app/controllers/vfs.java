@@ -42,7 +42,7 @@ public class vfs extends Application {
         List<FileObject> fileObjects = fileSystem.readdir(full_path, dirDepth);
 
         ICustomVFMapper<FileObject> mapper = new CommonsVFMapper();
-        List<ObjectNode> jsonList = mapper.toJSONList(fileObjects);
+        List<ObjectNode> jsonList = mapper.toJSONTree(fileObjects);
 
         return ok(jsonList.toString());
     }

@@ -98,7 +98,6 @@ public class CommonsVFS implements ICustomVFS<FileObject> {
                     }
                 }
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
