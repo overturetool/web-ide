@@ -13,9 +13,12 @@ public class outline extends Application {
     public Result file(String account, String absPath) {
         IVF file = new CommonsVF(ServerConfigurations.basePath + "/" + account + "/" + absPath);
 
+        if (!file.exists())
+            return ok();
+
         OutlineTreeContentProvider outlineProvider = new OutlineTreeContentProvider(file);
         List<Object> list = outlineProvider.getContent();
-        List<ObjectNode> jsonList = outlineProvider.toJSON(list);
+        List<ObjectNode> jsonList = outlineProvider.toJSON(list, file.getName());
 
         return ok(jsonList.toString());
     }

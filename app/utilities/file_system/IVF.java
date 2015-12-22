@@ -6,6 +6,8 @@ import java.util.List;
 public interface IVF<T> {
     T getFile();
 
+    String getName();
+
     boolean exists();
 
     String getExtension();

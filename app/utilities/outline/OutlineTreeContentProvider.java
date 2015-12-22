@@ -56,7 +56,7 @@ public class OutlineTreeContentProvider {
         }
     }
 
-    public List<ObjectNode> toJSON(List<Object> objectList) {
+    public List<ObjectNode> toJSON(List<Object> objectList, String target) {
         List<ObjectNode> jsonList = new ArrayList<>();
 
         for (Object node : objectList) {
@@ -116,6 +116,9 @@ public class OutlineTreeContentProvider {
             }
 
             if (location != null) {
+                if (!location.getFile().getName().equals(target))
+                    continue;
+
                 int startLine = location.getStartLine();
                 int endLine = location.getEndLine();
                 int startOffset = location.getStartOffset();

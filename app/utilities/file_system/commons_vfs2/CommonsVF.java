@@ -37,6 +37,11 @@ public class CommonsVF implements IVF<FileObject> {
     }
 
     @Override
+    public String getName() {
+        return file.getName().getBaseName();
+    }
+
+    @Override
     public boolean exists() {
         try {
             return file.exists();
