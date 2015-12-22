@@ -38,9 +38,6 @@ public class vfs extends Application {
         CommonsVFS fileSystem = new CommonsVFS();
         List<ObjectNode> fileObjects = fileSystem.readDirectoryAsJSONTree(full_path, dirDepth);
 
-//        IVFMapper<FileObject> mapper = new CommonsVFMapper();
-//        List<ObjectNode> jsonList = mapper.toJSONTree(fileObjects, dirDepth);
-
         return ok(fileObjects.toString());
     }
 
