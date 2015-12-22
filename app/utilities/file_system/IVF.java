@@ -2,7 +2,7 @@ package utilities.file_system;
 
 import java.io.File;
 
-public interface ICustomVF<T> {
+public interface IVF<T> {
     T getFile();
 
     boolean exists();

@@ -6,7 +6,7 @@ import play.mvc.WebSocket;
 import utilities.ServerConfigurations;
 import utilities.debug.DBGPReaderConnector;
 import utilities.file_system.commons_vfs2.CommonsVF;
-import utilities.file_system.ICustomVF;
+import utilities.file_system.IVF;
 
 import java.util.Base64;
 
@@ -19,7 +19,7 @@ public class debug extends Application {
         int port = 9223;
         String relativePath = ServerConfigurations.basePath + "/" + path;
 
-        ICustomVF file = new CommonsVF(relativePath);
+        IVF file = new CommonsVF(relativePath);
 
         if (!file.exists())
             return new WebSocket<String>() {

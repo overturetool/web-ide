@@ -1,6 +1,6 @@
 package utilities.debug;
 
-import utilities.file_system.ICustomVF;
+import utilities.file_system.IVF;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -19,11 +19,11 @@ public class DBGPReaderConnector {
     private String type;
     private String absolutePath;
 
-    public DBGPReaderConnector(int port, String entry, ICustomVF file) {
+    public DBGPReaderConnector(int port, String entry, IVF file) {
         this(port, entry, file.getExtension(), file.getAbsolutePath());
     }
 
-    public DBGPReaderConnector(int port, String entry, String type, ICustomVF dir) {
+    public DBGPReaderConnector(int port, String entry, String type, IVF dir) {
         this(port, entry, type, dir.getAbsolutePath());
     }
 

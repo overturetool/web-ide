@@ -18,9 +18,9 @@ import org.overture.interpreter.VDMSL;
 import org.overture.interpreter.util.ExitStatus;
 import org.overture.typechecker.assistant.TypeCheckerAssistantFactory;
 import play.libs.Json;
-import utilities.file_system.ICustomVF;
-import utilities.file_system.ICustomVFMapper;
-import utilities.file_system.ICustomVFS;
+import utilities.file_system.IVF;
+import utilities.file_system.IVFMapper;
+import utilities.file_system.IVFS;
 import utilities.file_system.commons_vfs2.CommonsVFMapper;
 import utilities.file_system.commons_vfs2.CommonsVFS;
 
@@ -33,10 +33,10 @@ import java.util.List;
 public class OutlineTreeContentProvider {
     private ModuleList ast;
 
-    public OutlineTreeContentProvider(ICustomVF file) {
+    public OutlineTreeContentProvider(IVF file) {
         List<File> files = new ArrayList<>();
-        ICustomVFMapper<FileObject> mapper = new CommonsVFMapper();
-        ICustomVFS<FileObject> vfs = new CommonsVFS();
+        IVFMapper<FileObject> mapper = new CommonsVFMapper();
+        IVFS<FileObject> vfs = new CommonsVFS();
 
         if (file.isDirectory()) {
             List<FileObject> fileObjects = vfs.readdir(file.getAbsolutePath(), 0);

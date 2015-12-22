@@ -5,15 +5,15 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileType;
 import play.libs.Json;
-import utilities.file_system.ICustomVFMapper;
+import utilities.file_system.IVFMapper;
 
 import java.io.File;
 import java.util.*;
 
-public class CommonsVFMapper implements ICustomVFMapper<FileObject> {
+public class CommonsVFMapper implements IVFMapper<FileObject> {
 
     @Override
-    public List<ObjectNode> toJSONTree(List<FileObject> fileObjects) {
+    public List<ObjectNode> toJSONTree(List<FileObject> fileObjects, int depth) {
         List<ObjectNode> jsonList = new ArrayList<>();
 
         for (FileObject fileObject : fileObjects) {
@@ -23,12 +23,15 @@ public class CommonsVFMapper implements ICustomVFMapper<FileObject> {
                 jsonObject.put("type", fileObject.getType() == FileType.FOLDER ? "directory" : "file");
 
                 if (fileObject.getType() == FileType.FOLDER) {
-
                     FileObject[] childrenArray = fileObject.getChildren();
                     List<FileObject> children = new ArrayList<>();
                     Collections.addAll(children, childrenArray);
 
-                    jsonObject.putPOJO("children", toJSONTree(children));
+                    if (depth == -1) {
+                        jsonObject.putPOJO("children", toJSONTree(children, depth));
+                    } else if (depth > 0) {
+                        jsonObject.putPOJO("children", toJSONTree(children, depth - 1));
+                    }
                 }
 
                 jsonList.add(jsonObject);
