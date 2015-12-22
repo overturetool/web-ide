@@ -7,6 +7,7 @@ import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileType;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import play.libs.Json;
+import utilities.ServerConfigurations;
 import utilities.file_system.FSSchemes;
 import utilities.file_system.IVFS;
 
@@ -121,6 +122,7 @@ public class CommonsVFS implements IVFS<FileObject> {
                 ObjectNode jsonObject = Json.newObject();
                 jsonObject.put("name", subFileObject.getName().getBaseName());
                 jsonObject.put("type", subFileObject.getType() == FileType.FOLDER ? "directory" : "file");
+                jsonObject.put("path", path.substring(ServerConfigurations.basePath.length() + 1, path.length()) + "/" + subFileObject.getName().getBaseName());
 
                 if (subFileObject.getType() == FileType.FOLDER) {
                     String subPath = path + "/" + subFileObject.getName().getBaseName();
