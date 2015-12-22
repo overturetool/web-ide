@@ -100,7 +100,8 @@ public class CommonsVF implements IVF<FileObject> {
                 return null;
 
             for (FileObject fo : parent.getChildren()) {
-                children.add(new File(fo.getURL().getPath()));
+                if (fo.getType() == FileType.FILE)
+                    children.add(new File(fo.getURL().getPath()));
             }
         } catch (FileSystemException e) {
             e.printStackTrace();

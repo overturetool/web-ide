@@ -36,7 +36,6 @@ public class OutlineTreeContentProvider {
             return;
         } else {
             files.addAll(file.getSiblings());
-            //files.add(file.getIOFile());
         }
 
         // Look into using the VDMJ class instead
