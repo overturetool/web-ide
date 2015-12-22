@@ -111,6 +111,8 @@ public class CommonsVFS implements IVFS<FileObject> {
     public List<ObjectNode> readDirectoryAsJSONTree(String path, int depth) {
         List<ObjectNode> nodes = new ArrayList<>();
 
+        path = path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
+
         try {
             StandardFileSystemManager fsManager = new StandardFileSystemManager();
             fsManager.init();
