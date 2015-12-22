@@ -9,6 +9,8 @@ public interface IVF<T> {
 
     String getExtension();
 
+    String getRelativePath();
+
     String getAbsolutePath();
 
     boolean isDirectory();

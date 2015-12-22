@@ -9,7 +9,8 @@ import utilities.file_system.FSSchemes;
 import utilities.file_system.IVFS;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CommonsVFS implements IVFS<FileObject> {
     @Override
@@ -84,21 +85,16 @@ public class CommonsVFS implements IVFS<FileObject> {
             String absolutePath = FSSchemes.File + "://" + new File(path).getAbsolutePath();
             FileObject fileObject = fsManager.resolveFile(absolutePath);
 
-            if (fileObject.getType() == FileType.FOLDER) {
-                Queue<FileObject> dirs = new LinkedList<>();
-                Collections.addAll(dirs, fileObject.getChildren());
+            for (FileObject subFileObject : fileObject.getChildren()) {
+                fileObjects.add(subFileObject);
 
-                while (!dirs.isEmpty()) {
-                    FileObject fo = dirs.remove();
-                    fileObjects.add(fo);
+                if (subFileObject.getType() == FileType.FOLDER) {
+                    String subPath = path + subFileObject.getName().getBaseName();
 
-                    if (fo.getType() == FileType.FOLDER) {
-                        if (depth == -1)
-                            Collections.addAll(dirs, fo.getChildren());
-                        else if (depth > 0) {
-                            Collections.addAll(dirs, fo.getChildren());
-                            depth = depth - 1;
-                        }
+                    if (depth == -1)
+                        fileObjects.addAll(readdir(subPath, depth));
+                    else if (depth > 0) {
+                        fileObjects.addAll(readdir(subPath, depth - 1));
                     }
                 }
             }

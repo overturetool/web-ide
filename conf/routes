@@ -8,12 +8,12 @@ GET     /                                                           controllers.
 # vfs
 PUT     /vfs/:account/*absPath                                          controllers.vfs.appendFile(account, absPath)
 GET     /vfs/:account/$absPath<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>       controllers.vfs.readFile(account, absPath)
-#GET     /vfs/:account/$absPath<[a-zA-Z0-9/_-]+>                         controllers.vfs.readdir(account, absPath, dept ?= "0")
 GET     /vfs/$path<[a-zA-Z0-9/_-]+>                                     controllers.vfs.readdir(path, depth ?= "0")
 POST    /vfs/:account/*absPath                                          controllers.vfs.writeFile(account, absPath)
 
 # outline
-GET     /outline/:account/$absPath<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>   controllers.outline.index(account, absPath)
+GET     /outline/:account/$absPath<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>   controllers.outline.file(account, absPath)
+GET     /outline/:account/$relPath<[a-zA-Z0-9/_-]+>                    controllers.outline.directory(account, relPath)
 
 #Web Socket management
 GET     /debug/$path<[a-zA-Z0-9/_-]+.*>                             controllers.debug.ws(path)
