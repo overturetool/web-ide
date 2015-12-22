@@ -8,6 +8,8 @@ import utilities.file_system.FSSchemes;
 import utilities.file_system.IVF;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CommonsVF implements IVF<FileObject> {
     private FileObject file;
@@ -80,5 +82,25 @@ public class CommonsVF implements IVF<FileObject> {
     @Override
     public File getIOFile() {
         return IOFile;
+    }
+
+    public List<File> getSiblings() {
+        FileObject parent = null;
+        List<File> children = new ArrayList<>();
+
+        try {
+            parent = file.getParent();
+
+            if (parent == null)
+                return null;
+
+            for (FileObject fo : parent.getChildren()) {
+                children.add(new File(fo.getURL().getPath()));
+            }
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+        }
+
+        return children;
     }
 }

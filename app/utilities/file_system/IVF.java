@@ -1,6 +1,7 @@
 package utilities.file_system;
 
 import java.io.File;
+import java.util.List;
 
 public interface IVF<T> {
     T getFile();
@@ -16,4 +17,6 @@ public interface IVF<T> {
     boolean isDirectory();
 
     File getIOFile();
+
+    List<File> getSiblings();
 }
