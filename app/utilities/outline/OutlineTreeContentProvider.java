@@ -2,7 +2,6 @@ package utilities.outline;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.definitions.*;
 import org.overture.ast.intf.lex.ILexLocation;
 import org.overture.ast.modules.AFromModuleImports;
@@ -19,10 +18,6 @@ import org.overture.interpreter.util.ExitStatus;
 import org.overture.typechecker.assistant.TypeCheckerAssistantFactory;
 import play.libs.Json;
 import utilities.file_system.IVF;
-import utilities.file_system.IVFMapper;
-import utilities.file_system.IVFS;
-import utilities.file_system.commons_vfs2.CommonsVFMapper;
-import utilities.file_system.commons_vfs2.CommonsVFS;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -34,13 +29,11 @@ public class OutlineTreeContentProvider {
     private ModuleList ast;
 
     public OutlineTreeContentProvider(IVF file) {
+        this.ast = new ModuleList();
         List<File> files = new ArrayList<>();
-        IVFMapper<FileObject> mapper = new CommonsVFMapper();
-        IVFS<FileObject> vfs = new CommonsVFS();
 
         if (file.isDirectory()) {
-            List<FileObject> fileObjects = vfs.readdir(file.getRelativePath(), 0);
-            files.addAll(mapper.toIOFileList(fileObjects));
+            return;
         } else {
             files.add(file.getIOFile());
         }

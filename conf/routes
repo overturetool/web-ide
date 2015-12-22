@@ -13,7 +13,6 @@ POST    /vfs/:account/*absPath                                          controll
 
 # outline
 GET     /outline/:account/$absPath<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>   controllers.outline.file(account, absPath)
-GET     /outline/:account/$relPath<[a-zA-Z0-9/_-]+>                    controllers.outline.directory(account, relPath)
 
 #Web Socket management
 GET     /debug/$path<[a-zA-Z0-9/_-]+.*>                             controllers.debug.ws(path)
