@@ -10,8 +10,19 @@ import utilities.outline.OutlineTreeContentProvider;
 import java.util.List;
 
 public class outline extends Application {
-    public Result index(String account, String absPath) {
+    public Result file(String account, String absPath) {
 
+        IVF file = new CommonsVF(ServerConfigurations.basePath + "/" + account + "/" + absPath);
+
+        OutlineTreeContentProvider outlineProvider = new OutlineTreeContentProvider(file);
+
+        List<Object> list = outlineProvider.getContent();
+        List<ObjectNode> jsonList = outlineProvider.toJSON(list);
+
+        return ok(jsonList.toString());
+    }
+
+    public Result directory(String account, String absPath) {
         IVF file = new CommonsVF(ServerConfigurations.basePath + "/" + account + "/" + absPath);
 
         OutlineTreeContentProvider outlineProvider = new OutlineTreeContentProvider(file);

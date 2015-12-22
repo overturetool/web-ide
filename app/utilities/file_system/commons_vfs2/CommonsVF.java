@@ -12,9 +12,11 @@ import java.io.File;
 public class CommonsVF implements IVF<FileObject> {
     private FileObject file;
     private File IOFile;
+    private String relativePath;
 
     public CommonsVF(String relativePath) {
-        IOFile = new File(relativePath);
+        this.IOFile = new File(relativePath);
+        this.relativePath = relativePath;
 
         try {
             StandardFileSystemManager fsManager = new StandardFileSystemManager();
@@ -46,6 +48,11 @@ public class CommonsVF implements IVF<FileObject> {
     @Override
     public String getExtension() {
         return file.getName().getExtension();
+    }
+
+    @Override
+    public String getRelativePath() {
+        return relativePath;
     }
 
     @Override

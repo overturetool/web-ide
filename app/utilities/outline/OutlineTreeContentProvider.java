@@ -39,7 +39,7 @@ public class OutlineTreeContentProvider {
         IVFS<FileObject> vfs = new CommonsVFS();
 
         if (file.isDirectory()) {
-            List<FileObject> fileObjects = vfs.readdir(file.getAbsolutePath(), 0);
+            List<FileObject> fileObjects = vfs.readdir(file.getRelativePath(), 0);
             files.addAll(mapper.toIOFileList(fileObjects));
         } else {
             files.add(file.getIOFile());
