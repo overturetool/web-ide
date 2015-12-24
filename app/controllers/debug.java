@@ -4,6 +4,7 @@ import org.apache.commons.codec.binary.StringUtils;
 import play.mvc.WebSocket;
 import utilities.ServerConfigurations;
 import utilities.debug.DBGPReaderConnector;
+import utilities.debug.DebugCommunicationFilter;
 import utilities.file_system.IVF;
 import utilities.file_system.commons_vfs2.CommonsVF;
 
@@ -47,7 +48,8 @@ public class debug extends Application {
 
                 // For each event received on the socket
                 in.onMessage(event -> {
-                    String overtureResult = connector.sendAndRead(event).replace("\u0000", "");
+                    String filteredEvent = DebugCommunicationFilter.ConvertPathToAbsolute(event);
+                    String overtureResult = connector.sendAndRead(filteredEvent).replace("\u0000", "");
                     out.write(overtureResult);
                     System.out.println(overtureResult);
                 });
