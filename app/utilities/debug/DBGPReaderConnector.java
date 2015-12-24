@@ -42,11 +42,16 @@ public class DBGPReaderConnector {
 
     public void connect() {
         try {
-            server = new ServerSocket(port);
+            if (port == -1)
+                server = findAvailablePort(49152, 65535);
+            else
+                server = new ServerSocket(port);
+
+            port = server.getLocalPort();
             server.setSoTimeout(timeout);
             server.setReuseAddress(true);
-        }
-        catch (IOException e) {
+
+        } catch (IOException e) {
             System.out.println("Could not listen on port " + port);
             e.printStackTrace();
             return;
@@ -117,5 +122,18 @@ public class DBGPReaderConnector {
         }
 
         return "An error occurred while communicating with DBGPReader";
+    }
+
+    private ServerSocket findAvailablePort(int minPort, int maxPort) throws IOException {
+        for (int i = minPort; i <= maxPort; i++) {
+            try {
+                return new ServerSocket(i);
+            } catch (IOException ex) {
+                // try next port
+            }
+        }
+
+        // if the program gets here, no port in the range was found
+        throw new IOException("no availble port found");
     }
 }

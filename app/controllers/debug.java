@@ -16,7 +16,7 @@ public class debug extends Application {
         String entryEncoded = request().getQueryString("entry");
         String entryDecoded = StringUtils.newStringUtf8(Base64.getDecoder().decode(entryEncoded));
 
-        int port = 9223;
+        int port = -1;
         String relativePath = ServerConfigurations.basePath + "/" + path;
 
         IVF file = new CommonsVF(relativePath);
