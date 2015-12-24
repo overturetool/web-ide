@@ -1,12 +1,11 @@
 package controllers;
 
 import org.apache.commons.codec.binary.StringUtils;
-import play.libs.F;
 import play.mvc.WebSocket;
 import utilities.ServerConfigurations;
 import utilities.debug.DBGPReaderConnector;
-import utilities.file_system.commons_vfs2.CommonsVF;
 import utilities.file_system.IVF;
+import utilities.file_system.commons_vfs2.CommonsVF;
 
 import java.util.Base64;
 
@@ -22,13 +21,7 @@ public class debug extends Application {
         IVF file = new CommonsVF(relativePath);
 
         if (!file.exists()) {
-            return new WebSocket<String>() {
-                @Override
-                public void onReady(In<String> in, Out<String> out) {
-                    out.write("file not found");
-                    out.close();
-                }
-            };
+            return errorResponse("file not found");
         }
 
         DBGPReaderConnector connector;
@@ -43,13 +36,7 @@ public class debug extends Application {
         String initialResponse = connector.read();
         if (initialResponse == null) {
             connector.disconnect();
-            return new WebSocket<String>() {
-                @Override
-                public void onReady(In<String> in, Out<String> out) {
-                    out.write("Initial read failed");
-                    out.close();
-                }
-            };
+            return errorResponse("Initial read failed");
         }
 
         return new WebSocket<String>() {
@@ -59,21 +46,27 @@ public class debug extends Application {
                 System.out.println(initialResponse);
 
                 // For each event received on the socket,
-                in.onMessage(new F.Callback<String>() {
-                    public void invoke(String event) {
-                        String overtureResult = connector.sendAndRead(event).replace("\u0000", "");
-                        out.write(overtureResult);
-                        System.out.println(overtureResult);
-                    }
+                in.onMessage(event -> {
+                    String overtureResult = connector.sendAndRead(event).replace("\u0000", "");
+                    out.write(overtureResult);
+                    System.out.println(overtureResult);
                 });
 
                 // When the socket is closed.
-                in.onClose(new F.Callback0() {
-                    public void invoke() {
-                        connector.disconnect();
-                        System.out.println("Disconnected!");
-                    }
+                in.onClose(() -> {
+                    connector.disconnect();
+                    System.out.println("Disconnected!");
                 });
+            }
+        };
+    }
+
+    private WebSocket<String> errorResponse(String message) {
+        return new WebSocket<String>() {
+            @Override
+            public void onReady(In<String> in, Out<String> out) {
+                out.write(message);
+                out.close();
             }
         };
     }
