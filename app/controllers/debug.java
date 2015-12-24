@@ -40,23 +40,20 @@ public class debug extends Application {
         }
 
         return new WebSocket<String>() {
-            // Called when the Websocket Handshake is done.
+            // Called when the Websocket Handshake is done
             public void onReady(WebSocket.In<String> in, WebSocket.Out<String> out) {
                 out.write(initialResponse.replace("\u0000", ""));
                 System.out.println(initialResponse);
 
-                // For each event received on the socket,
+                // For each event received on the socket
                 in.onMessage(event -> {
                     String overtureResult = connector.sendAndRead(event).replace("\u0000", "");
                     out.write(overtureResult);
                     System.out.println(overtureResult);
                 });
 
-                // When the socket is closed.
-                in.onClose(() -> {
-                    connector.disconnect();
-                    System.out.println("Disconnected!");
-                });
+                // When the socket is closed
+                in.onClose(connector::disconnect);
             }
         };
     }
