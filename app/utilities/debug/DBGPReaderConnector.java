@@ -125,7 +125,7 @@ public class DBGPReaderConnector {
     }
 
     private ServerSocket findAvailablePort(int minPort, int maxPort) throws IOException {
-        for (int i = minPort; i <= maxPort; i++) {
+        for (int i = minPort; i < maxPort; i++) {
             try {
                 return new ServerSocket(i);
             } catch (IOException ex) {
