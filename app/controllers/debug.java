@@ -21,7 +21,7 @@ public class debug extends Application {
 
         IVF file = new CommonsVF(relativePath);
 
-        if (!file.exists())
+        if (!file.exists()) {
             return new WebSocket<String>() {
                 @Override
                 public void onReady(In<String> in, Out<String> out) {
@@ -29,6 +29,7 @@ public class debug extends Application {
                     out.close();
                 }
             };
+        }
 
         DBGPReaderConnector connector;
 
@@ -39,18 +40,28 @@ public class debug extends Application {
 
         connector.connect();
 
+        String initialResponse = connector.read();
+        if (initialResponse == null) {
+            connector.disconnect();
+            return new WebSocket<String>() {
+                @Override
+                public void onReady(In<String> in, Out<String> out) {
+                    out.write("Initial read failed");
+                    out.close();
+                }
+            };
+        }
+
         return new WebSocket<String>() {
             // Called when the Websocket Handshake is done.
-            public void onReady(WebSocket.In<String> in, WebSocket.Out<String> out) {;
-                String initialResponse = connector.initialRead().replace("\u0000", "");
-                out.write(initialResponse);
+            public void onReady(WebSocket.In<String> in, WebSocket.Out<String> out) {
+                out.write(initialResponse.replace("\u0000", ""));
                 System.out.println(initialResponse);
 
                 // For each event received on the socket,
                 in.onMessage(new F.Callback<String>() {
                     public void invoke(String event) {
-                        // Log events to the console
-                        String overtureResult = connector.send(event).replace("\u0000", "");
+                        String overtureResult = connector.sendAndRead(event).replace("\u0000", "");
                         out.write(overtureResult);
                         System.out.println(overtureResult);
                     }

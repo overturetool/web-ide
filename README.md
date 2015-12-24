@@ -33,3 +33,9 @@ Give path to the base directory, AND specify type of project as query string par
 `
 ws://localhost:9000/debug/kdsaaby/kds_ws/barSL?entry=VGVzdEJhZ0FsbCgp&type=vdmsl
 `
+
+### lint
+
+`
+localhost:9000/lint/kdsaaby/kds_ws/bom.vdmsl
+`

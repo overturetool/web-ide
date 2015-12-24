@@ -1,6 +1,7 @@
 package utilities.debug;
 
 import org.overture.interpreter.debug.DBGPReaderV2;
+import utilities.PreventSystemExit;
 
 public class DBGPReaderServer extends Thread {
     private String[] args;
@@ -18,6 +19,13 @@ public class DBGPReaderServer extends Thread {
 
     @Override
     public void run() {
-        DBGPReaderV2.main(args);
+        PreventSystemExit.disableSystemExitCall();
+        try {
+            DBGPReaderV2.main(args);
+        } catch(PreventSystemExit.ExitTrappedException e) {
+            // Prevents the VM from exciting from System.exit(<int>);
+        } finally {
+            PreventSystemExit.enableSystemExitCall() ;
+        }
     }
 }

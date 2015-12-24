@@ -2,12 +2,17 @@ package utilities.debug;
 
 import utilities.file_system.IVF;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class DBGPReaderConnector {
-    private int port;
+    private final int timeout = 10000;
+    private final String host = "localhost";
+    private final String key = "webIDE";
 
     private ServerSocket server;
     private Socket client;
@@ -15,6 +20,7 @@ public class DBGPReaderConnector {
     private BufferedReader in;
     private PrintWriter out;
 
+    private int port;
     private String entry;
     private String type;
     private String absolutePath;
@@ -37,7 +43,7 @@ public class DBGPReaderConnector {
     public void connect() {
         try {
             server = new ServerSocket(port);
-            server.setSoTimeout(10000);
+            server.setSoTimeout(timeout);
             server.setReuseAddress(true);
         }
         catch (IOException e) {
@@ -49,7 +55,7 @@ public class DBGPReaderConnector {
         try {
             System.out.println("Ready to connect");
 
-            DBGPReaderServer overture = new DBGPReaderServer(type, "localhost", port, "webIDE", entry, absolutePath);
+            DBGPReaderServer overture = new DBGPReaderServer(type, host, port, key, entry, absolutePath);
             overture.start();
 
             client = server.accept();
@@ -71,42 +77,45 @@ public class DBGPReaderConnector {
         }
     }
 
-    public String initialRead() {
-        String line = null;
-        while (line == null) {
-            try {
-                if (in != null)
-                    line = in.readLine();
-            } catch (IOException e) {
-                e.printStackTrace();
+    public String read() {
+        try {
+            if (in != null) {
+                return in.readLine();
+            } else {
+                return null;
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        return line;
+        return "An error occurred while reading from DBGPReader";
     }
 
     public void disconnect() {
         try {
-            server.close();
+            if (in != null) in.close();
+            if (out != null) out.close();
+            if (client != null) client.close();
+            if (server != null) server.close();
         } catch (IOException e) {
             System.out.println("Exception thrown while disconnecting");
             e.printStackTrace();
         }
     }
 
-    public String send(String event) {
-        String line = "";
-
+    public String sendAndRead(String event) {
         out.println(event);
         out.flush();
 
         try {
-            line = in.readLine();
+            if (in != null) {
+                return in.readLine();
+            }
         } catch (IOException e) {
             System.out.println("Exception thrown while sending");
             e.printStackTrace();
         }
 
-        return line;
+        return "An error occurred while communicating with DBGPReader";
     }
 }
