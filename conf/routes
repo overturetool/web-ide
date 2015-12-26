@@ -17,6 +17,9 @@ GET     /outline/:account/$absPath<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>   controll
 # lint
 GET     /lint/:account/$absPath<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>      controllers.lint.file(account, absPath)
 
+# codecompletion
+GET     /codecompletion/:account/$absPath<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>      controllers.codecompletion.proposal(account, absPath)
+
 #Web Socket management
 GET     /debug/$path<[a-zA-Z0-9/_-]+.*>                             controllers.debug.ws(path)
 
