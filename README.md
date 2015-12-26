@@ -39,3 +39,8 @@ ws://localhost:9000/debug/kdsaaby/kds_ws/barSL?entry=VGVzdEJhZ0FsbCgp&type=vdmsl
 `
 localhost:9000/lint/kdsaaby/kds_ws/bom.vdmsl
 `
+
+### codecompletion
+`
+localhost:9000/codecompletion/kdsaaby/kds_ws/bom.vdmsl?offset=393
+`
