@@ -42,15 +42,16 @@ public class DBGPReaderConnector {
 
     public void connect() {
         try {
-            if (port == -1)
-                server = findAvailablePort(49152, 65535);
-            else
-                server = new ServerSocket(port);
+            if (server == null) {
+                if (port == -1)
+                    server = findAvailablePort(49152, 65535);
+                else
+                    server = new ServerSocket(port);
 
-            port = server.getLocalPort();
-            server.setSoTimeout(timeout);
-            server.setReuseAddress(true);
-
+                port = server.getLocalPort();
+                server.setSoTimeout(timeout);
+                server.setReuseAddress(true);
+            }
         } catch (IOException e) {
             System.out.println("Could not listen on port " + port);
             e.printStackTrace();
@@ -101,7 +102,7 @@ public class DBGPReaderConnector {
             if (in != null) in.close();
             if (out != null) out.close();
             if (client != null) client.close();
-            if (server != null) server.close();
+            //if (server != null) server.close();
         } catch (IOException e) {
             System.out.println("Exception thrown while disconnecting");
             e.printStackTrace();
