@@ -37,8 +37,7 @@ public class CommonsVFS implements IVFS<FileObject> {
         OutputStream out;
 
         try {
-            String full_path = FSSchemes.File + "://" + new File(relativePath).getAbsolutePath();
-            FileObject fileObject = fsManager.resolveFile(full_path);
+            FileObject fileObject = getFileObject();
 
             // if the file does not exist, this method creates it, and the parent folder, if necessary
             // if the file does exist, it appends whatever is written to the output stream
@@ -67,8 +66,7 @@ public class CommonsVFS implements IVFS<FileObject> {
         String result = "";
 
         try {
-            String full_path = FSSchemes.File + "://" + new File(relativePath).getAbsolutePath();
-            FileObject fileObject = fsManager.resolveFile(full_path);
+            FileObject fileObject = getFileObject();
 
             if (!fileObject.exists())
                 return null;
@@ -92,8 +90,7 @@ public class CommonsVFS implements IVFS<FileObject> {
         List<FileObject> fileObjects = new ArrayList<>();
 
         try {
-            String absolutePath = FSSchemes.File + "://" + new File(path).getAbsolutePath();
-            FileObject fileObject = fsManager.resolveFile(absolutePath);
+            FileObject fileObject = getFileObject();
 
             for (FileObject subFileObject : fileObject.getChildren()) {
                 fileObjects.add(subFileObject);
@@ -126,8 +123,7 @@ public class CommonsVFS implements IVFS<FileObject> {
         String filteredPath = path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
 
         try {
-            String absolutePath = FSSchemes.File + "://" + new File(filteredPath).getAbsolutePath();
-            FileObject fileObject = fsManager.resolveFile(absolutePath);
+            FileObject fileObject = getFileObject();
 
             for (FileObject subFileObject : fileObject.getChildren()) {
                 ObjectNode jsonObject = Json.newObject();
@@ -162,8 +158,7 @@ public class CommonsVFS implements IVFS<FileObject> {
         OutputStream out;
 
         try {
-            String full_path = FSSchemes.File + "://" + new File(relativePath).getAbsolutePath();
-            FileObject fileObject = fsManager.resolveFile(full_path);
+            FileObject fileObject = getFileObject();
 
             if (fileObject.exists())
                 fileObject.delete();
