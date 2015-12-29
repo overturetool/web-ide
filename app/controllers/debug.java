@@ -4,8 +4,8 @@ import org.apache.commons.codec.binary.StringUtils;
 import play.mvc.WebSocket;
 import utilities.ServerConfigurations;
 import utilities.debug.DBGPReaderConnector;
-import utilities.file_system.IVF;
-import utilities.file_system.commons_vfs2.CommonsVF;
+import utilities.file_system.IVFS;
+import utilities.file_system.commons_vfs2.CommonsVFS;
 
 import java.util.Base64;
 
@@ -18,7 +18,7 @@ public class debug extends Application {
         int port = -1;
         String relativePath = ServerConfigurations.basePath + "/" + path;
 
-        IVF file = new CommonsVF(relativePath);
+        IVFS file = new CommonsVFS(relativePath);
 
         if (!file.exists()) {
             return errorResponse("file not found");

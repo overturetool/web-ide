@@ -8,26 +8,26 @@ import utilities.codecompletion.assistant.ContentAssistProcessor;
 import utilities.codecompletion.proposal.mapper.ProposalToJsonMapper;
 import utilities.codecompletion.resources.Document;
 import utilities.codecompletion.resources.ICompletionProposal;
-import utilities.file_system.IVF;
-import utilities.file_system.commons_vfs2.CommonsVF;
+import utilities.file_system.IVFS;
+import utilities.file_system.commons_vfs2.CommonsVFS;
 
 import java.util.List;
 
 public class codecompletion extends Application {
-    public Result proposal(String account, String absPath) {
+    public Result proposal(String account, String path) {
         String offsetStr = request().getQueryString("offset");
         int offset = Integer.parseInt(offsetStr);
 
-        String path = ServerConfigurations.basePath + "/" + account + "/" + absPath;
-        IVF file = new CommonsVF(path);
+        String relativePath = ServerConfigurations.basePath + "/" + account + "/" + path;
+        IVFS file = new CommonsVFS(relativePath);
 
         Document document = new Document(file.getIOFile());
 
         if (ExitStatus.EXIT_ERRORS == document.parse())
-            return ok("Errors on parse");
+            return status(422, "Errors on parse");
 
         if (ExitStatus.EXIT_ERRORS == document.typeCheck())
-            return ok("Errors on typeCheck");
+            return status(422, "Errors on typeCheck");
 
         ContentAssistProcessor cap = new ContentAssistProcessor();
         List<ICompletionProposal> proposals = cap.computeCompletionProposals(document, offset);

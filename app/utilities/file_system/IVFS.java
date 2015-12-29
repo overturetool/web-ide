@@ -1,17 +1,32 @@
 package utilities.file_system;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import java.io.File;
 import java.util.List;
 
 public interface IVFS<T> {
-    boolean appendFile(String path, String content);
+    boolean appendFile(String content);
 
-    String readFile(String path);
+    String readFile();
 
-    List<T> readdir(String path, int depth);
+    List<T> readdir(int depth);
 
-    boolean writeFile(String path, String content);
+    List<ObjectNode> readdirAsJSONTree(int depth);
 
-    boolean exists(String rel_path);
+    boolean writeFile(String content);
 
-    String getExtension(String rel_path);
+    boolean exists();
+
+    String getExtension();
+
+    File getIOFile();
+
+    boolean isDirectory();
+
+    String getAbsolutePath();
+
+    List<File> getSiblings();
+
+    String getName();
 }

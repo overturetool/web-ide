@@ -1,6 +1,6 @@
 package utilities.debug;
 
-import utilities.file_system.IVF;
+import utilities.file_system.IVFS;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,11 +25,11 @@ public class DBGPReaderConnector {
     private String type;
     private String absolutePath;
 
-    public DBGPReaderConnector(int port, String entry, IVF file) {
+    public DBGPReaderConnector(int port, String entry, IVFS file) {
         this(port, entry, file.getExtension(), file.getAbsolutePath());
     }
 
-    public DBGPReaderConnector(int port, String entry, String type, IVF dir) {
+    public DBGPReaderConnector(int port, String entry, String type, IVFS dir) {
         this(port, entry, type, dir.getAbsolutePath());
     }
 

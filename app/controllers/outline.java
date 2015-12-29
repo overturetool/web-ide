@@ -3,15 +3,15 @@ package controllers;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import play.mvc.Result;
 import utilities.ServerConfigurations;
-import utilities.file_system.IVF;
-import utilities.file_system.commons_vfs2.CommonsVF;
+import utilities.file_system.IVFS;
+import utilities.file_system.commons_vfs2.CommonsVFS;
 import utilities.outline.OutlineTreeContentProvider;
 
 import java.util.List;
 
 public class outline extends Application {
-    public Result file(String account, String absPath) {
-        IVF file = new CommonsVF(ServerConfigurations.basePath + "/" + account + "/" + absPath);
+    public Result file(String account, String path) {
+        IVFS file = new CommonsVFS(ServerConfigurations.basePath + "/" + account + "/" + path);
 
         if (!file.exists())
             return ok();

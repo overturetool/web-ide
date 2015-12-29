@@ -12,7 +12,7 @@ import org.overture.parser.util.ParserUtil;
 import org.overture.parser.util.ParserUtil.ParserResult;
 import org.overture.typechecker.util.TypeCheckerUtil;
 import org.overture.typechecker.util.TypeCheckerUtil.TypeCheckResult;
-import utilities.file_system.IVF;
+import utilities.file_system.IVFS;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ public class LintProvider {
     private TypeCheckResult<List<AModuleModules>> typeCheckResult;
     private ParserResult<List<AModuleModules>> parserResult;
 
-    public LintProvider(IVF<FileObject> file) {
+    public LintProvider(IVFS<FileObject> file) {
         Settings.dialect = Dialect.VDM_SL;
         List<File> files = new ArrayList<>();
 

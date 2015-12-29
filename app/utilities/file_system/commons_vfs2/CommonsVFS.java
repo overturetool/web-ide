@@ -16,19 +16,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CommonsVFS implements IVFS<FileObject> {
+    private StandardFileSystemManager fsManager;
+    private String relativePath;
+
+    public CommonsVFS(String path) {
+        relativePath = path;
+        fsManager = new StandardFileSystemManager();
+
+        try {
+            fsManager.init();
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
-    public boolean appendFile(String path, String content) {
+    public boolean appendFile(String content) {
         boolean success = false;
-        StandardFileSystemManager fsManager;
         PrintWriter pw = null;
         OutputStream out;
 
         try {
-            fsManager = new StandardFileSystemManager();
-            fsManager.init();
-
-            String full_path = FSSchemes.File + "://" + new File(path).getAbsolutePath();
-            FileObject fileObject = fsManager.resolveFile(full_path);
+            FileObject fileObject = getFileObject();
 
             // if the file does not exist, this method creates it, and the parent folder, if necessary
             // if the file does exist, it appends whatever is written to the output stream
@@ -39,7 +48,6 @@ public class CommonsVFS implements IVFS<FileObject> {
             pw.flush();
 
             fileObject.close();
-            fsManager.close();
 
             success = true;
         } catch (FileSystemException e) {
@@ -54,15 +62,11 @@ public class CommonsVFS implements IVFS<FileObject> {
     }
 
     @Override
-    public String readFile(String path) {
+    public String readFile() {
         String result = "";
 
         try {
-            StandardFileSystemManager fsManager = new StandardFileSystemManager();
-            fsManager.init();
-
-            String full_path = FSSchemes.File + "://" + new File(path).getAbsolutePath();
-            FileObject fileObject = fsManager.resolveFile(full_path);
+            FileObject fileObject = getFileObject();
 
             if (!fileObject.exists())
                 return null;
@@ -78,15 +82,16 @@ public class CommonsVFS implements IVFS<FileObject> {
     }
 
     @Override
-    public List<FileObject> readdir(String path, int depth) {
+    public List<FileObject> readdir(int depth) {
+        return readdir(relativePath, depth);
+    }
+
+    // TODO : unused - needs testing
+    private List<FileObject> readdir(String path, int depth) {
         List<FileObject> fileObjects = new ArrayList<>();
 
         try {
-            StandardFileSystemManager fsManager = new StandardFileSystemManager();
-            fsManager.init();
-
-            String absolutePath = FSSchemes.File + "://" + new File(path).getAbsolutePath();
-            FileObject fileObject = fsManager.resolveFile(absolutePath);
+            FileObject fileObject = getFileObject(path);
 
             for (FileObject subFileObject : fileObject.getChildren()) {
                 fileObjects.add(subFileObject);
@@ -108,32 +113,33 @@ public class CommonsVFS implements IVFS<FileObject> {
         return fileObjects;
     }
 
-    public List<ObjectNode> readDirectoryAsJSONTree(String path, int depth) {
+    @Override
+    public List<ObjectNode> readdirAsJSONTree(int depth) {
+        return readdirAsJSONTree(relativePath, depth);
+    }
+
+    private List<ObjectNode> readdirAsJSONTree(String path, int depth) {
         List<ObjectNode> nodes = new ArrayList<>();
 
-        path = path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
+        String filteredPath = path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
 
         try {
-            StandardFileSystemManager fsManager = new StandardFileSystemManager();
-            fsManager.init();
-
-            String absolutePath = FSSchemes.File + "://" + new File(path).getAbsolutePath();
-            FileObject fileObject = fsManager.resolveFile(absolutePath);
+            FileObject fileObject = getFileObject(path);
 
             for (FileObject subFileObject : fileObject.getChildren()) {
                 ObjectNode jsonObject = Json.newObject();
                 jsonObject.put("name", subFileObject.getName().getBaseName());
                 jsonObject.put("type", subFileObject.getType() == FileType.FOLDER ? "directory" : "file");
-                jsonObject.put("path", path.substring(ServerConfigurations.basePath.length() + 1, path.length()) + "/" + subFileObject.getName().getBaseName());
+                jsonObject.put("path", filteredPath.substring(ServerConfigurations.basePath.length() + 1, filteredPath.length()) + "/" + subFileObject.getName().getBaseName());
 
                 if (subFileObject.getType() == FileType.FOLDER) {
-                    String subPath = path + "/" + subFileObject.getName().getBaseName();
+                    String subPath = filteredPath + "/" + subFileObject.getName().getBaseName();
 
                     if (depth == -1) {
-                        jsonObject.putPOJO("children", readDirectoryAsJSONTree(subPath, -1));
+                        jsonObject.putPOJO("children", readdirAsJSONTree(subPath, -1));
                     }
                     else if (depth > 0) {
-                        jsonObject.putPOJO("children", readDirectoryAsJSONTree(subPath, depth - 1));
+                        jsonObject.putPOJO("children", readdirAsJSONTree(subPath, depth - 1));
                     }
                 }
 
@@ -147,18 +153,13 @@ public class CommonsVFS implements IVFS<FileObject> {
     }
 
     @Override
-    public boolean writeFile(String path, String content) {
+    public boolean writeFile(String content) {
         boolean success = false;
-        StandardFileSystemManager fsManager;
         PrintWriter pw = null;
         OutputStream out;
 
         try {
-            fsManager = new StandardFileSystemManager();
-            fsManager.init();
-
-            String full_path = FSSchemes.File + "://" + new File(path).getAbsolutePath();
-            FileObject fileObject = fsManager.resolveFile(full_path);
+            FileObject fileObject = getFileObject();
 
             if (fileObject.exists())
                 fileObject.delete();
@@ -170,7 +171,6 @@ public class CommonsVFS implements IVFS<FileObject> {
             pw.flush();
 
             fileObject.close();
-            fsManager.close();
 
             success = true;
         } catch (FileSystemException e) {
@@ -183,9 +183,10 @@ public class CommonsVFS implements IVFS<FileObject> {
         return success;
     }
 
-    public boolean exists(String rel_path) {
+    @Override
+    public boolean exists() {
         try {
-            FileObject fileObject = getFileObject(rel_path);
+            FileObject fileObject = getFileObject();
             return fileObject != null && fileObject.exists();
         } catch (FileSystemException e) {
             e.printStackTrace();
@@ -194,10 +195,10 @@ public class CommonsVFS implements IVFS<FileObject> {
         return false;
     }
 
-    public String getExtension(String rel_path) {
-        FileObject fileObject = getFileObject(rel_path);
-
+    @Override
+    public String getExtension() {
         try {
+            FileObject fileObject = getFileObject();
             if (fileObject != null && fileObject.exists())
                 return fileObject.getName().getExtension();
         } catch (FileSystemException e) {
@@ -207,17 +208,73 @@ public class CommonsVFS implements IVFS<FileObject> {
         return null;
     }
 
-    private FileObject getFileObject(String rel_path) {
-        try {
-            StandardFileSystemManager fsManager = new StandardFileSystemManager();
-            fsManager.init();
+    @Override
+    public File getIOFile() {
+        return new File(relativePath);
+    }
 
-            String full_path = FSSchemes.File + "://" + new File(rel_path).getAbsolutePath();
-            return fsManager.resolveFile(full_path);
+    @Override
+    public boolean isDirectory() {
+        try {
+            return getFileObject().getType() == FileType.FOLDER;
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    @Override
+    public String getAbsolutePath() {
+        try {
+            return getFileObject().getURL().toString();
         } catch (FileSystemException e) {
             e.printStackTrace();
         }
 
         return null;
+    }
+
+    @Override
+    public List<File> getSiblings() {
+        FileObject parent = null;
+        List<File> children = new ArrayList<>();
+
+        try {
+            parent = getFileObject().getParent();
+
+            if (parent == null)
+                return null;
+
+            for (FileObject fo : parent.getChildren()) {
+                if (fo.getType() == FileType.FILE)
+                    children.add(new File(fo.getURL().getPath()));
+            }
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+        }
+
+        return children;
+    }
+
+    @Override
+    public String getName() {
+        try {
+            return getFileObject().getName().getBaseName();
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    private FileObject getFileObject() throws FileSystemException {
+        String fullPath = FSSchemes.File + "://" + new File(relativePath).getAbsolutePath();
+        return fsManager.resolveFile(fullPath);
+    }
+
+    private FileObject getFileObject(String path) throws FileSystemException {
+        String fullPath = FSSchemes.File + "://" + new File(path).getAbsolutePath();
+        return fsManager.resolveFile(fullPath);
     }
 }
