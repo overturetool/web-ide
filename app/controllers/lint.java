@@ -1,22 +1,22 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import core.lint.LintMapper;
+import core.lint.LintProvider;
+import core.utilities.PathHelper;
+import core.vfs.IVFS;
+import core.vfs.commons_vfs2.CommonsVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.parser.messages.VDMError;
 import org.overture.parser.messages.VDMWarning;
 import play.libs.Json;
 import play.mvc.Result;
-import core.ServerConfigurations;
-import core.vfs.IVFS;
-import core.vfs.commons_vfs2.CommonsVFS;
-import core.lint.LintMapper;
-import core.lint.LintProvider;
 
 import java.util.List;
 
 public class lint extends Application {
     public Result file(String account, String path) {
-        IVFS<FileObject> file = new CommonsVFS(ServerConfigurations.basePath + "/" + account + "/" + path);
+        IVFS<FileObject> file = new CommonsVFS(PathHelper.JoinPath(account, path));
 
         if (!file.exists())
             return ok();

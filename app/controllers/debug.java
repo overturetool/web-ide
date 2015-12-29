@@ -1,11 +1,11 @@
 package controllers;
 
-import org.apache.commons.codec.binary.StringUtils;
-import play.mvc.WebSocket;
-import core.ServerConfigurations;
 import core.debug.DBGPReaderConnector;
+import core.utilities.PathHelper;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
+import org.apache.commons.codec.binary.StringUtils;
+import play.mvc.WebSocket;
 
 import java.util.Base64;
 
@@ -16,9 +16,8 @@ public class debug extends Application {
         String entryDecoded = StringUtils.newStringUtf8(Base64.getDecoder().decode(entryEncoded));
 
         int port = -1;
-        String relativePath = ServerConfigurations.basePath + "/" + path;
 
-        IVFS file = new CommonsVFS(relativePath);
+        IVFS file = new CommonsVFS(PathHelper.JoinPath(path));
 
         if (!file.exists()) {
             return errorResponse("file not found");

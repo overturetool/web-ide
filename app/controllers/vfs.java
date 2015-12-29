@@ -1,20 +1,19 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import core.utilities.PathHelper;
+import core.vfs.commons_vfs2.CommonsVFS;
 import play.mvc.Http;
 import play.mvc.Result;
-import core.ServerConfigurations;
-import core.vfs.commons_vfs2.CommonsVFS;
 
 import java.util.List;
 
 public class vfs extends Application {
     public Result appendFile(String account, String path) {
         Http.RequestBody body = request().body();
-        String relativePath = ServerConfigurations.basePath + "/" + account + "/" + path;
 
-        CommonsVFS fileSystem = new CommonsVFS(relativePath);
-        boolean success = fileSystem.appendFile(body.asText());
+        CommonsVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        boolean success = vfs.appendFile(body.asText());
 
         if (!success)
             return status(422);
@@ -23,30 +22,25 @@ public class vfs extends Application {
     }
 
     public Result readFile(String account, String path) {
-        String relativePath = ServerConfigurations.basePath + "/" + account + "/" + path;
-
-        CommonsVFS fileSystem = new CommonsVFS(relativePath);
-        String result = fileSystem.readFile();
-
+        CommonsVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        String result = vfs.readFile();
         return ok(result);
     }
 
     public Result readdir(String path, String depth) {
         int depthInt = Integer.parseInt(depth);
-        String relativePath = ServerConfigurations.basePath + "/" + path;
 
-        CommonsVFS fileSystem = new CommonsVFS(relativePath);
-        List<ObjectNode> fileObjects = fileSystem.readdirAsJSONTree(depthInt);
+        CommonsVFS vfs = new CommonsVFS(PathHelper.JoinPath(path));
+        List<ObjectNode> fileObjects = vfs.readdirAsJSONTree(depthInt);
 
         return ok(fileObjects.toString());
     }
 
     public Result writeFile(String account, String path) {
         Http.RequestBody body = request().body();
-        String relativePath = ServerConfigurations.basePath + "/" + account + "/" + path;
 
-        CommonsVFS fileSystem = new CommonsVFS(relativePath);
-        boolean success = fileSystem.writeFile(body.asText());
+        CommonsVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        boolean success = vfs.writeFile(body.asText());
 
         if (!success)
             return status(422);
