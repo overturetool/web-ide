@@ -201,9 +201,8 @@ public class CommonsVFS implements IVFS<FileObject> {
 
     @Override
     public String getExtension() {
-        FileObject fileObject = getFileObject();
-
         try {
+            FileObject fileObject = getFileObject();
             if (fileObject != null && fileObject.exists())
                 return fileObject.getName().getExtension();
         } catch (FileSystemException e) {
@@ -264,17 +263,17 @@ public class CommonsVFS implements IVFS<FileObject> {
 
     @Override
     public String getName() {
-        return getFileObject().getName().getBaseName();
-    }
-
-    private FileObject getFileObject() {
         try {
-            String fullPath = FSSchemes.File + "://" + new File(relativePath).getAbsolutePath();
-            return fsManager.resolveFile(fullPath);
+            return getFileObject().getName().getBaseName();
         } catch (FileSystemException e) {
             e.printStackTrace();
         }
 
         return null;
+    }
+
+    private FileObject getFileObject() throws FileSystemException {
+        String fullPath = FSSchemes.File + "://" + new File(relativePath).getAbsolutePath();
+        return fsManager.resolveFile(fullPath);
     }
 }
