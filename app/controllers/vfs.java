@@ -9,11 +9,11 @@ import utilities.file_system.commons_vfs2.CommonsVFS;
 import java.util.List;
 
 public class vfs extends Application {
-    public Result appendFile(String account, String absPath) {
+    public Result appendFile(String account, String path) {
         Http.RequestBody body = request().body();
-        String path = ServerConfigurations.basePath + "/" + account + "/" + absPath;
+        String relativePath = ServerConfigurations.basePath + "/" + account + "/" + path;
 
-        CommonsVFS fileSystem = new CommonsVFS(path);
+        CommonsVFS fileSystem = new CommonsVFS(relativePath);
         boolean success = fileSystem.appendFile(body.asText());
 
         if (!success)
@@ -22,30 +22,30 @@ public class vfs extends Application {
         return ok();
     }
 
-    public Result readFile(String account, String absPath) {
-        String path = ServerConfigurations.basePath + "/" + account + "/" + absPath;
+    public Result readFile(String account, String path) {
+        String relativePath = ServerConfigurations.basePath + "/" + account + "/" + path;
 
-        CommonsVFS fileSystem = new CommonsVFS(path);
+        CommonsVFS fileSystem = new CommonsVFS(relativePath);
         String result = fileSystem.readFile();
 
         return ok(result);
     }
 
     public Result readdir(String path, String depth) {
-        int dirDepth = Integer.parseInt(depth);
-        String full_path = ServerConfigurations.basePath + "/" + path;
+        int depthInt = Integer.parseInt(depth);
+        String relativePath = ServerConfigurations.basePath + "/" + path;
 
-        CommonsVFS fileSystem = new CommonsVFS(full_path);
-        List<ObjectNode> fileObjects = fileSystem.readdirAsJSONTree(dirDepth);
+        CommonsVFS fileSystem = new CommonsVFS(relativePath);
+        List<ObjectNode> fileObjects = fileSystem.readdirAsJSONTree(depthInt);
 
         return ok(fileObjects.toString());
     }
 
-    public Result writeFile(String account, String absPath) {
+    public Result writeFile(String account, String path) {
         Http.RequestBody body = request().body();
-        String path = ServerConfigurations.basePath + "/" + account + "/" + absPath;
+        String relativePath = ServerConfigurations.basePath + "/" + account + "/" + path;
 
-        CommonsVFS fileSystem = new CommonsVFS(path);
+        CommonsVFS fileSystem = new CommonsVFS(relativePath);
         boolean success = fileSystem.writeFile(body.asText());
 
         if (!success)

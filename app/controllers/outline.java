@@ -10,8 +10,8 @@ import utilities.outline.OutlineTreeContentProvider;
 import java.util.List;
 
 public class outline extends Application {
-    public Result file(String account, String absPath) {
-        IVFS file = new CommonsVFS(ServerConfigurations.basePath + "/" + account + "/" + absPath);
+    public Result file(String account, String path) {
+        IVFS file = new CommonsVFS(ServerConfigurations.basePath + "/" + account + "/" + path);
 
         if (!file.exists())
             return ok();

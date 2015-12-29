@@ -15,8 +15,8 @@ import utilities.lint.LintProvider;
 import java.util.List;
 
 public class lint extends Application {
-    public Result file(String account, String absPath) {
-        IVFS<FileObject> file = new CommonsVFS(ServerConfigurations.basePath + "/" + account + "/" + absPath);
+    public Result file(String account, String path) {
+        IVFS<FileObject> file = new CommonsVFS(ServerConfigurations.basePath + "/" + account + "/" + path);
 
         if (!file.exists())
             return ok();
