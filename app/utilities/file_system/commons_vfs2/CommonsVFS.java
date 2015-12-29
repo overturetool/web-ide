@@ -86,11 +86,12 @@ public class CommonsVFS implements IVFS<FileObject> {
         return readdir(relativePath, depth);
     }
 
+    // TODO : unused - needs testing
     private List<FileObject> readdir(String path, int depth) {
         List<FileObject> fileObjects = new ArrayList<>();
 
         try {
-            FileObject fileObject = getFileObject();
+            FileObject fileObject = getFileObject(path);
 
             for (FileObject subFileObject : fileObject.getChildren()) {
                 fileObjects.add(subFileObject);
@@ -123,7 +124,7 @@ public class CommonsVFS implements IVFS<FileObject> {
         String filteredPath = path.endsWith("/") ? path.substring(0, path.length() - 1) : path;
 
         try {
-            FileObject fileObject = getFileObject();
+            FileObject fileObject = getFileObject(path);
 
             for (FileObject subFileObject : fileObject.getChildren()) {
                 ObjectNode jsonObject = Json.newObject();
@@ -269,6 +270,11 @@ public class CommonsVFS implements IVFS<FileObject> {
 
     private FileObject getFileObject() throws FileSystemException {
         String fullPath = FSSchemes.File + "://" + new File(relativePath).getAbsolutePath();
+        return fsManager.resolveFile(fullPath);
+    }
+
+    private FileObject getFileObject(String path) throws FileSystemException {
+        String fullPath = FSSchemes.File + "://" + new File(path).getAbsolutePath();
         return fsManager.resolveFile(fullPath);
     }
 }
