@@ -2,10 +2,10 @@ package controllers;
 
 import org.apache.commons.codec.binary.StringUtils;
 import play.mvc.WebSocket;
-import utilities.ServerConfigurations;
-import utilities.debug.DBGPReaderConnector;
-import utilities.file_system.IVFS;
-import utilities.file_system.commons_vfs2.CommonsVFS;
+import core.ServerConfigurations;
+import core.debug.DBGPReaderConnector;
+import core.vfs.IVFS;
+import core.vfs.commons_vfs2.CommonsVFS;
 
 import java.util.Base64;
 

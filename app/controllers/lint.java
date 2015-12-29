@@ -6,11 +6,11 @@ import org.overture.parser.messages.VDMError;
 import org.overture.parser.messages.VDMWarning;
 import play.libs.Json;
 import play.mvc.Result;
-import utilities.ServerConfigurations;
-import utilities.file_system.IVFS;
-import utilities.file_system.commons_vfs2.CommonsVFS;
-import utilities.lint.LintMapper;
-import utilities.lint.LintProvider;
+import core.ServerConfigurations;
+import core.vfs.IVFS;
+import core.vfs.commons_vfs2.CommonsVFS;
+import core.lint.LintMapper;
+import core.lint.LintProvider;
 
 import java.util.List;
 

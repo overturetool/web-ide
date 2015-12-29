@@ -3,13 +3,13 @@ package controllers;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.overture.interpreter.util.ExitStatus;
 import play.mvc.Result;
-import utilities.ServerConfigurations;
-import utilities.codecompletion.assistant.ContentAssistProcessor;
-import utilities.codecompletion.proposal.mapper.ProposalToJsonMapper;
-import utilities.codecompletion.resources.Document;
-import utilities.codecompletion.resources.ICompletionProposal;
-import utilities.file_system.IVFS;
-import utilities.file_system.commons_vfs2.CommonsVFS;
+import core.ServerConfigurations;
+import core.codecompletion.assistant.ContentAssistProcessor;
+import core.codecompletion.proposal.mapper.ProposalToJsonMapper;
+import core.codecompletion.resources.Document;
+import core.codecompletion.resources.ICompletionProposal;
+import core.vfs.IVFS;
+import core.vfs.commons_vfs2.CommonsVFS;
 
 import java.util.List;
 
