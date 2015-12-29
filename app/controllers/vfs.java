@@ -2,7 +2,9 @@ package controllers;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.utilities.PathHelper;
+import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
+import org.apache.commons.vfs2.FileObject;
 import play.mvc.Http;
 import play.mvc.Result;
 
@@ -12,7 +14,7 @@ public class vfs extends Application {
     public Result appendFile(String account, String path) {
         Http.RequestBody body = request().body();
 
-        CommonsVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
         boolean success = vfs.appendFile(body.asText());
 
         if (!success)
@@ -22,7 +24,7 @@ public class vfs extends Application {
     }
 
     public Result readFile(String account, String path) {
-        CommonsVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
         String result = vfs.readFile();
         return ok(result);
     }
@@ -30,7 +32,7 @@ public class vfs extends Application {
     public Result readdir(String path, String depth) {
         int depthInt = Integer.parseInt(depth);
 
-        CommonsVFS vfs = new CommonsVFS(PathHelper.JoinPath(path));
+        IVFS<FileObject> vfs = new CommonsVFS(PathHelper.JoinPath(path));
         List<ObjectNode> fileObjects = vfs.readdirAsJSONTree(depthInt);
 
         return ok(fileObjects.toString());
@@ -39,7 +41,7 @@ public class vfs extends Application {
     public Result writeFile(String account, String path) {
         Http.RequestBody body = request().body();
 
-        CommonsVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
         boolean success = vfs.writeFile(body.asText());
 
         if (!success)
