@@ -17,7 +17,7 @@ import org.overture.interpreter.VDMSL;
 import org.overture.interpreter.util.ExitStatus;
 import org.overture.typechecker.assistant.TypeCheckerAssistantFactory;
 import play.libs.Json;
-import utilities.file_system.IVF;
+import utilities.file_system.IVFS;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ import java.util.List;
 public class OutlineTreeContentProvider {
     private ModuleList ast;
 
-    public OutlineTreeContentProvider(IVF file) {
+    public OutlineTreeContentProvider(IVFS file) {
         this.ast = new ModuleList();
         List<File> files = new ArrayList<>();
 

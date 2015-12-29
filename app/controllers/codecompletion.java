@@ -8,8 +8,8 @@ import utilities.codecompletion.assistant.ContentAssistProcessor;
 import utilities.codecompletion.proposal.mapper.ProposalToJsonMapper;
 import utilities.codecompletion.resources.Document;
 import utilities.codecompletion.resources.ICompletionProposal;
-import utilities.file_system.IVF;
-import utilities.file_system.commons_vfs2.CommonsVF;
+import utilities.file_system.IVFS;
+import utilities.file_system.commons_vfs2.CommonsVFS;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ public class codecompletion extends Application {
         int offset = Integer.parseInt(offsetStr);
 
         String path = ServerConfigurations.basePath + "/" + account + "/" + absPath;
-        IVF file = new CommonsVF(path);
+        IVFS file = new CommonsVFS(path);
 
         Document document = new Document(file.getIOFile());
 

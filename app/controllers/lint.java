@@ -7,8 +7,8 @@ import org.overture.parser.messages.VDMWarning;
 import play.libs.Json;
 import play.mvc.Result;
 import utilities.ServerConfigurations;
-import utilities.file_system.IVF;
-import utilities.file_system.commons_vfs2.CommonsVF;
+import utilities.file_system.IVFS;
+import utilities.file_system.commons_vfs2.CommonsVFS;
 import utilities.lint.LintMapper;
 import utilities.lint.LintProvider;
 
@@ -16,7 +16,7 @@ import java.util.List;
 
 public class lint extends Application {
     public Result file(String account, String absPath) {
-        IVF<FileObject> file = new CommonsVF(ServerConfigurations.basePath + "/" + account + "/" + absPath);
+        IVFS<FileObject> file = new CommonsVFS(ServerConfigurations.basePath + "/" + account + "/" + absPath);
 
         if (!file.exists())
             return ok();

@@ -13,8 +13,8 @@ public class vfs extends Application {
         Http.RequestBody body = request().body();
         String path = ServerConfigurations.basePath + "/" + account + "/" + absPath;
 
-        CommonsVFS fileSystem = new CommonsVFS();
-        boolean success = fileSystem.appendFile(path, body.asText());
+        CommonsVFS fileSystem = new CommonsVFS(path);
+        boolean success = fileSystem.appendFile(body.asText());
 
         if (!success)
             return status(422);
@@ -25,8 +25,8 @@ public class vfs extends Application {
     public Result readFile(String account, String absPath) {
         String path = ServerConfigurations.basePath + "/" + account + "/" + absPath;
 
-        CommonsVFS fileSystem = new CommonsVFS();
-        String result = fileSystem.readFile(path);
+        CommonsVFS fileSystem = new CommonsVFS(path);
+        String result = fileSystem.readFile();
 
         return ok(result);
     }
@@ -35,8 +35,8 @@ public class vfs extends Application {
         int dirDepth = Integer.parseInt(depth);
         String full_path = ServerConfigurations.basePath + "/" + path;
 
-        CommonsVFS fileSystem = new CommonsVFS();
-        List<ObjectNode> fileObjects = fileSystem.readDirectoryAsJSONTree(full_path, dirDepth);
+        CommonsVFS fileSystem = new CommonsVFS(full_path);
+        List<ObjectNode> fileObjects = fileSystem.readdirAsJSONTree(dirDepth);
 
         return ok(fileObjects.toString());
     }
@@ -45,8 +45,8 @@ public class vfs extends Application {
         Http.RequestBody body = request().body();
         String path = ServerConfigurations.basePath + "/" + account + "/" + absPath;
 
-        CommonsVFS fileSystem = new CommonsVFS();
-        boolean success = fileSystem.writeFile(path, body.asText());
+        CommonsVFS fileSystem = new CommonsVFS(path);
+        boolean success = fileSystem.writeFile(body.asText());
 
         if (!success)
             return status(422);
