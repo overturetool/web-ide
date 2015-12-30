@@ -132,4 +132,14 @@ public class Document {
         int line = offsetToLine(offset);
         return offsetList.get(line - 1) + 1;
     }
+
+    public int getOffset(int line, int column) {
+        int offset = 0;
+
+        for (int i = 0; i < line - 1; i++) {
+            offset = offset + offsetList.get(i) + 1;
+        }
+
+        return (offset + column) - 1;
+    }
 }
