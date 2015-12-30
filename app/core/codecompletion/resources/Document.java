@@ -15,12 +15,33 @@ public class Document {
     private ModuleList modules;
     private ExitStatus parseStatus;
     private ExitStatus typeCheckStatus;
+    private List<Integer> offsetList;
 
-    public Document(File file)
-    {
+    public Document(File file) {
         this.file = file;
         vdmsl = new VDMSL();
         modules = new ModuleList();
+
+        offsetList = new ArrayList<>();
+        BufferedReader br = null;
+
+        try {
+            br = new BufferedReader(new FileReader(file));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        if (br == null)
+            return;
+
+        try {
+            String line;
+            while ((line = br.readLine()) != null) {
+                offsetList.add(line.length());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -90,5 +111,25 @@ public class Document {
     {
         typeCheckStatus = vdmsl.typeCheck();
         return typeCheckStatus;
+    }
+
+    public int offsetToLine(int offset) {
+        int sum = 0;
+        int line = 0;
+
+        for (int i = 0; i < offsetList.size(); i++) {
+            sum = sum + offsetList.get(i) + 1;
+            if (sum > offset) {
+                line = i;
+                break;
+            }
+        }
+
+        return line + 1;
+    }
+
+    public int offsetToColumn(int offset) {
+        int line = offsetToLine(offset);
+        return offsetList.get(line - 1) + 1;
     }
 }

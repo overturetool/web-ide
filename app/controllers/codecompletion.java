@@ -22,6 +22,10 @@ public class codecompletion extends Application {
 
         Document document = new Document(file.getIOFile());
 
+        System.out.println("Offset: " + offset);
+        System.out.println("Line: " + document.offsetToLine(offset));
+        System.out.println("Column: " + document.offsetToColumn(offset));
+
         if (ExitStatus.EXIT_ERRORS == document.parse())
             return status(422, "Errors on parse");
 
