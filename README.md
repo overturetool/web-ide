@@ -42,5 +42,5 @@ localhost:9000/lint/kdsaaby/kds_ws/bom.vdmsl
 
 ### codecompletion
 `
-localhost:9000/codecompletion/kdsaaby/kds_ws/bom.vdmsl?offset=393
+localhost:9000/codecompletion/kdsaaby/kds_ws/bom.vdmsl?line=20&column=1
 `
