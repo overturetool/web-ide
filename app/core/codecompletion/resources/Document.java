@@ -15,12 +15,13 @@ public class Document {
     private ModuleList modules;
     private ExitStatus parseStatus;
     private ExitStatus typeCheckStatus;
+    private List<Integer> offsetList;
 
-    public Document(File file)
-    {
+    public Document(File file) {
         this.file = file;
-        vdmsl = new VDMSL();
-        modules = new ModuleList();
+        this.vdmsl = new VDMSL();
+        this.modules = new ModuleList();
+        this.offsetList = generateOffsetList(file);
     }
 
     /**
@@ -48,6 +49,31 @@ public class Document {
         return null;
     }
 
+    private List<Integer> generateOffsetList(File file) {
+        List<Integer> tmpOffsetList = new ArrayList<>();
+        BufferedReader br = null;
+
+        try {
+            br = new BufferedReader(new FileReader(file));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        if (br == null)
+            return tmpOffsetList;
+
+        try {
+            String line;
+            while ((line = br.readLine()) != null) {
+                tmpOffsetList.add(line.length());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return tmpOffsetList;
+    }
+
     public char getChar(int offset) throws BadLocationException {
         char c = 0;
 
@@ -66,13 +92,9 @@ public class Document {
 
             br.close();
         }
-        catch (FileNotFoundException e0)
+        catch (IOException e)
         {
-            e0.printStackTrace();
-        }
-        catch (IOException e1)
-        {
-            e1.printStackTrace();
+            e.printStackTrace();
         }
 
         return c;
@@ -90,5 +112,35 @@ public class Document {
     {
         typeCheckStatus = vdmsl.typeCheck();
         return typeCheckStatus;
+    }
+
+    public int getLine(int offset) {
+        int sum = 0;
+        int line = 0;
+
+        for (int i = 0; i < offsetList.size(); i++) {
+            sum = sum + offsetList.get(i) + 1;
+            if (sum > offset) {
+                line = i;
+                break;
+            }
+        }
+
+        return line + 1;
+    }
+
+    public int getColumn(int offset) {
+        int line = getLine(offset);
+        return offsetList.get(line - 1) + 1;
+    }
+
+    public int getOffset(int line, int column) {
+        int offset = 0;
+
+        for (int i = 0; i < line - 1; i++) {
+            offset = offset + offsetList.get(i) + 1;
+        }
+
+        return (offset + column) - 1;
     }
 }

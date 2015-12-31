@@ -13,6 +13,10 @@ import java.util.List;
 public class ContentAssistProcessor {
     CompletionProcessor processor = new CompletionProcessor();
 
+    public List<ICompletionProposal> computeCompletionProposals(Document document, int line, int column) {
+        return computeCompletionProposals(document, document.getOffset(line, column));
+    }
+
     /**
      * Computes the code completion proposals for a vdm document
      *
