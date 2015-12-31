@@ -19,29 +19,9 @@ public class Document {
 
     public Document(File file) {
         this.file = file;
-        vdmsl = new VDMSL();
-        modules = new ModuleList();
-
-        offsetList = new ArrayList<>();
-        BufferedReader br = null;
-
-        try {
-            br = new BufferedReader(new FileReader(file));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        if (br == null)
-            return;
-
-        try {
-            String line;
-            while ((line = br.readLine()) != null) {
-                offsetList.add(line.length());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.vdmsl = new VDMSL();
+        this.modules = new ModuleList();
+        this.offsetList = generateOffsetList(file);
     }
 
     /**
@@ -69,6 +49,31 @@ public class Document {
         return null;
     }
 
+    private List<Integer> generateOffsetList(File file) {
+        List<Integer> tmpOffsetList = new ArrayList<>();
+        BufferedReader br = null;
+
+        try {
+            br = new BufferedReader(new FileReader(file));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        if (br == null)
+            return tmpOffsetList;
+
+        try {
+            String line;
+            while ((line = br.readLine()) != null) {
+                tmpOffsetList.add(line.length());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return tmpOffsetList;
+    }
+
     public char getChar(int offset) throws BadLocationException {
         char c = 0;
 
@@ -87,13 +92,9 @@ public class Document {
 
             br.close();
         }
-        catch (FileNotFoundException e0)
+        catch (IOException e)
         {
-            e0.printStackTrace();
-        }
-        catch (IOException e1)
-        {
-            e1.printStackTrace();
+            e.printStackTrace();
         }
 
         return c;
@@ -113,7 +114,7 @@ public class Document {
         return typeCheckStatus;
     }
 
-    public int offsetToLine(int offset) {
+    public int getLine(int offset) {
         int sum = 0;
         int line = 0;
 
@@ -128,8 +129,8 @@ public class Document {
         return line + 1;
     }
 
-    public int offsetToColumn(int offset) {
-        int line = offsetToLine(offset);
+    public int getColumn(int offset) {
+        int line = getLine(offset);
         return offsetList.get(line - 1) + 1;
     }
 
