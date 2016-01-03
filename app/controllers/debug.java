@@ -1,6 +1,7 @@
 package controllers;
 
 import core.debug.DBGPReaderConnector;
+import core.debug.DebugCommunicationFilter;
 import core.utilities.PathHelper;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
@@ -46,7 +47,9 @@ public class debug extends Application {
 
                 // For each event received on the socket
                 in.onMessage(event -> {
-                    String overtureResult = connector.sendAndRead(event).replace("\u0000", "");
+                    //String overtureResult = connector.sendAndRead(event).replace("\u0000", "");
+                    String filteredEvent = DebugCommunicationFilter.ConvertPathToAbsolute(event);
+                    String overtureResult = connector.sendAndRead(filteredEvent).replace("\u0000", "");
                     out.write(overtureResult);
                     System.out.println(overtureResult);
                 });
