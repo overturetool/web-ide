@@ -1,6 +1,7 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import core.StatusCode;
 import core.lint.LintMapper;
 import core.lint.LintProvider;
 import core.utilities.PathHelper;
@@ -19,7 +20,7 @@ public class lint extends Application {
         IVFS<FileObject> file = new CommonsVFS(PathHelper.JoinPath(account, path));
 
         if (!file.exists())
-            return ok();
+            return status(StatusCode.UnprocessableEntity, "File not found");
 
         LintProvider lintProvider = new LintProvider(file);
         List<VDMError> parserErrors = lintProvider.getParserErrors();

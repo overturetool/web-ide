@@ -10,6 +10,7 @@ import core.utilities.PathHelper;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import org.overture.interpreter.util.ExitStatus;
+import play.libs.Json;
 import play.mvc.Result;
 
 import java.util.List;
@@ -34,6 +35,9 @@ public class codecompletion extends Application {
 
         IVFS file = new CommonsVFS(PathHelper.JoinPath(account, path));
 
+        if (!file.exists())
+            return status(StatusCode.UnprocessableEntity, "File not found");
+
         Document document = new Document(file.getIOFile());
 
         if (ExitStatus.EXIT_ERRORS == document.parse())
@@ -48,6 +52,6 @@ public class codecompletion extends Application {
         ProposalToJsonMapper mapper = new ProposalToJsonMapper();
         List<ObjectNode> proposalsAsJson = mapper.toJson(proposals, document);
 
-        return ok(proposalsAsJson.toString());
+        return ok(Json.newArray().addAll(proposalsAsJson));
     }
 }
