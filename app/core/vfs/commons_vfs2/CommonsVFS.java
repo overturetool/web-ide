@@ -247,7 +247,7 @@ public class CommonsVFS implements IVFS<FileObject> {
                 return null;
 
             for (FileObject fo : parent.getChildren()) {
-                if (fo.getType() == FileType.FILE)
+                if (fo.getType() == FileType.FILE && fo.getName().getExtension().contains("vdm"))
                     children.add(new File(fo.getURL().getPath()));
             }
         } catch (FileSystemException e) {

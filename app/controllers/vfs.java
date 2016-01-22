@@ -5,6 +5,7 @@ import core.utilities.PathHelper;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import org.apache.commons.vfs2.FileObject;
+import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 
@@ -35,7 +36,7 @@ public class vfs extends Application {
         IVFS<FileObject> vfs = new CommonsVFS(PathHelper.JoinPath(path));
         List<ObjectNode> fileObjects = vfs.readdirAsJSONTree(depthInt);
 
-        return ok(fileObjects.toString());
+        return ok(Json.newArray().addAll(fileObjects));
     }
 
     public Result writeFile(String account, String path) {
