@@ -65,7 +65,6 @@ public class debug extends Application {
             @Override
             public void onReady(In<String> in, Out<String> out) {
                 out.write(message);
-                out.close();
             }
         };
     }
