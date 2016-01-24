@@ -1,6 +1,9 @@
 package core.lint;
 
+import core.vfs.IVFS;
 import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
+import org.apache.commons.vfs2.FileType;
 import org.overture.ast.lex.Dialect;
 import org.overture.ast.modules.AModuleModules;
 import org.overture.ast.util.modules.ModuleList;
@@ -12,7 +15,6 @@ import org.overture.parser.util.ParserUtil;
 import org.overture.parser.util.ParserUtil.ParserResult;
 import org.overture.typechecker.util.TypeCheckerUtil;
 import org.overture.typechecker.util.TypeCheckerUtil.TypeCheckResult;
-import core.vfs.IVFS;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -28,11 +30,23 @@ public class LintProvider {
         Settings.dialect = Dialect.VDM_SL;
         List<File> files = new ArrayList<>();
 
-        if (!file.isDirectory()) {
-            files.addAll(file.getSiblings());
-            this.parserResult = ParserUtil.parseSl(files);
-            this.typeCheckResult = TypeCheckerUtil.typeCheckSl(files);
+        // TODO : Change this implementation not to use FileObjects directly
+        if (file.isDirectory()) {
+            List<FileObject> fileObjects = file.readdir(0);
+            try {
+                for (FileObject fo : fileObjects) {
+                    if (fo.getType() == FileType.FILE)
+                        files.add(new File(fo.getName().getPath()));
+                }
+            } catch (FileSystemException e) {
+                e.printStackTrace();
+            }
+        } else {
+            files.add(file.getIOFile());
         }
+
+        this.parserResult = ParserUtil.parseSl(files);
+        this.typeCheckResult = TypeCheckerUtil.typeCheckSl(files);
     }
 
     public List<VDMError> getParserErrors() {

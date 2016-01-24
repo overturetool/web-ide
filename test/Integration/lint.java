@@ -22,8 +22,8 @@ public class lint {
     }
 
     @Test
-    public void lintResponseWithStatusCode404GivenPathToDirectory() {
-        get(hostWithPort + "/lint/test/test_ws").then().statusCode(404);
+    public void lintResponseWithStatusCode200GivenPathToDirectory() {
+        get(hostWithPort + "/lint/test/test_ws").then().statusCode(200);
     }
 
     @Test

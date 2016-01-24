@@ -16,6 +16,7 @@ GET     /outline/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>      controll
 
 # lint
 GET     /lint/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>         controllers.lint.file(account, path)
+GET     /lint/:account/$path<[a-zA-Z0-9/_-]+>                           controllers.lint.file(account, path)
 
 # codecompletion
 GET     /codecompletion/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>      controllers.codecompletion.proposal(account, path)
