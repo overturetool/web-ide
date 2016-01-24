@@ -1,7 +1,8 @@
 package controllers;
 
-import core.debug.DBGPReaderConnector;
 import core.debug.DebugCommunicationFilter;
+import core.debug.ProxyClient;
+import core.debug.ProxyServer;
 import core.utilities.PathHelper;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
@@ -24,18 +25,20 @@ public class debug extends Application {
             return errorResponse("file not found");
         }
 
-        DBGPReaderConnector connector;
+        ProxyServer proxyServer;
 
         if (file.isDirectory())
-            connector = new DBGPReaderConnector(port, entryDecoded, type, file);
+            proxyServer = new ProxyServer(port, entryDecoded, type, file);
         else
-            connector = new DBGPReaderConnector(port, entryDecoded, file);
+            proxyServer = new ProxyServer(port, entryDecoded, file);
 
-        connector.connect();
+        ProxyClient proxyClient = proxyServer.connect();
+        if (proxyClient == null)
+            return errorResponse("Error occurred while initiating connection");
 
-        String initialResponse = connector.read();
+        String initialResponse = proxyClient.read();
         if (initialResponse == null) {
-            connector.disconnect();
+            proxyClient.disconnect();
             return errorResponse("Initial read failed");
         }
 
@@ -47,15 +50,14 @@ public class debug extends Application {
 
                 // For each event received on the socket
                 in.onMessage(event -> {
-                    //String overtureResult = connector.sendAndRead(event).replace("\u0000", "");
                     String filteredEvent = DebugCommunicationFilter.ConvertPathToAbsolute(event);
-                    String overtureResult = connector.sendAndRead(filteredEvent).replace("\u0000", "");
+                    String overtureResult = proxyClient.sendAndRead(filteredEvent).replace("\u0000", "");
                     out.write(overtureResult);
                     System.out.println(overtureResult);
                 });
 
                 // When the socket is closed
-                in.onClose(connector::disconnect);
+                in.onClose(proxyClient::disconnect);
             }
         };
     }
@@ -65,6 +67,7 @@ public class debug extends Application {
             @Override
             public void onReady(In<String> in, Out<String> out) {
                 out.write(message);
+                //out.close();
             }
         };
     }
