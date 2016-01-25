@@ -1,7 +1,8 @@
 package controllers;
 
-import core.debug.DBGPReaderConnector;
 import core.debug.DebugCommunicationFilter;
+import core.debug.ProxyClient;
+import core.debug.ProxyServer;
 import core.utilities.PathHelper;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
@@ -20,22 +21,27 @@ public class debug extends Application {
 
         IVFS file = new CommonsVFS(PathHelper.JoinPath(path));
 
-        if (!file.exists()) {
+        if (!file.exists())
             return errorResponse("file not found");
+
+        ProxyServer proxyServer;
+
+        if (file.isDirectory()) {
+            if (type == null)
+                return errorResponse("Model type was not defined");
+
+            proxyServer = new ProxyServer(port, entryDecoded, type, file);
+        } else {
+            proxyServer = new ProxyServer(port, entryDecoded, file);
         }
 
-        DBGPReaderConnector connector;
+        ProxyClient proxyClient = proxyServer.connect();
+        if (proxyClient == null)
+            return errorResponse("Error occurred while initiating connection");
 
-        if (file.isDirectory())
-            connector = new DBGPReaderConnector(port, entryDecoded, type, file);
-        else
-            connector = new DBGPReaderConnector(port, entryDecoded, file);
-
-        connector.connect();
-
-        String initialResponse = connector.read();
+        String initialResponse = proxyClient.read();
         if (initialResponse == null) {
-            connector.disconnect();
+            proxyClient.disconnect();
             return errorResponse("Initial read failed");
         }
 
@@ -43,19 +49,18 @@ public class debug extends Application {
             // Called when the Websocket Handshake is done
             public void onReady(WebSocket.In<String> in, WebSocket.Out<String> out) {
                 out.write(initialResponse.replace("\u0000", ""));
-                System.out.println(initialResponse);
+                //System.out.println(initialResponse);
 
                 // For each event received on the socket
                 in.onMessage(event -> {
-                    //String overtureResult = connector.sendAndRead(event).replace("\u0000", "");
                     String filteredEvent = DebugCommunicationFilter.ConvertPathToAbsolute(event);
-                    String overtureResult = connector.sendAndRead(filteredEvent).replace("\u0000", "");
+                    String overtureResult = proxyClient.sendAndRead(filteredEvent).replace("\u0000", "");
                     out.write(overtureResult);
-                    System.out.println(overtureResult);
+                    //System.out.println(overtureResult);
                 });
 
                 // When the socket is closed
-                in.onClose(connector::disconnect);
+                in.onClose(proxyClient::disconnect);
             }
         };
     }
@@ -65,6 +70,7 @@ public class debug extends Application {
             @Override
             public void onReady(In<String> in, Out<String> out) {
                 out.write(message);
+                //out.close();
             }
         };
     }

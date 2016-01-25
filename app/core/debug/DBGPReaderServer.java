@@ -1,13 +1,16 @@
 package core.debug;
 
-import org.overture.interpreter.debug.DBGPReaderV2;
-import core.utilities.PreventSystemExit;
+import java.io.IOException;
 
-public class DBGPReaderServer extends Thread {
+public class DBGPReaderServer {
     private String[] args;
 
     public DBGPReaderServer(String type, String host, int port, String key, String entry, String file) {
         this.args = new String[]{
+            "java",
+            "-cp",
+            "Overture-2.3.0.jar",
+            "org.overture.interpreter.debug.DBGPReaderV2",
             "-" + type,
             "-h", host,
             "-p", Integer.toString(port),
@@ -17,15 +20,11 @@ public class DBGPReaderServer extends Thread {
         };
     }
 
-    @Override
-    public void run() {
-        PreventSystemExit.disableSystemExitCall();
+    public void start() {
         try {
-            DBGPReaderV2.main(args);
-        } catch(PreventSystemExit.ExitTrappedException e) {
-            // Prevents the VM from exciting from System.exit(<int>);
-        } finally {
-            PreventSystemExit.enableSystemExitCall() ;
+            new ProcessBuilder(args).start();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

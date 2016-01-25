@@ -52,11 +52,9 @@ public class WebSocketTestClientSync {
      */
     @OnMessage
     public void onMessage(String message) {
-        if (this.messageHandler != null)
+        if (this.messageHandler != null) {
             this.messageHandler.handleMessage(message);
-
-        synchronized (token) {
-            token.notify();
+            //synchronized (token) { token.notify(); }
         }
     }
 
@@ -80,15 +78,9 @@ public class WebSocketTestClientSync {
      * @param message
      */
     public void sendMessage(String message) throws IOException {
-        synchronized (token) {
-            try {
-                token.wait(5000);
-                if (this.session != null)
-                    this.session.getBasicRemote().sendText(message);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
+        //synchronized (token) { token.wait(5000); }
+        if (this.session != null)
+            this.session.getBasicRemote().sendText(message);
     }
 
     /**
