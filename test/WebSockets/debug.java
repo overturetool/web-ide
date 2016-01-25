@@ -1,7 +1,7 @@
-package Integration;
+package WebSockets;
 
-import Integration.Helpers.String2XML;
-import Integration.Helpers.WebSocketTestClientSync;
+import Helpers.String2XML;
+import Helpers.WebSocketTestClientSync;
 import org.apache.commons.codec.binary.StringUtils;
 import org.junit.Test;
 import org.w3c.dom.Document;

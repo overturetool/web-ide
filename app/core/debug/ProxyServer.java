@@ -41,7 +41,7 @@ public class ProxyServer {
 
             port = server.getLocalPort();
             server.setSoTimeout(timeout);
-            server.setReuseAddress(true);
+            //server.setReuseAddress(true);
         } catch (IOException e) {
             System.out.println("Could not listen on port " + port);
             e.printStackTrace();
@@ -51,7 +51,7 @@ public class ProxyServer {
         ProxyClient client = new ProxyClient(server);
         client.start();
 
-        new DBGPReaderServer(type, host, port, key, entry, absolutePath).start();
+        new DBGPReaderInitializer(type, host, port, key, entry, absolutePath).start();
 
         return client;
     }

@@ -44,12 +44,7 @@ public class ProxyClient extends Thread {
 
     public String read() {
         try {
-            if (in == null) {
-                // Wait for input stream to be initialized
-                synchronized (lock) {
-                    lock.wait(5000);
-                }
-            }
+            awaitInitialization();
 
             if (in != null) {
                 return in.readLine();
@@ -64,14 +59,16 @@ public class ProxyClient extends Thread {
     }
 
     public String sendAndRead(String event) {
-        out.println(event);
-        out.flush();
-
         try {
+            awaitInitialization();
+
+            out.println(event);
+            out.flush();
+
             if (in != null) {
                 return in.readLine();
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             System.out.println("Exception thrown while sending");
             e.printStackTrace();
         }
@@ -92,6 +89,15 @@ public class ProxyClient extends Thread {
         } catch (IOException e) {
             System.out.println("Exception thrown while disconnecting");
             e.printStackTrace();
+        }
+    }
+
+    private void awaitInitialization() throws InterruptedException {
+        if (in == null || out == null) {
+            // Wait for input- and/or output-stream to be initialized
+            synchronized (lock) {
+                lock.wait(5000);
+            }
         }
     }
 }

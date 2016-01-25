@@ -1,4 +1,4 @@
-package Integration.Helpers;
+package Helpers;
 
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;

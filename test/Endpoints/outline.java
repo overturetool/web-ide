@@ -1,4 +1,4 @@
-package Integration;
+package Endpoints;
 
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.ValidatableResponse;

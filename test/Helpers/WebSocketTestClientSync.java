@@ -1,4 +1,4 @@
-package Integration.Helpers;
+package Helpers;
 
 import javax.websocket.*;
 import java.io.IOException;
