@@ -94,7 +94,7 @@ public class ProxyClient extends Thread {
 
     private void awaitInitialization() throws InterruptedException {
         if (in == null || out == null) {
-            // Wait for input- and/or output-stream to be initialized
+            // Wait for input- or output-stream to be initialized
             synchronized (lock) {
                 lock.wait(5000);
             }
