@@ -34,16 +34,14 @@ public class ProxyServer {
 
     public synchronized ProxyClient connect() {
         try {
-            if (server == null) {
-                if (port == -1)
-                    server = findAvailablePort(49152, 65535);
-                else
-                    server = new ServerSocket(port);
+            if (port == -1)
+                server = findAvailablePort(49152, 65535);
+            else
+                server = new ServerSocket(port);
 
-                port = server.getLocalPort();
-                server.setSoTimeout(timeout);
-                server.setReuseAddress(true);
-            }
+            port = server.getLocalPort();
+            server.setSoTimeout(timeout);
+            server.setReuseAddress(true);
         } catch (IOException e) {
             System.out.println("Could not listen on port " + port);
             e.printStackTrace();

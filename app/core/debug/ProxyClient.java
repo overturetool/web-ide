@@ -8,25 +8,25 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class ProxyClient extends Thread {
-    private ServerSocket server;
+    private final ServerSocket server;
     private Socket client;
     private BufferedReader in;
     private PrintWriter out;
-    private final Object lock;
+    private final Object lock = new Object();
 
-    public ProxyClient(ServerSocket server) {
-        this.lock = new Object();
+    public ProxyClient(final ServerSocket server) {
         this.server = server;
     }
 
     @Override
     public void run() {
         try {
-            System.out.println("Ready to connect");
+            System.out.println("Ready to connect on port " + server.getLocalPort());
             client = server.accept();
-            System.out.println("Connection accepted!");
+            System.out.println("Connection accepted on port " + client.getLocalPort());
         } catch (IOException e) {
             e.printStackTrace();
+            return;
         }
 
         try {

@@ -21,7 +21,7 @@ import static org.hamcrest.core.Is.is;
 
 public class debug {
     // Debug protocol: http://xdebug.org/docs-dbgp.php
-    //@Test
+    @Test
     public void ShouldReceiveCorrectSequenceOfXMLResponses() throws Exception {
         final Object lock = new Object();
         URI uri = new URI("ws://localhost:9000/debug/test/test_ws/bom.vdmsl?entry=UGFydHMoMSwgYm9tKQ==");
@@ -102,7 +102,7 @@ public class debug {
         assertThat(entryDecoded, is("Parts(1, bom) = {2, 3, 4, 5, 6}"));
     }
 
-    //@Test
+    @Test
     public void FileNotFound() throws URISyntaxException, IOException, InterruptedException {
         final Object lock = new Object();
         URI uri = new URI("ws://localhost:9000/debug/test/test_ws/bom1.vdmsl?entry=UGFydHMoMSwgYm9tKQ==");
@@ -127,7 +127,8 @@ public class debug {
 
     @Test
     public void InterleavedSessions() throws URISyntaxException, InterruptedException, IOException {
-        final Object lock = new Object();
+//        final Object lock0 = new Object();
+//        final Object lock1 = new Object();
         URI uri0 = new URI("ws://localhost:9000/debug/test/test_ws/bom.vdmsl?entry=UGFydHMoMSwgYm9tKQ==");
         URI uri1 = new URI("ws://localhost:9000/debug/kdsaaby/kds_ws/barSL/bag.vdmsl?entry=QkFHVEVTVGBUZXN0QmFnQWxsKCk=");
 
@@ -138,8 +139,8 @@ public class debug {
             int subStringFrom = message.trim().indexOf("<");
             message = message.trim().substring(subStringFrom);
             list.add(message);
-            System.out.println("client0: " + message);
-//            synchronized (lock) { lock.notify(); }
+//            System.out.println("client0: " + message);
+//            synchronized (lock0) { lock0.notify(); }
         });
 
         final WebSocketTestClientSync client1 = new WebSocketTestClientSync(uri1);
@@ -147,8 +148,8 @@ public class debug {
             int subStringFrom = message.trim().indexOf("<");
             message = message.trim().substring(subStringFrom);
             list.add(message);
-            System.out.println("client1: " + message);
-//            synchronized (lock) { lock.notify(); }
+//            System.out.println("client1: " + message);
+//            synchronized (lock1) { lock1.notify(); }
         });
 
         List<String> commandsForClient0 = new ArrayList<>();
@@ -157,16 +158,13 @@ public class debug {
         commandsForClient0.add("breakpoint_list -i 2");
         commandsForClient0.add("run -i 3");
         commandsForClient0.add("run -i 4");
-        commandsForClient0.add("status -i 5");
-//        commandsForClient0.add("status -i 6");
 
         List<String> commandsForClient1 = new ArrayList<>();
-        commandsForClient1.add("status -i 0");
-        commandsForClient1.add("status -i 1");
-        commandsForClient1.add("status -i 2");
-        commandsForClient1.add("status -i 3");
-        commandsForClient1.add("status -i 4");
-        commandsForClient1.add("status -i 5");
+        commandsForClient1.add("status -i 10");
+        commandsForClient1.add("status -i 11");
+        commandsForClient1.add("status -i 12");
+        commandsForClient1.add("status -i 13");
+        commandsForClient1.add("status -i 14");
 
         int client0Size = commandsForClient0.size();
         int client1Size = commandsForClient1.size();
@@ -174,27 +172,24 @@ public class debug {
         int upperBound = Integer.max(client0Size, client1Size);
 
         // Send commands to debug protocol
-//        synchronized (lock) { lock.wait(); }
+//        synchronized (lock0) { lock0.wait(5000); }
+//        synchronized (lock1) { lock1.wait(5000); }
         for (int i = 0; i < upperBound; i++) {
             if (i < commandsForClient0.size()) {
                 client0.sendMessage(commandsForClient0.get(i));
-//                synchronized (lock) { lock.wait(); }
+//                synchronized (lock0) { lock0.wait(5000); }
             }
 
             if (i < commandsForClient1.size()) {
                 client1.sendMessage(commandsForClient1.get(i));
-//                synchronized (lock) { lock.wait(5000); }
+//                synchronized (lock1) { lock1.wait(5000); }
             }
         }
 
 //        synchronized (lock) { lock.wait(5000); }
 //        synchronized (lock) { lock.wait(5000); }
 
-//        Thread.sleep(20000);
-
-        while(list.size() < client0Size + client1Size + 1) {
-            // Busy wait
-        }
+        Thread.sleep(10000);
 
         assertThat(list.size(), is(client0Size + client1Size + 2));
     }
