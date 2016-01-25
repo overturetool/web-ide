@@ -44,7 +44,7 @@ public class ProxyClient extends Thread {
 
     public String read() {
         try {
-            awaitInitialization();
+            awaitInitialization(5000);
 
             if (in != null) {
                 return in.readLine();
@@ -60,7 +60,7 @@ public class ProxyClient extends Thread {
 
     public String sendAndRead(String event) {
         try {
-            awaitInitialization();
+            awaitInitialization(5000);
 
             out.println(event);
             out.flush();
@@ -92,11 +92,11 @@ public class ProxyClient extends Thread {
         }
     }
 
-    private void awaitInitialization() throws InterruptedException {
+    private void awaitInitialization(int timeout) throws InterruptedException {
         if (in == null || out == null) {
             // Wait for input- or output-stream to be initialized
             synchronized (lock) {
-                lock.wait(5000);
+                lock.wait(timeout);
             }
         }
     }
