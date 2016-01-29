@@ -35,4 +35,6 @@ public interface IVFS<T> {
     String moveTo(String destination);
 
     String moveTo(String destination, String collisionPolicy);
+
+    boolean delete();
 }

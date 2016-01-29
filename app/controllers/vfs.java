@@ -73,4 +73,13 @@ public class vfs extends Application {
 
         return ok();
     }
+
+    public Result delete(String account, String path) {
+        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+
+        if (vfs.delete())
+            return ok();
+        else
+            return status(StatusCode.UnprocessableEntity, "An error occurred while delete file");
+    }
 }
