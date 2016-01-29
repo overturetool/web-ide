@@ -26,7 +26,7 @@ public class vfs {
 
         given()
             .contentType(ContentType.TEXT).body("String to append")
-            .when().put(hostWithPort + "/vfs/test/test_ws/bom.vdmsl")
+            .when().put(hostWithPort + "/vfs/appendFile/test/test_ws/bom.vdmsl")
             .then().statusCode(200);
 
         int newLength = vfs.readFile().length();
@@ -38,24 +38,24 @@ public class vfs {
     }
 
     @Test
-    public void readFileReturnsStatusCode200() {
-        get(hostWithPort + "/vfs/test/test_ws").then().statusCode(200);
+    public void readFileReturnsStatusCode404() {
+        get(hostWithPort + "/vfs/readFile/test/test_ws").then().statusCode(404);
     }
 
     @Test
     public void readFileReturnsContentWithLength1806() {
-        String document = get(hostWithPort + "/vfs/test/test_ws/bom.vdmsl").body().asString();
+        String document = get(hostWithPort + "/vfs/readFile/test/test_ws/bom.vdmsl").body().asString();
         assertThat(document.length(), is(1804));
     }
 
     @Test
-    public void readdirReturnsStatusCode200() {
-        get(hostWithPort + "/vfs/test/test_ws/bom.vdmsl").then().statusCode(200);
+    public void readdirReturnsStatusCode404() {
+        get(hostWithPort + "/vfs/readdir/test/test_ws/bom.vdmsl").then().statusCode(404);
     }
 
     @Test
     public void readdirhasCorrectTreeStructure() {
-        ValidatableResponse response = when().get(hostWithPort + "/vfs/test?depth=-1").then().contentType(ContentType.JSON);
+        ValidatableResponse response = when().get(hostWithPort + "/vfs/readdir/test?depth=-1").then().contentType(ContentType.JSON);
         response.body("size()", equalTo(2));
 
         // Level 0
@@ -94,7 +94,7 @@ public class vfs {
 
         given()
             .contentType(ContentType.TEXT).body(tmp + " extra string written")
-            .when().post(hostWithPort + "/vfs/test/test_ws/bom.vdmsl")
+            .when().post(hostWithPort + "/vfs/writeFile/test/test_ws/bom.vdmsl")
             .then().statusCode(200);
 
         int newLength = vfs.readFile().length();

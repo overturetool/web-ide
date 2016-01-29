@@ -24,9 +24,15 @@ public interface IVFS<T> {
 
     boolean isDirectory();
 
+    String getRelativePath();
+
     String getAbsolutePath();
 
     List<File> getSiblings();
 
     String getName();
+
+    String moveTo(String destination);
+
+    String moveTo(String destination, String collisionPolicy);
 }
