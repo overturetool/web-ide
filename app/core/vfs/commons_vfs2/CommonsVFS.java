@@ -7,10 +7,7 @@ import core.vfs.FSSchemes;
 import core.vfs.FileOperationResult;
 import core.vfs.IVFS;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.FileType;
-import org.apache.commons.vfs2.Selectors;
+import org.apache.commons.vfs2.*;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import play.libs.Json;
 
@@ -338,6 +335,26 @@ public class CommonsVFS implements IVFS<FileObject> {
         }
 
         return false;
+    }
+
+    @Override
+    public boolean rename(String name) {
+        try {
+            FileObject src = getFileObject();
+            FileObject des = getFileObject(src.getName().getParent().getPath() + "/" + name);
+
+            if (!src.canRenameTo(des))
+                return false;
+
+            des.copyFrom(src, Selectors.SELECT_ALL);
+            src.delete(Selectors.SELECT_ALL);
+
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
     }
 
     private FileObject getFileObject() throws FileSystemException {
