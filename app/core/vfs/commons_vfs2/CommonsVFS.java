@@ -10,6 +10,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileType;
+import org.apache.commons.vfs2.Selectors;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import play.libs.Json;
 
@@ -326,6 +327,17 @@ public class CommonsVFS implements IVFS<FileObject> {
         }
 
         return FileOperationResult.Success;
+    }
+
+    @Override
+    public boolean delete() {
+        try {
+            return getFileObject().delete(Selectors.SELECT_ALL) > 0;
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+        }
+
+        return false;
     }
 
     private FileObject getFileObject() throws FileSystemException {
