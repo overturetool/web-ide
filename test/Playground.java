@@ -47,7 +47,7 @@ public class Playground {
     @Test
     public void handleCollision() {
         String account = "test1";
-        String filename = "(10)bom.vdmsl";
+        String filename = "bom.vdmsl";
         String path = "test_ws/" + filename;
 
         IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
@@ -59,6 +59,6 @@ public class Playground {
         // Clean up
 //        vfs.moveFile(PathHelper.JoinPath(account, "test_ws"));
 
-        assertEquals(relativePath, PathHelper.JoinPath(account, "test_ws/1/2a/(10)" + filename.substring(3)));
+        assertEquals(relativePath, PathHelper.JoinPath(account, "test_ws/1/2a/" + filename.replace(".", "1.")));
     }
 }

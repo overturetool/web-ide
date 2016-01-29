@@ -2,10 +2,10 @@ package core.vfs.commons_vfs2;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.ServerConfigurations;
-import core.vfs.FSSchemes;
 import core.vfs.CollisionPolicy;
-import core.vfs.IVFS;
+import core.vfs.FSSchemes;
 import core.vfs.FileOperationResult;
+import core.vfs.IVFS;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
@@ -16,6 +16,8 @@ import play.libs.Json;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CommonsVFS implements IVFS<FileObject> {
     private StandardFileSystemManager fsManager;
@@ -288,31 +290,36 @@ public class CommonsVFS implements IVFS<FileObject> {
             if(!src.exists() || des.getParent().getType() != FileType.FOLDER)
                 return FileOperationResult.Failure;
 
-            if (des.exists() && !collisionPolicy.equals(CollisionPolicy.Stop)) {
-                if (collisionPolicy.equals(CollisionPolicy.Override)) {
-                    src.moveTo(des);
-                    relativePath = newRelativePath;
-                } else if (collisionPolicy.equals(CollisionPolicy.KeepBoth)) {
+            // A file with the same name exists - handle collision according to policy
+            if (des.exists()) {
+                if (collisionPolicy.equals(CollisionPolicy.Stop))
+                    return FileOperationResult.Failure;
 
-                    // TODO : Change this
+                if (collisionPolicy.equals(CollisionPolicy.KeepBoth)) {
                     String filename = src.getName().getBaseName();
 
-                    if (filename.charAt(0) == '(') {
-                        int end = filename.indexOf(')');
-                        String num = filename.substring(1, end);
-                        int numInc = Integer.parseInt(num) + 1;
-
-                        newRelativePath = destination + "/(" + numInc + ")" + filename.substring(end + 1);
-                        des = getFileObject(newRelativePath);
+                    if (src.getType() == FileType.FILE) {
+                        String regex = "-?\\d+\\.";
+                        Pattern p = Pattern.compile(regex);
+                        Matcher m = p.matcher(filename);
+                        if (m.find()) {
+                            String group = m.group().replace(".", "");
+                            int copyNumber = Integer.parseInt(group) + 1;
+                            filename = filename.replaceFirst(regex, copyNumber + ".");
+                        } else {
+                            filename = filename.replace(".", "1.");
+                        }
+                    } else {
+                        filename = filename.concat("1");
                     }
 
-                    src.moveTo(des);
-                    relativePath = newRelativePath;
+                    newRelativePath = destination + "/" + filename;
+                    des = getFileObject(newRelativePath);
                 }
-            } else {
-                src.moveTo(des);
-                relativePath = newRelativePath;
             }
+
+            src.moveTo(des);
+            relativePath = newRelativePath;
         } catch (FileSystemException e) {
             e.printStackTrace();
             return FileOperationResult.Failure;
