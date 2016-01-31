@@ -24,6 +24,9 @@ GET     /lint/:account/$path<[a-zA-Z0-9/_-]+>                           controll
 # codecompletion
 GET     /codecompletion/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+> controllers.codecompletion.proposal(account, path)
 
+# pog
+GET     /pog/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>          controllers.pog.generatePog(account, path)
+
 # Web Socket management
 GET     /debug/$path<[a-zA-Z0-9/_-]+.*>                                 controllers.debug.ws(path)
 

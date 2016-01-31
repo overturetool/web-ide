@@ -10,7 +10,15 @@ public interface IVFS<T> {
 
     String readFile();
 
+    List<T> readdir();
+
     List<T> readdir(int depth);
+
+    List<File> readdirAsIOFile();
+
+    List<File> readdirAsIOFile(int depth);
+
+    List<ObjectNode> readdirAsJSONTree();
 
     List<ObjectNode> readdirAsJSONTree(int depth);
 
