@@ -84,11 +84,15 @@ public class CommonsVFS implements IVFS<FileObject> {
     }
 
     @Override
+    public List<FileObject> readdir() {
+        return readdir(0);
+    }
+
+    @Override
     public List<FileObject> readdir(int depth) {
         return readdir(relativePath, depth);
     }
 
-    // TODO : unused - needs testing
     private List<FileObject> readdir(String path, int depth) {
         List<FileObject> fileObjects = new ArrayList<>();
 
@@ -113,6 +117,37 @@ public class CommonsVFS implements IVFS<FileObject> {
         }
 
         return fileObjects;
+    }
+
+    @Override
+    public List<File> readdirAsIOFile() {
+        return readdirAsIOFile(0);
+    }
+
+    @Override
+    public List<File> readdirAsIOFile(int depth) {
+        List<File> files = new ArrayList<>();
+
+        if (isDirectory()) {
+            List<FileObject> fileObjects = readdir(depth);
+            try {
+                for (FileObject fo : fileObjects) {
+                    if (fo.getType() == FileType.FILE)
+                        files.add(new File(fo.getName().getPath()));
+                }
+            } catch (FileSystemException e) {
+                e.printStackTrace();
+            }
+        } else {
+            files.add(getIOFile());
+        }
+
+        return files;
+    }
+
+    @Override
+    public List<ObjectNode> readdirAsJSONTree() {
+        return readdirAsJSONTree(0);
     }
 
     @Override
