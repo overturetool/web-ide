@@ -16,12 +16,12 @@ public class Playground {
 
         IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
 
-        vfs.moveTo(PathHelper.JoinPath(account, "test_ws/1"));
+        vfs.move(PathHelper.JoinPath(account, "test_ws/1"));
 
         String relativePath = vfs.getRelativePath();
 
         // Clean up
-        vfs.moveTo(PathHelper.JoinPath(account, "test_ws"));
+        vfs.move(PathHelper.JoinPath(account, "test_ws"));
 
         assertEquals(relativePath, PathHelper.JoinPath(account, "test_ws/1/" + filename));
     }
@@ -34,7 +34,7 @@ public class Playground {
 
         IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
 
-        vfs.moveTo(PathHelper.JoinPath(account, "test_ws/1/2a"));
+        vfs.move(PathHelper.JoinPath(account, "test_ws/1/2a"));
 
         String relativePath = vfs.getRelativePath();
 
@@ -52,7 +52,7 @@ public class Playground {
 
         IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
 
-        vfs.moveTo(PathHelper.JoinPath(account, "test_ws/1/2a"), CollisionPolicy.KeepBoth);
+        vfs.move(PathHelper.JoinPath(account, "test_ws/1/2a"), CollisionPolicy.KeepBoth);
 
         String relativePath = vfs.getRelativePath();
 

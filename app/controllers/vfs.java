@@ -57,6 +57,10 @@ public class vfs extends Application {
 
     public Result move(String account, String path) {
         JsonNode request = request().body().asJson();
+
+        if (request == null)
+            return status(StatusCode.UnprocessableEntity, "Request body empty or not valid JSON");
+
         JsonNode destination = request.get("destination");
         JsonNode collisionPolicy = request.get("collisionPolicy");
 
@@ -67,7 +71,7 @@ public class vfs extends Application {
             collisionPolicy = Json.newObject().textNode(CollisionPolicy.KeepBoth);
 
         IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
-        String result = vfs.moveTo(PathHelper.JoinPath(destination.asText()), collisionPolicy.asText());
+        String result = vfs.move(PathHelper.JoinPath(destination.asText()), collisionPolicy.asText());
 
         if (result.equals(FileOperationResult.Failure))
             return status(StatusCode.UnprocessableEntity, "File operation failed");
