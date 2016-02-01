@@ -222,8 +222,7 @@ public class OutlineTreeContentProvider {
         }
     }
 
-    private List<PDefinition> filterDefinitionList(List<PDefinition> fInput)
-    {
+    private List<PDefinition> filterDefinitionList(List<PDefinition> fInput) {
         for (int i = 0; i < fInput.size(); i++) {
             PDefinition def = fInput.get(i);
 

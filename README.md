@@ -7,13 +7,26 @@
 ## Endpoints
 #### readFile
 `
-localhost:9000/vfs/<account>/<path>*/file.extension
+localhost:9000/vfs/readFile/<account>/<path>*/file.extension
 `
 
 #### readdir
 `
-localhost:9000/vfs/<account>/<path>*
+localhost:9000/vfs/readdir/<account>/<path>*
 `
+
+### move
+`
+localhost:9000/vfs/move/<account>/[<path>*|file.extension]
+`
+
+    {
+       "destination": "test1/test_ws/1/2a",
+       "collisionPolicy": "Stop"
+    }
+
+collisionPolicy = { Stop, Override, KeepBoth }
+
 
 #### debug
 `
