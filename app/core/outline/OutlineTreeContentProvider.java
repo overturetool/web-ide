@@ -13,13 +13,9 @@ import org.overture.ast.types.ARecordInvariantType;
 import org.overture.ast.types.PType;
 import org.overture.ast.types.SInvariantType;
 import org.overture.ast.util.modules.ModuleList;
-import org.overture.interpreter.VDMSL;
-import org.overture.interpreter.util.ExitStatus;
 import org.overture.typechecker.assistant.TypeCheckerAssistantFactory;
 import play.libs.Json;
-import core.vfs.IVFS;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -28,31 +24,8 @@ import java.util.List;
 public class OutlineTreeContentProvider {
     private ModuleList ast;
 
-    public OutlineTreeContentProvider(IVFS file) {
-        this.ast = new ModuleList();
-        List<File> files = new ArrayList<>();
-
-        if (file.isDirectory()) {
-            return;
-        } else {
-            files.addAll(file.getSiblings());
-        }
-
-        // Look into using the VDMJ class instead
-        VDMSL vdmsl = new VDMSL();
-        ExitStatus parseStatus = vdmsl.parse(files);
-
-        if (parseStatus == ExitStatus.EXIT_OK) {
-            ExitStatus typeCheckStatus = vdmsl.typeCheck();
-
-            if (typeCheckStatus == ExitStatus.EXIT_OK) {
-                try {
-                    this.ast = vdmsl.getInterpreter().getModules();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+    public OutlineTreeContentProvider(ModuleList ast) {
+        this.ast = ast;
     }
 
     public List<ObjectNode> toJSON(List<Object> objectList, String target) {
@@ -151,10 +124,6 @@ public class OutlineTreeContentProvider {
         }
 
         return list;
-    }
-
-    public ModuleList getAst() {
-        return ast;
     }
 
     public Object[] getChildren(Object parentElement) {
