@@ -10,7 +10,7 @@ PUT     /vfs/appendFile/:account/*path                                  controll
 GET     /vfs/readFile/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+> controllers.vfs.readFile(account, path)
 GET     /vfs/readdir/$path<[a-zA-Z0-9/_-]+>                             controllers.vfs.readdir(path, depth ?= "0")
 POST    /vfs/writeFile/:account/*path                                   controllers.vfs.writeFile(account, path)
-PUT     /vfs/moveTo/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>   controllers.vfs.moveTo(account, path)
+PUT     /vfs/move/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>     controllers.vfs.move(account, path)
 DELETE  /vfs/delete/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>   controllers.vfs.delete(account, path)
 PUT     /vfs/rename/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>   controllers.vfs.rename(account, path, name)
 

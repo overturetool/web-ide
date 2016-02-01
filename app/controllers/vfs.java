@@ -4,8 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.StatusCode;
 import core.utilities.PathHelper;
-import core.vfs.IVFS;
+import core.vfs.CollisionPolicy;
 import core.vfs.FileOperationResult;
+import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import org.apache.commons.vfs2.FileObject;
 import play.libs.Json;
@@ -54,7 +55,7 @@ public class vfs extends Application {
         return ok();
     }
 
-    public Result moveTo(String account, String path) {
+    public Result move(String account, String path) {
         JsonNode request = request().body().asJson();
         JsonNode destination = request.get("destination");
         JsonNode collisionPolicy = request.get("collisionPolicy");
@@ -63,12 +64,12 @@ public class vfs extends Application {
             return status(StatusCode.UnprocessableEntity, "missing destination");
 
         if (collisionPolicy == null)
-            return status(StatusCode.UnprocessableEntity, "missing collision policy");
+            collisionPolicy = Json.newObject().textNode(CollisionPolicy.KeepBoth);
 
         IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
         String result = vfs.moveTo(PathHelper.JoinPath(destination.asText()), collisionPolicy.asText());
 
-        if (request.asText().equals(FileOperationResult.Failure))
+        if (result.equals(FileOperationResult.Failure))
             return status(StatusCode.UnprocessableEntity, "File operation failed");
 
         return ok();

@@ -310,10 +310,12 @@ public class CommonsVFS implements IVFS<FileObject> {
         return null;
     }
 
+    @Override
     public String moveTo(String destination) {
         return moveTo(destination, CollisionPolicy.Stop);
     }
 
+    @Override
     public String moveTo(String destination, String collisionPolicy) {
         try {
             FileObject src = getFileObject();
@@ -335,6 +337,7 @@ public class CommonsVFS implements IVFS<FileObject> {
                         String regex = "-?\\d+\\.";
                         Pattern p = Pattern.compile(regex);
                         Matcher m = p.matcher(filename);
+
                         if (m.find()) {
                             String group = m.group().replace(".", "");
                             int copyNumber = Integer.parseInt(group) + 1;
