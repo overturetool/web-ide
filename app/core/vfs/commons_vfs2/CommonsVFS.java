@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.ServerConfigurations;
 import core.vfs.CollisionPolicy;
 import core.vfs.FSSchemes;
-import core.vfs.FileOperationResult;
 import core.vfs.IVFS;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.vfs2.*;
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
+import org.apache.commons.vfs2.FileType;
+import org.apache.commons.vfs2.Selectors;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import play.libs.Json;
 
@@ -317,22 +319,23 @@ public class CommonsVFS implements IVFS<FileObject> {
 
     @Override
     public String move(String destination, String collisionPolicy) {
+        String filename;
+
         try {
             FileObject src = getFileObject();
-            String newRelativePath = destination + "/" + src.getName().getBaseName();
+            filename = src.getName().getBaseName();
+            String newRelativePath = destination + "/" + filename;
             FileObject des = getFileObject(newRelativePath);
 
             if(!src.exists() || des.getParent().getType() != FileType.FOLDER)
-                return FileOperationResult.Failure;
+                return null;
 
             // A file with the same name exists - handle collision according to policy
             if (des.exists()) {
                 if (collisionPolicy.equals(CollisionPolicy.Stop))
-                    return FileOperationResult.Failure;
+                    return null;
 
                 if (collisionPolicy.equals(CollisionPolicy.KeepBoth)) {
-                    String filename = src.getName().getBaseName();
-
                     if (src.getType() == FileType.FILE) {
                         String regex = "-?\\d+\\.";
                         Pattern p = Pattern.compile(regex);
@@ -358,10 +361,10 @@ public class CommonsVFS implements IVFS<FileObject> {
             relativePath = newRelativePath;
         } catch (FileSystemException e) {
             e.printStackTrace();
-            return FileOperationResult.Failure;
+            return null;
         }
 
-        return FileOperationResult.Success;
+        return filename;
     }
 
     @Override

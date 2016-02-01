@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.StatusCode;
 import core.utilities.PathHelper;
 import core.vfs.CollisionPolicy;
-import core.vfs.FileOperationResult;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import org.apache.commons.vfs2.FileObject;
@@ -73,10 +72,10 @@ public class vfs extends Application {
         IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
         String result = vfs.move(PathHelper.JoinPath(destination.asText()), collisionPolicy.asText());
 
-        if (result.equals(FileOperationResult.Failure))
+        if (result == null)
             return status(StatusCode.UnprocessableEntity, "File operation failed");
 
-        return ok();
+        return ok(result);
     }
 
     public Result delete(String account, String path) {
