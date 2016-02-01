@@ -327,6 +327,9 @@ public class CommonsVFS implements IVFS<FileObject> {
             String newRelativePath = destination + "/" + filename;
             FileObject des = getFileObject(newRelativePath);
 
+            if (src == des)
+                return null;
+
             if(!src.exists() || des.getParent().getType() != FileType.FOLDER)
                 return null;
 
