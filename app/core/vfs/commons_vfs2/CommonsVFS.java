@@ -311,12 +311,12 @@ public class CommonsVFS implements IVFS<FileObject> {
     }
 
     @Override
-    public String moveTo(String destination) {
-        return moveTo(destination, CollisionPolicy.Stop);
+    public String move(String destination) {
+        return move(destination, CollisionPolicy.Stop);
     }
 
     @Override
-    public String moveTo(String destination, String collisionPolicy) {
+    public String move(String destination, String collisionPolicy) {
         try {
             FileObject src = getFileObject();
             String newRelativePath = destination + "/" + src.getName().getBaseName();

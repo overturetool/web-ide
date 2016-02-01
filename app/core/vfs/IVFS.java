@@ -40,9 +40,9 @@ public interface IVFS<T> {
 
     String getName();
 
-    String moveTo(String destination);
+    String move(String destination);
 
-    String moveTo(String destination, String collisionPolicy);
+    String move(String destination, String collisionPolicy);
 
     boolean delete();
 
