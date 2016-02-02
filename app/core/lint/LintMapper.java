@@ -1,6 +1,7 @@
 package core.lint;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import core.utilities.PathHelper;
 import org.overture.parser.messages.VDMMessage;
 import play.libs.Json;
 
@@ -9,10 +10,17 @@ import java.util.List;
 
 public class LintMapper {
     public <T extends VDMMessage> List<ObjectNode> messagesToJson(List<T> messages) {
+        return messagesToJson(messages, null);
+    }
+
+    public <T extends VDMMessage> List<ObjectNode> messagesToJson(List<T> messages, String targetModuleName) {
         List<ObjectNode> jsonList = new ArrayList<>();
 
         for (VDMMessage message : messages) {
-            jsonList.add(mapObject(message));
+            if (targetModuleName != null && message.location.getModule().equals(targetModuleName))
+                jsonList.add(mapObject(message));
+            else if (targetModuleName == null)
+                jsonList.add(mapObject(message));
         }
 
         return jsonList;
@@ -33,6 +41,9 @@ public class LintMapper {
         long hits = object.location.getHits();
 
         ObjectNode locationNode = Json.newObject();
+        locationNode.put("executable", object.location.getExecutable());
+        locationNode.put("file", PathHelper.RelativePath(object.location.getFile().getPath()));
+        locationNode.put("module", object.location.getModule());
         locationNode.put("startLine", startLine);
         locationNode.put("endLine", endLine);
         locationNode.put("startOffset", startOffset);
