@@ -5,14 +5,18 @@ import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
+import org.overture.ast.lex.Dialect;
 import org.overture.ast.modules.AFromModuleImports;
 import org.overture.ast.modules.AModuleImports;
 import org.overture.ast.modules.AModuleModules;
 import org.overture.ast.util.modules.ModuleList;
+import org.overture.config.Settings;
 import org.overture.interpreter.VDMSL;
 import org.overture.interpreter.runtime.ModuleInterpreter;
 import org.overture.interpreter.util.ExitStatus;
+import org.overture.parser.util.ParserUtil;
 import org.overture.pog.pub.IProofObligationList;
+import org.overture.typechecker.util.TypeCheckerUtil;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -21,8 +25,22 @@ import java.util.List;
 
 public class ModelWrapper {
     private ModuleInterpreter interpreter;
+    private List<File> _files;
+    private String targetModuleName;
 
     public ModelWrapper(IVFS<FileObject> file) {
+        // TODO : Possible to avoid parsing just for getting module name?
+        try {
+            VDMSL vdmsl = new VDMSL();
+            ExitStatus parseExitStatus = vdmsl.parse(wrapInList(file.getIOFile()));
+
+            if (parseExitStatus.equals(ExitStatus.EXIT_OK))
+                this.targetModuleName = vdmsl.getInterpreter().getDefaultName();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         List<File> files = wrapInList(file.getIOFile());
 
         List<File> importFiles = resolveImports(file);
@@ -34,6 +52,10 @@ public class ModelWrapper {
 
     public ModelWrapper(List<File> files) {
         init(files);
+    }
+
+    public String getTargetModuleName() {
+        return this.targetModuleName;
     }
 
     public ModuleList getAst() {
@@ -50,7 +72,18 @@ public class ModelWrapper {
         return null;
     }
 
+    public ParserUtil.ParserResult<List<AModuleModules>> getParserResults() {
+        return ParserUtil.parseSl(this._files);
+    }
+
+    public TypeCheckerUtil.TypeCheckResult<List<AModuleModules>> getTypeCheckerResults() {
+        return TypeCheckerUtil.typeCheckSl(this._files);
+    }
+
     private void init(List<File> files) {
+        this._files = files;
+        Settings.dialect = Dialect.VDM_SL; // Necessary for the parser and typechecker
+
         // Look into using the VDMJ class instead
         VDMSL vdmsl = new VDMSL();
         ExitStatus parseStatus = vdmsl.parse(files);
