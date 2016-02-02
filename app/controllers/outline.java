@@ -11,24 +11,16 @@ import org.apache.commons.vfs2.FileObject;
 import play.libs.Json;
 import play.mvc.Result;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 public class outline extends Application {
     public Result file(String account, String path) {
         IVFS<FileObject> file = new CommonsVFS(PathHelper.JoinPath(account, path));
-        List<File> files = new ArrayList<>();
 
         if (!file.exists())
             return status(StatusCode.UnprocessableEntity, "File not found");
 
-        if (file.isDirectory())
-            files.addAll(file.readdirAsIOFile());
-        else
-            files.add(file.getIOFile());
-
-        ModelWrapper modelWrapper = new ModelWrapper(files);
+        ModelWrapper modelWrapper = new ModelWrapper(file);
 
         OutlineTreeContentProvider outlineProvider = new OutlineTreeContentProvider(modelWrapper.getAst());
         List<Object> list = outlineProvider.getContent();
