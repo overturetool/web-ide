@@ -13,6 +13,8 @@ POST    /vfs/writeFile/:account/*path                                   controll
 PUT     /vfs/move/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>     controllers.vfs.move(account, path)
 DELETE  /vfs/delete/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>   controllers.vfs.delete(account, path)
 PUT     /vfs/rename/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>   controllers.vfs.rename(account, path, name)
+POST    /vfs/mkdir/:account/$path<[a-zA-Z0-9/_-]*>                      controllers.vfs.mkdir(account, path)
+POST    /vfs/mkFile/:account/$path<[a-zA-Z0-9./_-]*>                    controllers.vfs.mkFile(account, path)
 
 # outline
 GET     /outline/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>      controllers.outline.file(account, path)

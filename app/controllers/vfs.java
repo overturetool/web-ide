@@ -81,18 +81,36 @@ public class vfs extends Application {
     public Result delete(String account, String path) {
         IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
 
-        if (vfs.delete())
-            return ok();
-        else
+        if (!vfs.delete())
             return status(StatusCode.UnprocessableEntity, "An error occurred while delete file");
+
+        return ok();
     }
 
     public Result rename(String account, String path, String name) {
         IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
 
-        if (vfs.rename(name))
-            return ok();
-        else
-            return status(StatusCode.UnprocessableEntity, "An error occurred while delete file");
+        if (!vfs.rename(name))
+            return status(StatusCode.UnprocessableEntity, "An error occurred while renaming file");
+
+        return ok();
+    }
+
+    public Result mkdir(String account, String path) {
+        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+
+        if (!vfs.mkdir())
+            return status(StatusCode.UnprocessableEntity, "An error occurred while creating directory");
+
+        return ok();
+    }
+
+    public Result mkFile(String account, String path) {
+        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+
+        if (!vfs.mkFile())
+            return status(StatusCode.UnprocessableEntity, "An error occurred while creating file");
+
+        return ok();
     }
 }

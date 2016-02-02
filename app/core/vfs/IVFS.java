@@ -47,4 +47,8 @@ public interface IVFS<T> {
     boolean delete();
 
     boolean rename(String name);
+
+    boolean mkFile();
+
+    boolean mkdir();
 }

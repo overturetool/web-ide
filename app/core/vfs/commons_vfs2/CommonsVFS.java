@@ -406,6 +406,29 @@ public class CommonsVFS implements IVFS<FileObject> {
         return true;
     }
 
+    public boolean mkFile() {
+        try {
+            getFileObject().createFile();
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean mkdir() {
+        try {
+            getFileObject().createFolder();
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+            return false;
+        }
+
+        return true;
+    }
+
     private FileObject getFileObject() throws FileSystemException {
         String fullPath = FSSchemes.File + "://" + new File(relativePath).getAbsolutePath();
         return fsManager.resolveFile(fullPath);
