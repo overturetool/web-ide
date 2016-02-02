@@ -22,14 +22,19 @@ public class vfs extends Application {
         boolean success = vfs.appendFile(body.asText());
 
         if (!success)
-            return status(422);
+            return status(StatusCode.UnprocessableEntity, "Appending to file failed");
 
         return ok();
     }
 
     public Result readFile(String account, String path) {
         IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+
+        if (!vfs.exists())
+            return status(StatusCode.UnprocessableEntity, "File does not exists");
+
         String result = vfs.readFile();
+
         return ok(result);
     }
 

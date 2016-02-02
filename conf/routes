@@ -3,34 +3,34 @@
 # ~~~~
 
 # Home page
-GET     /                                                               controllers.Application.index()
+GET     /                                                                   controllers.Application.index()
 
 # vfs
-PUT     /vfs/appendFile/:account/*path                                  controllers.vfs.appendFile(account, path)
-GET     /vfs/readFile/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+> controllers.vfs.readFile(account, path)
-GET     /vfs/readdir/$path<[a-zA-Z0-9/_-]+>                             controllers.vfs.readdir(path, depth ?= "0")
-POST    /vfs/writeFile/:account/*path                                   controllers.vfs.writeFile(account, path)
-PUT     /vfs/move/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>     controllers.vfs.move(account, path)
-DELETE  /vfs/delete/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>   controllers.vfs.delete(account, path)
-PUT     /vfs/rename/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>   controllers.vfs.rename(account, path, name)
-POST    /vfs/mkdir/:account/$path<[a-zA-Z0-9/_-]*>                      controllers.vfs.mkdir(account, path)
-POST    /vfs/mkFile/:account/$path<[a-zA-Z0-9./_-]*>                    controllers.vfs.mkFile(account, path)
+PUT     /vfs/appendFile/:account/*path                                      controllers.vfs.appendFile(account, path)
+GET     /vfs/readFile/:account/$path<[a-zA-Z0-9/_-]+([.]{1}[a-zA-Z0-9]+)?>  controllers.vfs.readFile(account, path)
+GET     /vfs/readdir/$path<[a-zA-Z0-9/_-]+>                                 controllers.vfs.readdir(path, depth ?= "0")
+POST    /vfs/writeFile/:account/$path<[a-zA-Z0-9/_-]+([.]{1}[a-zA-Z0-9]+)?> controllers.vfs.writeFile(account, path)
+PUT     /vfs/move/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>         controllers.vfs.move(account, path)
+DELETE  /vfs/delete/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>       controllers.vfs.delete(account, path)
+PUT     /vfs/rename/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>       controllers.vfs.rename(account, path, name)
+POST    /vfs/mkdir/:account/$path<[a-zA-Z0-9/_-]*>                          controllers.vfs.mkdir(account, path)
+POST    /vfs/mkFile/:account/$path<[a-zA-Z0-9./_-]*>                        controllers.vfs.mkFile(account, path)
 
 # outline
-GET     /outline/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>      controllers.outline.file(account, path)
+GET     /outline/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>          controllers.outline.file(account, path)
 
 # lint
-GET     /lint/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>         controllers.lint.file(account, path)
-GET     /lint/:account/$path<[a-zA-Z0-9/_-]+>                           controllers.lint.file(account, path)
+GET     /lint/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>             controllers.lint.file(account, path)
+GET     /lint/:account/$path<[a-zA-Z0-9/_-]+>                               controllers.lint.file(account, path)
 
 # codecompletion
-GET     /codecompletion/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+> controllers.codecompletion.proposal(account, path)
+GET     /codecompletion/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>   controllers.codecompletion.proposal(account, path)
 
 # pog
-GET     /pog/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>          controllers.pog.generatePog(account, path)
+GET     /pog/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>              controllers.pog.generatePog(account, path)
 
 # Web Socket management
-GET     /debug/$path<[a-zA-Z0-9/_-]+.*>                                 controllers.debug.ws(path)
+GET     /debug/$path<[a-zA-Z0-9/_-]+.*>                                     controllers.debug.ws(path)
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file                                                   controllers.Assets.versioned(path="/public", file: Asset)
+GET     /assets/*file                                                       controllers.Assets.versioned(path="/public", file: Asset)
