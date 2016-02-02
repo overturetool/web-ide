@@ -2,6 +2,7 @@ package core.outline;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import core.utilities.PathHelper;
 import org.overture.ast.definitions.*;
 import org.overture.ast.intf.lex.ILexLocation;
 import org.overture.ast.modules.AFromModuleImports;
@@ -100,6 +101,9 @@ public class OutlineTreeContentProvider {
 
                 ObjectNode locationNode = Json.newObject();
 
+                locationNode.put("executable", location.getExecutable());
+                locationNode.put("file", PathHelper.RelativePath(location.getFile().getPath()));
+                locationNode.put("module", location.getModule());
                 locationNode.put("startLine", startLine);
                 locationNode.put("endLine", endLine);
                 locationNode.put("startOffset", startOffset);

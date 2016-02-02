@@ -1,6 +1,13 @@
 package core.wrappers;
 
+import core.utilities.PathHelper;
+import core.vfs.IVFS;
+import core.vfs.commons_vfs2.CommonsVFS;
+import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
+import org.overture.ast.modules.AFromModuleImports;
+import org.overture.ast.modules.AModuleImports;
+import org.overture.ast.modules.AModuleModules;
 import org.overture.ast.util.modules.ModuleList;
 import org.overture.interpreter.VDMSL;
 import org.overture.interpreter.runtime.ModuleInterpreter;
@@ -9,15 +16,19 @@ import org.overture.pog.pub.IProofObligationList;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class ModelWrapper {
-    private VDMSL vdmsl;
     private ModuleInterpreter interpreter;
 
-    public ModelWrapper(File file) {
-        List<File> files = new ArrayList<>();
-        files.add(file);
+    public ModelWrapper(IVFS<FileObject> file) {
+        List<File> files = wrapInList(file.getIOFile());
+
+        List<File> importFiles = resolveImports(file);
+        if (importFiles != null)
+            files.addAll(importFiles);
+
         init(files);
     }
 
@@ -41,7 +52,7 @@ public class ModelWrapper {
 
     private void init(List<File> files) {
         // Look into using the VDMJ class instead
-        this.vdmsl = new VDMSL();
+        VDMSL vdmsl = new VDMSL();
         ExitStatus parseStatus = vdmsl.parse(files);
 
         if (parseStatus == ExitStatus.EXIT_OK) {
@@ -55,5 +66,104 @@ public class ModelWrapper {
                 }
             }
         }
+
+        // Safety-net to avoid NullPointerExceptions
+        try {
+            if (interpreter == null)
+                interpreter = new ModuleInterpreter(new ModuleList());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private List<File> resolveImports(IVFS<FileObject> file) {
+        List<File> files = new ArrayList<>();
+
+        VDMSL vdmsl = new VDMSL();
+        ExitStatus parseStatus = vdmsl.parse(wrapInList(file.getIOFile()));
+
+        if (parseStatus == ExitStatus.EXIT_ERRORS)
+            return null;
+
+        try {
+            ModuleList modules = vdmsl.getInterpreter().getModules();
+            LinkedList<AFromModuleImports> imports = findImports(modules);
+
+            if (imports == null)
+                return null;
+
+            for (AFromModuleImports item : imports) {
+                files.addAll(findModule(file, item.getName().getName()));
+            }
+
+            if (files.size() == 0)
+                return null;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return files;
+    }
+
+    public List<File> findModule(IVFS<FileObject> file, String module) {
+        List<File> files = new ArrayList<>();
+        List<File> siblings = file.getSiblings();
+
+        for (File sibling : siblings) {
+            VDMSL vdmsl = new VDMSL();
+
+            ExitStatus parseExitStatus = vdmsl.parse(wrapInList(sibling));
+
+            if (parseExitStatus.equals(ExitStatus.EXIT_ERRORS))
+                continue;
+
+            // TODO : Re-think this
+            IVFS<FileObject> siblingFileObject = new CommonsVFS(PathHelper.RelativePath(sibling.getPath()));
+            List<File> siblingImports = resolveImports(siblingFileObject);
+            if (siblingImports != null)
+                files.addAll(siblingImports);
+
+            try {
+                AModuleModules moduleModules = vdmsl.getInterpreter().findModule(module);
+
+                if (moduleModules == null)
+                    continue;
+
+                files.addAll(moduleModules.getFiles());
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        return files;
+    }
+
+    private LinkedList<AFromModuleImports> findImports(ModuleList modules) {
+        try {
+            for (Object node : modules) {
+                if (!(node instanceof AModuleModules))
+                    continue;
+
+                AModuleModules module = (AModuleModules) node;
+                AModuleImports imports = module.getImports();
+
+                if (imports == null)
+                    return null;
+
+                return imports.getImports();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return null;
+    }
+
+    private List<File> wrapInList(File file) {
+        List<File> files = new ArrayList<>();
+        files.add(file);
+        return files;
     }
 }

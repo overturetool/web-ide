@@ -26,7 +26,7 @@ public class pog extends Application {
         if (file.isDirectory())
             modelWrapper = new ModelWrapper(file.readdirAsIOFile());
         else
-            modelWrapper = new ModelWrapper(file.getIOFile());
+            modelWrapper = new ModelWrapper(file);
 
         IProofObligationList pog = modelWrapper.getPog();
         PogMapper pogMapper = new PogMapper(pog);

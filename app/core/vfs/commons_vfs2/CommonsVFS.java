@@ -281,7 +281,7 @@ public class CommonsVFS implements IVFS<FileObject> {
 
     @Override
     public List<File> getSiblings() {
-        FileObject parent = null;
+        FileObject parent;
         List<File> children = new ArrayList<>();
 
         try {
@@ -291,7 +291,11 @@ public class CommonsVFS implements IVFS<FileObject> {
                 return null;
 
             for (FileObject fo : parent.getChildren()) {
-                if (fo.getType() == FileType.FILE && fo.getName().getExtension().contains("vdm"))
+                // Do not add 'this' as a sibling
+                if (fo == getFileObject())
+                    continue;
+
+                if (fo.getType() == FileType.FILE || fo.getType() == FileType.FOLDER)
                     children.add(new File(fo.getURL().getPath()));
             }
         } catch (FileSystemException e) {
