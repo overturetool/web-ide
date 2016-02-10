@@ -48,7 +48,7 @@ public interface IVFS<T> {
 
     boolean rename(String name);
 
-    boolean mkFile();
+    String mkFile();
 
-    boolean mkdir();
+    String mkdir();
 }
