@@ -16,6 +16,13 @@ public class debug extends Application {
         String type = request().getQueryString("type");
         String entryEncoded = request().getQueryString("entry");
         String entryDecoded = StringUtils.newStringUtf8(Base64.getDecoder().decode(entryEncoded));
+        String defaultName = null;
+
+        int containsDefault = entryDecoded.indexOf("`"); // returns -1 if the character does not occur
+        if (containsDefault > 0) {
+            defaultName = entryDecoded.substring(0, containsDefault);
+            defaultName = Base64.getEncoder().encodeToString(defaultName.getBytes());
+        }
 
         int port = -1;
 
@@ -27,12 +34,10 @@ public class debug extends Application {
         ProxyServer proxyServer;
 
         if (file.isDirectory()) {
-            if (type == null)
-                return errorResponse("Model type was not defined");
-
-            proxyServer = new ProxyServer(port, entryDecoded, type, file);
+            if (type == null) return errorResponse("Model type was not defined");
+            proxyServer = new ProxyServer(port, entryDecoded, type, defaultName, file);
         } else {
-            proxyServer = new ProxyServer(port, entryDecoded, file);
+            proxyServer = new ProxyServer(port, entryDecoded, defaultName, file);
         }
 
         ProxyClient proxyClient = proxyServer.connect();
@@ -49,14 +54,12 @@ public class debug extends Application {
             // Called when the Websocket Handshake is done
             public void onReady(WebSocket.In<String> in, WebSocket.Out<String> out) {
                 out.write(initialResponse.replace("\u0000", ""));
-                //System.out.println(initialResponse);
 
                 // For each event received on the socket
                 in.onMessage(event -> {
                     String filteredEvent = DebugCommunicationFilter.ConvertPathToAbsolute(event);
                     String overtureResult = proxyClient.sendAndRead(filteredEvent).replace("\u0000", "");
                     out.write(overtureResult);
-                    //System.out.println(overtureResult);
                 });
 
                 // When the socket is closed

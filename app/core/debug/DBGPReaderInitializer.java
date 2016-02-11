@@ -1,23 +1,52 @@
 package core.debug;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DBGPReaderInitializer {
-    private String[] args;
+    private List<String> args;
 
-    public DBGPReaderInitializer(String type, String host, int port, String key, String entry, String file) {
-        this.args = new String[] {
-            "java",
-            "-cp",
-            "Overture-2.3.0.jar",
-            "org.overture.interpreter.debug.DBGPReaderV2",
-            "-" + type,
-            "-h", host,
-            "-p", Integer.toString(port),
-            "-k", key,
-            "-e", entry,
-            file
-        };
+    public DBGPReaderInitializer(String type, String host, int port, String key, String entry, String defaultName, String file) {
+        args = new ArrayList<>();
+
+        args.add("java");
+        args.add("-cp");
+        args.add("Overture-2.3.0.jar");
+        args.add("org.overture.interpreter.debug.DBGPReaderV2");
+
+        if (type != null) {
+            args.add("-" + type);
+        }
+
+        if (host != null) {
+            args.add("-h");
+            args.add(host);
+        }
+
+        if (port != -1) {
+            args.add("-p");
+            args.add(Integer.toString(port));
+        }
+
+        if (key != null) {
+            args.add("-k");
+            args.add(key);
+        }
+
+        if (entry != null) {
+            args.add("-e");
+            args.add(entry);
+        }
+
+        if (defaultName != null) {
+            args.add("-default64");
+            args.add(defaultName);
+        }
+
+        args.add("-w"); // turn off warnings
+
+        args.add(file);
     }
 
     public void start() {
