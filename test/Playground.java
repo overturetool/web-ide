@@ -47,12 +47,12 @@ public class Playground {
     @Test
     public void handleCollision() {
         String account = "test1";
-        String filename = "bom.vdmsl";
+        String filename = "bom1.vdmsl";
         String path = "test_ws/" + filename;
 
         IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
 
-        vfs.move(PathHelper.JoinPath(account, "test_ws/1/2a"), CollisionPolicy.KeepBoth);
+        vfs.move(PathHelper.JoinPath(account, "test_ws/1/bom1.vdmsl"), CollisionPolicy.KeepBoth);
 
         String relativePath = vfs.getRelativePath();
 

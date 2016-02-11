@@ -15,20 +15,22 @@ public class ProxyServer {
     private int port;
     private String entry;
     private String type;
+    private String defaultName;
     private String absolutePath;
 
-    public ProxyServer(int port, String entry, IVFS file) {
-        this(port, entry, file.getExtension(), file.getAbsolutePath());
+    public ProxyServer(int port, String entry, String defaultName, IVFS file) {
+        this(port, entry, file.getExtension(), defaultName, file.getAbsolutePath());
     }
 
-    public ProxyServer(int port, String entry, String type, IVFS dir) {
-        this(port, entry, type, dir.getAbsolutePath());
+    public ProxyServer(int port, String entry, String type, String defaultName, IVFS dir) {
+        this(port, entry, type, defaultName, dir.getAbsolutePath());
     }
 
-    public ProxyServer(int port, String entry, String type, String absolutePath) {
+    public ProxyServer(int port, String entry, String type, String defaultName, String absolutePath) {
         this.port = port;
         this.entry = entry;
         this.type = type;
+        this.defaultName = defaultName;
         this.absolutePath = absolutePath;
     }
 
@@ -51,7 +53,7 @@ public class ProxyServer {
         ProxyClient client = new ProxyClient(server);
         client.start();
 
-        new DBGPReaderInitializer(type, host, port, key, entry, absolutePath).start();
+        new DBGPReaderInitializer(type, host, port, key, entry, defaultName, absolutePath).start();
 
         return client;
     }
@@ -66,6 +68,6 @@ public class ProxyServer {
         }
 
         // if the program gets here, no port in the range was found
-        throw new IOException("no availble port found");
+        throw new IOException("no available port found");
     }
 }

@@ -1,8 +1,6 @@
 package core.wrappers;
 
-import core.utilities.PathHelper;
 import core.vfs.IVFS;
-import core.vfs.commons_vfs2.CommonsVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
 import org.overture.ast.lex.Dialect;
@@ -152,10 +150,10 @@ public class ModelWrapper {
                 continue;
 
             // TODO : Re-think this
-            IVFS<FileObject> siblingFileObject = new CommonsVFS(PathHelper.RelativePath(sibling.getPath()));
-            List<File> siblingImports = resolveImports(siblingFileObject);
-            if (siblingImports != null)
-                files.addAll(siblingImports);
+//            IVFS<FileObject> siblingFileObject = new CommonsVFS("workspace/" + PathHelper.RelativePath(sibling.getPath()));
+//            List<File> siblingImports = resolveImports(siblingFileObject);
+//            if (siblingImports != null)
+//                files.addAll(siblingImports);
 
             try {
                 AModuleModules moduleModules = vdmsl.getInterpreter().findModule(module);

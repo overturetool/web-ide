@@ -6,10 +6,7 @@ import core.vfs.CollisionPolicy;
 import core.vfs.FSSchemes;
 import core.vfs.IVFS;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.FileType;
-import org.apache.commons.vfs2.Selectors;
+import org.apache.commons.vfs2.*;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import play.libs.Json;
 
@@ -323,9 +320,9 @@ public class CommonsVFS implements IVFS<FileObject> {
 
     @Override
     public String move(String destination, String collisionPolicy) {
-        int indx = destination.lastIndexOf('/');
-        String filename = destination.substring(indx + 1);
-        destination = destination.substring(0, indx);
+        int lastIndexOfSlash = destination.lastIndexOf('/');
+        String filename = destination.substring(lastIndexOfSlash + 1);
+        destination = destination.substring(0, lastIndexOfSlash);
 
         try {
             FileObject src = getFileObject();
@@ -340,32 +337,13 @@ public class CommonsVFS implements IVFS<FileObject> {
 
             // A file with the same name exists - handle collision according to policy
             if (des.exists()) {
-                if (collisionPolicy.equals(CollisionPolicy.Stop))
+                newRelativePath = handleCollision(src, des, collisionPolicy);
+
+                if (newRelativePath == null)
                     return null;
-
-                if (collisionPolicy.equals(CollisionPolicy.KeepBoth)) {
-                    if (src.getType() == FileType.FILE) {
-                        String regex = "-?\\d+\\.";
-                        Pattern p = Pattern.compile(regex);
-                        Matcher m = p.matcher(filename);
-
-                        if (m.find()) {
-                            String group = m.group().replace(".", "");
-                            int copyNumber = Integer.parseInt(group) + 1;
-                            filename = filename.replaceFirst(regex, copyNumber + ".");
-                        } else {
-                            filename = filename.replace(".", "1.");
-                        }
-                    } else {
-                        filename = filename.concat("1");
-                    }
-
-                    newRelativePath = destination + "/" + filename;
-                    des = getFileObject(newRelativePath);
-                }
             }
 
-            src.moveTo(des);
+            src.moveTo(getFileObject(newRelativePath));
             relativePath = newRelativePath;
         } catch (FileSystemException e) {
             e.printStackTrace();
@@ -406,36 +384,122 @@ public class CommonsVFS implements IVFS<FileObject> {
         return true;
     }
 
-    public boolean mkFile() {
+    @Override
+    public String mkFile() {
+        FileObject newFile;
+
         try {
-            getFileObject().createFile();
+            FileObject des = getFileObject();
+            String path = des.getName().getPath();
+
+            if (des.exists())
+                path = handleCollision(des, des, CollisionPolicy.KeepBoth);
+
+            if (path == null)
+                return null;
+
+            newFile = getFileObject(path);
+            newFile.createFile();
+            relativePath = path;
         } catch (FileSystemException e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
 
-        return true;
+        return newFile.getName().getBaseName();
     }
 
     @Override
-    public boolean mkdir() {
+    public String mkdir() {
+        FileObject newdir;
+
         try {
-            getFileObject().createFolder();
+            FileObject des = getFileObject();
+            String path = des.getName().getPath();
+
+            if (des.exists())
+                path = handleCollision(des, des, CollisionPolicy.KeepBoth);
+
+            if (path == null)
+                return null;
+
+            newdir = getFileObject(path);
+            newdir.createFolder();
+            relativePath = path;
         } catch (FileSystemException e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
 
-        return true;
+        return newdir.getName().getBaseName();
     }
 
     private FileObject getFileObject() throws FileSystemException {
-        String fullPath = FSSchemes.File + "://" + new File(relativePath).getAbsolutePath();
-        return fsManager.resolveFile(fullPath);
+        return getFileObject(relativePath);
     }
 
     private FileObject getFileObject(String path) throws FileSystemException {
         String fullPath = FSSchemes.File + "://" + new File(path).getAbsolutePath();
         return fsManager.resolveFile(fullPath);
+    }
+
+    private String handleCollision(FileObject src, FileObject des, String collisionPolicy) throws FileSystemException {
+        String path = des.getName().getPath();
+        String filename = des.getName().getBaseName();
+        String destination = des.getName().getPath().substring(0, path.length() - filename.length() - 1);
+        String newRelativePath = path;
+
+        if (collisionPolicy.equals(CollisionPolicy.Stop))
+            return null;
+
+        if (collisionPolicy.equals(CollisionPolicy.KeepBoth)) {
+            if (src.getType() == FileType.FILE) {
+                String regex = "-?\\d+\\.";
+                Pattern p = Pattern.compile(regex);
+                Matcher m = p.matcher(filename);
+
+                if (m.find()) {
+                    String group = m.group().replace(".", "");
+                    int copyNumber = Integer.parseInt(group) + 1;
+                    filename = filename.replaceFirst(regex, copyNumber + ".");
+                } else {
+                    filename = filename.replace(".", "1.");
+                }
+            } else if (src.getType() == FileType.FOLDER) {
+                int len = filename.length();
+                boolean isDigit = Character.isDigit(filename.toCharArray()[len - 1]);
+
+                if (filename.length() > 1 && isDigit) {
+                    int num = getNumberAtEnd(filename);
+                    int numLen = Integer.toString(num).length();
+                    filename = filename.substring(0, filename.length() - numLen) + ++num;
+                } else {
+                    filename = filename.concat("1");
+                }
+            }
+
+            newRelativePath = destination + "/" + filename;
+        }
+
+        return newRelativePath;
+    }
+
+    private static int getNumberAtEnd(String s){
+        int res = 0;
+        int p = 1;
+        int i = s.length() - 1;
+
+        while(i >= 0){
+            int d = s.charAt(i) - '0';
+            if (d >= 0 && d <= 9)
+                res += d * p;
+            else
+                break;
+
+            i--;
+            p *= 10;
+        }
+
+        return res;
     }
 }

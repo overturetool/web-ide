@@ -103,19 +103,21 @@ public class vfs extends Application {
 
     public Result mkdir(String account, String path) {
         IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        String dirname = vfs.mkdir();
 
-        if (!vfs.mkdir())
+        if (dirname == null)
             return status(StatusCode.UnprocessableEntity, "An error occurred while creating directory");
 
-        return ok();
+        return ok(dirname);
     }
 
     public Result mkFile(String account, String path) {
         IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        String filename = vfs.mkFile();
 
-        if (!vfs.mkFile())
+        if (filename == null)
             return status(StatusCode.UnprocessableEntity, "An error occurred while creating file");
 
-        return ok();
+        return ok(filename);
     }
 }
