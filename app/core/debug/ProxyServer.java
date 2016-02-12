@@ -1,6 +1,7 @@
 package core.debug;
 
 import core.vfs.IVFS;
+import play.Logger;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -45,7 +46,7 @@ public class ProxyServer {
             server.setSoTimeout(timeout);
             //server.setReuseAddress(true);
         } catch (IOException e) {
-            System.out.println("Could not listen on port " + port);
+            Logger.info("Could not listen on port " + port);
             e.printStackTrace();
             return null;
         }

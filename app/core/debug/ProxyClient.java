@@ -1,5 +1,7 @@
 package core.debug;
 
+import play.Logger;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -21,9 +23,9 @@ public class ProxyClient extends Thread {
     @Override
     public void run() {
         try {
-            System.out.println("Ready to connect on port " + server.getLocalPort());
+            Logger.debug("Ready to connect on port " + server.getLocalPort());
             client = server.accept();
-            System.out.println("Connection accepted on port " + client.getLocalPort());
+            Logger.debug("Connection accepted on port " + client.getLocalPort());
         } catch (IOException e) {
             e.printStackTrace();
             return;
@@ -33,7 +35,7 @@ public class ProxyClient extends Thread {
             in = new BufferedReader(new InputStreamReader(client.getInputStream()));
             out = new PrintWriter(client.getOutputStream(), true);
         } catch (IOException e) {
-            System.out.println("Exception thrown while initiating input and output streams");
+            Logger.info("Exception thrown while initiating input and output streams");
             e.printStackTrace();
         }
 
@@ -69,7 +71,7 @@ public class ProxyClient extends Thread {
                 return in.readLine();
             }
         } catch (IOException | InterruptedException e) {
-            System.out.println("Exception thrown while sending");
+            Logger.info("Exception thrown while sending");
             e.printStackTrace();
         }
 
@@ -87,7 +89,7 @@ public class ProxyClient extends Thread {
             if (server != null)
                 server.close();
         } catch (IOException e) {
-            System.out.println("Exception thrown while disconnecting");
+            Logger.info("Exception thrown while disconnecting");
             e.printStackTrace();
         }
     }
