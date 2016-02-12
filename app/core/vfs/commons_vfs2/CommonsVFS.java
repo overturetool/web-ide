@@ -6,12 +6,16 @@ import core.vfs.CollisionPolicy;
 import core.vfs.FSSchemes;
 import core.vfs.IVFS;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.vfs2.*;
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
+import org.apache.commons.vfs2.FileType;
+import org.apache.commons.vfs2.Selectors;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import play.libs.Json;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -125,7 +129,7 @@ public class CommonsVFS implements IVFS<FileObject> {
 
     @Override
     public List<File> readdirAsIOFile(int depth) {
-        List<File> files = new ArrayList<>();
+        List<File> files = Collections.synchronizedList(new ArrayList<>());
 
         if (isDirectory()) {
             List<FileObject> fileObjects = readdir(depth);

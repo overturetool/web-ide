@@ -13,15 +13,21 @@ public class PathHelper {
 
     public static synchronized String RelativePath(String absolute) {
         String[] split = absolute.split("/");
-        String relative = "";
+        String relative = "/" + ServerConfigurations.basePath;
         int baseIndex = -1;
 
         for (int i = 0; i < split.length; i++) {
-            if (baseIndex == -1 && split[i].equals(ServerConfigurations.basePath))
+            if (split[i].equals(ServerConfigurations.basePath)) {
                 baseIndex = i;
-            else if (baseIndex > -1)
-                relative += "/" + split[i];
+                break;
+            }
         }
+
+        if (baseIndex == -1)
+            return relative;
+
+        for (int i = baseIndex + 1; i < split.length; i++)
+            relative += "/" + split[i];
 
         return relative;
     }

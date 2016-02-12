@@ -59,7 +59,8 @@ public class debug extends Application {
                 in.onMessage(event -> {
                     String filteredEvent = DebugCommunicationFilter.ConvertPathToAbsolute(event);
                     String overtureResult = proxyClient.sendAndRead(filteredEvent).replace("\u0000", "");
-                    out.write(overtureResult);
+                    String filteredOvertureResult = DebugCommunicationFilter.ConvertPathsToRelative(overtureResult);
+                    out.write(filteredOvertureResult);
                 });
 
                 // When the socket is closed

@@ -1,6 +1,6 @@
 package WebSockets;
 
-import Helpers.String2XML;
+import core.utilities.String2XML;
 import Helpers.WebSocketTestClientSync;
 import org.apache.commons.codec.binary.StringUtils;
 import org.junit.Test;
