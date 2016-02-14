@@ -104,7 +104,7 @@ public class ModelWrapper {
 
                     this.targetModuleName = this.interpreter.getDefaultName();
 
-                    // TODO : Concurrency issues there
+                    // TODO : Concurrency issues here
                     this.parserResult = ParserUtil.parseSl(files);
                     this.typeCheckResult = TypeCheckerUtil.typeCheckSl(files);
                 } catch (Exception e) {
@@ -116,9 +116,10 @@ public class ModelWrapper {
 
         // Safety-net to avoid NullPointerExceptions
         try {
-            if (this.interpreter == null)
+            if (this.interpreter == null) {
                 this.interpreter = new ModuleInterpreter(new ModuleList());
                 this.interpreter.init(null);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

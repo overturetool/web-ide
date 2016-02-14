@@ -1,7 +1,6 @@
 package core.vfs;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.apache.commons.vfs2.FileObject;
 
 import java.io.File;
 import java.util.List;
@@ -53,5 +52,5 @@ public interface IVFS<T> {
 
     String mkdir();
 
-    IVFS<FileObject> getParent();
+    IVFS<T> getParent();
 }
