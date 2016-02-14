@@ -31,6 +31,13 @@ public class CommonsVFS implements IVFS<FileObject> {
 
         try {
             fsManager.init();
+
+            //fsManager.toFileObject()
+            //fsManager.setCacheStrategy(CacheStrategy.ON_RESOLVE);
+
+            //fsManager.setBaseFile(new File(ServerConfigurations.basePath));
+            //FileObject baseFileObject = fsManager.getBaseFile();
+            //FileObject fileObject = fsManager.resolveFile(baseFileObject, "rsreimer/bom/bom.vdmsl");
         } catch (FileSystemException e) {
             e.printStackTrace();
         }
