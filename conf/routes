@@ -29,6 +29,9 @@ GET     /codecompletion/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>   cont
 # pog
 GET     /pog/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>              controllers.pog.generatePog(account, path)
 
+# evaluate
+GET     /eval/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>             controllers.evaluate.execute(account, path)
+
 # Web Socket management
 GET     /debug/$path<[a-zA-Z0-9/_-]+.*>                                     controllers.debug.ws(path)
 

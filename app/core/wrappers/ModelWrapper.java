@@ -10,9 +10,11 @@ import org.overture.config.Settings;
 import org.overture.interpreter.VDMSL;
 import org.overture.interpreter.runtime.ModuleInterpreter;
 import org.overture.interpreter.util.ExitStatus;
+import org.overture.interpreter.values.Value;
 import org.overture.parser.util.ParserUtil;
 import org.overture.pog.pub.IProofObligationList;
 import org.overture.typechecker.util.TypeCheckerUtil;
+import play.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -32,7 +34,7 @@ public class ModelWrapper {
             files.add(file.getIOFile());
 
             List<File> siblings = file.getSiblings();
-            if (siblings != null)
+            if (siblings != null && !siblings.isEmpty())
                 files.addAll(siblings);
             else if (file.isDirectory())
                 files.addAll(file.readdirAsIOFile(-1));
@@ -44,6 +46,15 @@ public class ModelWrapper {
     public ModelWrapper(List<File> files) {
         synchronized (lock) {
             init(files);
+        }
+    }
+
+    public String evaluate(String input) {
+        try {
+            Value value = this.interpreter.execute(input.trim(), null);
+            return value.toString();
+        } catch (Exception e) {
+            return e.toString();
         }
     }
 
@@ -89,10 +100,15 @@ public class ModelWrapper {
             if (typeCheckStatus == ExitStatus.EXIT_OK) {
                 try {
                     this.interpreter = vdmsl.getInterpreter();
+                    this.interpreter.init(null);
+
                     this.targetModuleName = this.interpreter.getDefaultName();
+
+                    // TODO : Concurrency issues there
                     this.parserResult = ParserUtil.parseSl(files);
                     this.typeCheckResult = TypeCheckerUtil.typeCheckSl(files);
                 } catch (Exception e) {
+                    Logger.error("Exception thrown when getting interpreter", e);
                     e.printStackTrace();
                 }
             }
@@ -100,8 +116,9 @@ public class ModelWrapper {
 
         // Safety-net to avoid NullPointerExceptions
         try {
-            if (interpreter == null)
-                interpreter = new ModuleInterpreter(new ModuleList());
+            if (this.interpreter == null)
+                this.interpreter = new ModuleInterpreter(new ModuleList());
+                this.interpreter.init(null);
         } catch (Exception e) {
             e.printStackTrace();
         }

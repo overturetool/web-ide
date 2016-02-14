@@ -11,6 +11,7 @@ import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileType;
 import org.apache.commons.vfs2.Selectors;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
+import play.Logger;
 import play.libs.Json;
 
 import java.io.*;
@@ -282,25 +283,17 @@ public class CommonsVFS implements IVFS<FileObject> {
 
     @Override
     public List<File> getSiblings() {
-        FileObject parent;
-        List<File> children = new ArrayList<>();
+        IVFS<FileObject> parent = getParent();
 
-        try {
-            parent = getFileObject().getParent();
+        if (parent == null)
+            return null;
 
-            if (parent == null)
-                return null;
+        List<File> children = parent.readdirAsIOFile(-1);
 
-            for (FileObject fo : parent.getChildren()) {
-                // Do not add 'this' as a sibling
-                if (fo == getFileObject())
-                    continue;
-
-                if (fo.getType() == FileType.FILE || fo.getType() == FileType.FOLDER)
-                    children.add(new File(fo.getURL().getPath()));
-            }
-        } catch (FileSystemException e) {
-            e.printStackTrace();
+        // Remove 'this' from children
+        for (int i = 0; i < children.size(); i++) {
+            if (children.get(i).getName().equals(getName()))
+                children.remove(i);
         }
 
         return children;
@@ -436,6 +429,17 @@ public class CommonsVFS implements IVFS<FileObject> {
         }
 
         return newdir.getName().getBaseName();
+    }
+
+    @Override
+    public IVFS<FileObject> getParent() {
+        try {
+            return new CommonsVFS(getFileObject().getParent().getURL().getPath());
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+            Logger.error("Exception thrown when getting IVFS parent", e);
+        }
+        return null;
     }
 
     private FileObject getFileObject() throws FileSystemException {
