@@ -53,6 +53,7 @@ public class debug extends Application {
         return new WebSocket<String>() {
             // Called when the Websocket Handshake is done
             public void onReady(WebSocket.In<String> in, WebSocket.Out<String> out) {
+                //String initialResponseFiltered = DebugCommunicationFilter.ConvertPathsToRelative(initialResponse.replace("\u0000", ""));
                 out.write(initialResponse.replace("\u0000", ""));
 
                 // For each event received on the socket
@@ -74,7 +75,7 @@ public class debug extends Application {
             @Override
             public void onReady(In<String> in, Out<String> out) {
                 out.write(message);
-                //out.close();
+                out.close();
             }
         };
     }

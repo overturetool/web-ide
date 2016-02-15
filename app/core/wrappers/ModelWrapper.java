@@ -118,7 +118,6 @@ public class ModelWrapper {
         try {
             if (this.interpreter == null) {
                 this.interpreter = new ModuleInterpreter(new ModuleList());
-                this.interpreter.init(null);
             }
         } catch (Exception e) {
             e.printStackTrace();

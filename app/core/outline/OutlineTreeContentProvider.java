@@ -102,7 +102,7 @@ public class OutlineTreeContentProvider {
                 ObjectNode locationNode = Json.newObject();
 
                 locationNode.put("executable", location.getExecutable());
-                locationNode.put("file", PathHelper.RelativePath(location.getFile().getPath()));
+                locationNode.put("file", PathHelper.RemoveBase(location.getFile().getPath()));
                 locationNode.put("module", location.getModule());
                 locationNode.put("startLine", startLine);
                 locationNode.put("endLine", endLine);

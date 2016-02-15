@@ -38,7 +38,7 @@ public class PogMapper {
         ILexLocation location = po.getLocation();
 
         locationNode.put("executable", location.getExecutable());
-        locationNode.put("file", PathHelper.RelativePath(location.getFile().getPath()));
+        locationNode.put("file", PathHelper.RemoveBase(location.getFile().getPath()));
         locationNode.put("module", location.getModule());
         locationNode.put("startLine", location.getStartLine());
         locationNode.put("endLine", location.getEndLine());

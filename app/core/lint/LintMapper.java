@@ -42,7 +42,7 @@ public class LintMapper {
 
         ObjectNode locationNode = Json.newObject();
         locationNode.put("executable", object.location.getExecutable());
-        locationNode.put("file", PathHelper.RelativePath(object.location.getFile().getPath()));
+        locationNode.put("file", PathHelper.RemoveBase(object.location.getFile().getPath()));
         locationNode.put("module", object.location.getModule());
         locationNode.put("startLine", startLine);
         locationNode.put("endLine", endLine);
