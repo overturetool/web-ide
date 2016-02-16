@@ -15,7 +15,7 @@ public class Playground {
         String filename = "bom.vdmsl";
         String path = "bom/" + filename;
 
-        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        IVFS vfs = new CommonsVFS(account, path);
         ModelWrapper model = new ModelWrapper(vfs);
         String value0 = model.evaluate("1 + 1");
         assertEquals(value0, "2");
@@ -48,7 +48,7 @@ public class Playground {
         String filename = "bom.vdmsl";
         String path = "test_ws/" + filename;
 
-        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        IVFS vfs = new CommonsVFS(account, path);
 
         vfs.move(PathHelper.JoinPath(account, "test_ws/1"));
 
@@ -66,7 +66,7 @@ public class Playground {
         String dirname = "2";
         String path = "test_ws/1/" + dirname;
 
-        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        IVFS vfs = new CommonsVFS(account, path);
 
         vfs.move(PathHelper.JoinPath(account, "test_ws/1/2a"));
 
@@ -84,7 +84,7 @@ public class Playground {
         String filename = "bom1.vdmsl";
         String path = "test_ws/" + filename;
 
-        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        IVFS vfs = new CommonsVFS(account, path);
 
         vfs.move(PathHelper.JoinPath(account, "test_ws/1/bom1.vdmsl"), CollisionPolicy.KeepBoth);
 

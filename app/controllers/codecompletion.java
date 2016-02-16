@@ -6,7 +6,6 @@ import core.codecompletion.assistant.ContentAssistProcessor;
 import core.codecompletion.proposal.mapper.ProposalToJsonMapper;
 import core.codecompletion.resources.Document;
 import core.codecompletion.resources.ICompletionProposal;
-import core.utilities.PathHelper;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import org.overture.interpreter.util.ExitStatus;
@@ -33,7 +32,7 @@ public class codecompletion extends Application {
             return status(StatusCode.UnprocessableEntity, "Invalid query argument format");
         }
 
-        IVFS file = new CommonsVFS(PathHelper.JoinPath(account, path));
+        IVFS file = new CommonsVFS(account, path);
 
         if (!file.exists())
             return status(StatusCode.UnprocessableEntity, "File not found");

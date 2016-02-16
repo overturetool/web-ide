@@ -36,7 +36,7 @@ public interface IVFS<T> {
 
     String getAbsolutePath();
 
-    String getAbsoluteUri();
+    String getAbsoluteUrl();
 
     List<File> getSiblings();
 

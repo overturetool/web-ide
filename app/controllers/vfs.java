@@ -3,7 +3,6 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.StatusCode;
-import core.utilities.PathHelper;
 import core.vfs.CollisionPolicy;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
@@ -12,13 +11,14 @@ import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import java.io.File;
 import java.util.List;
 
 public class vfs extends Application {
     public Result appendFile(String account, String path) {
         Http.RequestBody body = request().body();
 
-        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        IVFS vfs = new CommonsVFS(account, path);
         boolean success = vfs.appendFile(body.asText());
 
         if (!success)
@@ -28,7 +28,7 @@ public class vfs extends Application {
     }
 
     public Result readFile(String account, String path) {
-        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        IVFS vfs = new CommonsVFS(account, path);
 
         if (!vfs.exists())
             return status(StatusCode.UnprocessableEntity, "File does not exists");
@@ -38,10 +38,10 @@ public class vfs extends Application {
         return ok(result);
     }
 
-    public Result readdir(String path, String depth) {
+    public Result readdir(String account, String path, String depth) {
         int depthInt = Integer.parseInt(depth);
 
-        IVFS<FileObject> vfs = new CommonsVFS(PathHelper.JoinPath(path));
+        IVFS<FileObject> vfs = new CommonsVFS(account, path);
         List<ObjectNode> fileObjects = vfs.readdirAsJSONTree(depthInt);
 
         return ok(Json.newArray().addAll(fileObjects));
@@ -50,11 +50,11 @@ public class vfs extends Application {
     public Result writeFile(String account, String path) {
         Http.RequestBody body = request().body();
 
-        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        IVFS vfs = new CommonsVFS(account, path);
         boolean success = vfs.writeFile(body.asText());
 
         if (!success)
-            return status(422);
+            return status(StatusCode.UnprocessableEntity, "File operation failed");
 
         return ok();
     }
@@ -74,8 +74,13 @@ public class vfs extends Application {
         if (collisionPolicy == null)
             collisionPolicy = Json.newObject().textNode(CollisionPolicy.KeepBoth);
 
-        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
-        String result = vfs.move(PathHelper.JoinPath(destination.asText()), collisionPolicy.asText());
+        // TODO : Temporary fix
+        String des = destination.asText();
+        des = des.startsWith("/") ? des.substring(1) : des;
+        des = des.replaceFirst(account + File.separator, "");
+
+        IVFS vfs = new CommonsVFS(account, path);
+        String result = vfs.move(des, collisionPolicy.asText());
 
         if (result == null)
             return status(StatusCode.UnprocessableEntity, "File operation failed");
@@ -83,8 +88,8 @@ public class vfs extends Application {
         return ok(result);
     }
 
-    public Result delete(String path) {
-        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(path));
+    public Result delete(String account, String path) {
+        IVFS vfs = new CommonsVFS(account, path);
 
         if (!vfs.delete())
             return status(StatusCode.UnprocessableEntity, "An error occurred while delete file");
@@ -93,7 +98,7 @@ public class vfs extends Application {
     }
 
     public Result rename(String account, String path, String name) {
-        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        IVFS vfs = new CommonsVFS(account, path);
 
         if (!vfs.rename(name))
             return status(StatusCode.UnprocessableEntity, "An error occurred while renaming file");
@@ -102,7 +107,7 @@ public class vfs extends Application {
     }
 
     public Result mkdir(String account, String path) {
-        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        IVFS vfs = new CommonsVFS(account, path);
         String dirname = vfs.mkdir();
 
         if (dirname == null)
@@ -112,7 +117,7 @@ public class vfs extends Application {
     }
 
     public Result mkFile(String account, String path) {
-        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        IVFS vfs = new CommonsVFS(account, path);
         String filename = vfs.mkFile();
 
         if (filename == null)

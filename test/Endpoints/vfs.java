@@ -2,7 +2,6 @@ package Endpoints;
 
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.ValidatableResponse;
-import core.utilities.PathHelper;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import org.junit.Test;
@@ -21,7 +20,7 @@ public class vfs {
         String path = "test_ws/bom.vdmsl";
 
         // Save the current state of the document
-        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        IVFS vfs = new CommonsVFS(account, path);
         String tmp = vfs.readFile();
 
         given()
@@ -88,7 +87,7 @@ public class vfs {
         String path = "test_ws/bom.vdmsl";
 
         // Save the current state of the document
-        IVFS vfs = new CommonsVFS(PathHelper.JoinPath(account, path));
+        IVFS vfs = new CommonsVFS(account, path);
         String tmp = vfs.readFile();
         int oldLength = tmp.length();
 

@@ -25,7 +25,7 @@ public class DebugCommunicationFilter {
         int index = message.indexOf("<");
         message = message.substring(index);
 
-        String[] patterns = {"filename=\"file:"};
+        String[] patterns = {"filename=\"file:", "fileuri=\"file:"};
 
         for (String pattern : patterns)
             message = scanAndReplace(message, pattern);
@@ -47,7 +47,7 @@ public class DebugCommunicationFilter {
                 File file = new File(absolutePath);
 
                 if (file.isAbsolute()) {
-                    String relativePath = PathHelper.RemoveBase(file.getPath()).substring(1); // remove leading '/' - Should this be avoided?
+                    String relativePath = PathHelper.RemoveBase(file.getPath());
                     message = message.replaceFirst(file.toURI().toString(), relativePath);
                     scanStartIndex = (startIndex + relativePath.length()) - 4;
                 } else {

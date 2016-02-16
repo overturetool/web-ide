@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.StatusCode;
 import core.lint.LintMapper;
 import core.lint.LintProvider;
-import core.utilities.PathHelper;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import core.wrappers.ModelWrapper;
@@ -18,7 +17,7 @@ import java.util.List;
 
 public class lint extends Application {
     public Result file(String account, String path) {
-        IVFS<FileObject> file = new CommonsVFS(PathHelper.JoinPath(account, path));
+        IVFS<FileObject> file = new CommonsVFS(account, path);
 
         if (!file.exists())
             return status(StatusCode.UnprocessableEntity, "File not found");
