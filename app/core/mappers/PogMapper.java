@@ -7,6 +7,7 @@ import org.overture.pog.pub.IProofObligation;
 import org.overture.pog.pub.IProofObligationList;
 import play.libs.Json;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,7 +19,10 @@ public class PogMapper {
     }
 
     public List<ObjectNode> toJson() {
-        return this.pog.stream().map(this::mapObject).collect(Collectors.toList());
+        if (this.pog != null)
+            return this.pog.stream().map(this::mapObject).collect(Collectors.toList());
+        else
+            return new ArrayList<>();
     }
 
     private ObjectNode mapObject(IProofObligation po) {

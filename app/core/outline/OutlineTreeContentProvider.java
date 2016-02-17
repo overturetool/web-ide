@@ -123,9 +123,11 @@ public class OutlineTreeContentProvider {
     public List<Object> getContent() {
         List<Object> list = new ArrayList<>();
 
-        for (Object node : ast) {
+        if (this.ast == null)
+            return list;
+
+        for (Object node : this.ast)
             Collections.addAll(list, getChildren(node));
-        }
 
         return list;
     }

@@ -7,6 +7,7 @@ import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import core.wrappers.ModelWrapper;
 import org.apache.commons.vfs2.FileObject;
+import org.overture.ast.util.modules.ModuleList;
 import play.libs.Json;
 import play.mvc.Result;
 
@@ -21,7 +22,8 @@ public class outline extends Application {
 
         ModelWrapper modelWrapper = new ModelWrapper(file);
 
-        OutlineTreeContentProvider outlineProvider = new OutlineTreeContentProvider(modelWrapper.getAst());
+        ModuleList ast = modelWrapper.getAst();
+        OutlineTreeContentProvider outlineProvider = new OutlineTreeContentProvider(ast);
         List<Object> list = outlineProvider.getContent();
         List<ObjectNode> jsonList = outlineProvider.toJSON(list, file.getName());
 

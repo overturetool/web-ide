@@ -1,6 +1,6 @@
 package controllers;
 
-import core.debug.DebugCommunicationFilter;
+import core.debug.CommunicationFilter;
 import core.debug.ProxyClient;
 import core.debug.ProxyServer;
 import core.vfs.IVFS;
@@ -52,14 +52,14 @@ public class debug extends Application {
         return new WebSocket<String>() {
             // Called when the Websocket Handshake is done
             public void onReady(WebSocket.In<String> in, WebSocket.Out<String> out) {
-                String initialResponseFiltered = DebugCommunicationFilter.ConvertPathsToRelative(initialResponse.replace("\u0000", ""));
+                String initialResponseFiltered = CommunicationFilter.ConvertPathsToRelative(initialResponse.replace("\u0000", ""));
                 out.write(initialResponseFiltered);
 
                 // For each event received on the socket
                 in.onMessage(event -> {
-                    String filteredEvent = DebugCommunicationFilter.ConvertPathToAbsolute(event);
+                    String filteredEvent = CommunicationFilter.ConvertPathToAbsolute(event);
                     String overtureResult = proxyClient.sendAndRead(filteredEvent).replace("\u0000", "");
-                    String filteredOvertureResult = DebugCommunicationFilter.ConvertPathsToRelative(overtureResult);
+                    String filteredOvertureResult = CommunicationFilter.ConvertPathsToRelative(overtureResult);
                     out.write(filteredOvertureResult);
                 });
 

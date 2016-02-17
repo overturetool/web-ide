@@ -6,7 +6,7 @@ import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
 
-public class DebugCommunicationFilter {
+public class CommunicationFilter {
     public static String ConvertPathToAbsolute(String message) {
         String[] stringArray = message.split("\\s");
 

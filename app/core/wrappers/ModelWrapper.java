@@ -3,53 +3,50 @@ package core.wrappers;
 import core.vfs.IVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
-import org.overture.ast.lex.Dialect;
-import org.overture.ast.modules.AModuleModules;
 import org.overture.ast.util.modules.ModuleList;
-import org.overture.config.Settings;
 import org.overture.interpreter.VDMSL;
 import org.overture.interpreter.runtime.ModuleInterpreter;
 import org.overture.interpreter.util.ExitStatus;
 import org.overture.interpreter.values.Value;
-import org.overture.parser.util.ParserUtil;
+import org.overture.pog.obligation.ProofObligationList;
 import org.overture.pog.pub.IProofObligationList;
-import org.overture.typechecker.util.TypeCheckerUtil;
 import play.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 public class ModelWrapper {
     private ModuleInterpreter interpreter;
-    private ParserUtil.ParserResult<List<AModuleModules>> parserResult;
-    private TypeCheckerUtil.TypeCheckResult<List<AModuleModules>> typeCheckResult;
     private String targetModuleName;
-    private final Object lock = new Object();
+
+    private static final int MAX_AVAILABLE = 1;
+    private static final Semaphore available = new Semaphore(MAX_AVAILABLE, true);
 
     public ModelWrapper(IVFS<FileObject> file) {
-        synchronized (lock) {
-            List<File> files = Collections.synchronizedList(new ArrayList<>());
-            files.add(file.getIOFile());
+        available.acquireUninterruptibly();
+        List<File> files = Collections.synchronizedList(new ArrayList<>());
+        files.add(file.getIOFile());
 
-            List<File> siblings = file.getSiblings();
-            if (siblings != null && !siblings.isEmpty())
-                files.addAll(siblings);
-            else if (file.isDirectory())
-                files.addAll(file.readdirAsIOFile(-1));
+        List<File> siblings = file.getSiblings();
+        if (siblings != null && !siblings.isEmpty())
+            files.addAll(siblings);
+        else if (file.isDirectory())
+            files.addAll(file.readdirAsIOFile(-1));
 
-            init(files);
-        }
+        init(files);
+        available.release();
     }
 
     public ModelWrapper(List<File> files) {
-        synchronized (lock) {
-            init(files);
-        }
+        available.acquireUninterruptibly();
+        init(files);
+        available.release();
     }
 
-    public String evaluate(String input) {
+    public synchronized String evaluate(String input) {
         try {
             Value value = this.interpreter.execute(input.trim(), null);
             return value.toString();
@@ -63,30 +60,23 @@ public class ModelWrapper {
     }
 
     public ModuleList getAst() {
-        return this.interpreter.getModules();
+        if (this.interpreter != null)
+            return this.interpreter.getModules();
+        else
+            return new ModuleList();
     }
 
     public IProofObligationList getPog() {
         try {
-            return this.interpreter.getProofObligations();
+            if (this.interpreter != null)
+                return this.interpreter.getProofObligations();
         } catch (AnalysisException e) {
             e.printStackTrace();
         }
-
-        return null;
-    }
-
-    public ParserUtil.ParserResult<List<AModuleModules>> getParserResults() {
-        return this.parserResult;
-    }
-
-    public TypeCheckerUtil.TypeCheckResult<List<AModuleModules>> getTypeCheckerResults() {
-        return this.typeCheckResult;
+        return new ProofObligationList();
     }
 
     private synchronized void init(List<File> files) {
-        Settings.dialect = Dialect.VDM_SL; // Necessary for the parser and typechecker
-
         // Look into using the VDMJ class instead
         VDMSL vdmsl = new VDMSL();
         vdmsl.setWarnings(false);
@@ -101,14 +91,9 @@ public class ModelWrapper {
                 try {
                     this.interpreter = vdmsl.getInterpreter();
                     this.interpreter.init(null);
-
                     this.targetModuleName = this.interpreter.getDefaultName();
-
-                    // TODO : Concurrency issues here
-                    this.parserResult = ParserUtil.parseSl(files);
-                    this.typeCheckResult = TypeCheckerUtil.typeCheckSl(files);
                 } catch (Exception e) {
-                    Logger.error("Exception thrown when getting interpreter", e);
+                    Logger.error(e.getMessage(), e);
                     e.printStackTrace();
                 }
             }
