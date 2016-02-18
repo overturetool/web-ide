@@ -55,4 +55,8 @@ public interface IVFS<T> {
     String mkdir();
 
     IVFS<T> getParent();
+
+    long lastModifiedTime();
+
+    String pseudoIdentity();
 }

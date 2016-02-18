@@ -472,6 +472,21 @@ public class CommonsVFS implements IVFS<FileObject> {
         return null;
     }
 
+    @Override
+    public long lastModifiedTime() {
+        try {
+            return getFileObject().getContent().getLastModifiedTime();
+        } catch (FileSystemException e) {
+            Logger.error(e.getMessage(), e);
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    public String pseudoIdentity() {
+        return this.relativePath + "@" + this.account;
+    }
+
     private FileObject getFileObject() throws FileSystemException {
         return getFileObject(relativePath);
     }
@@ -541,7 +556,7 @@ public class CommonsVFS implements IVFS<FileObject> {
         return newFilename;
     }
 
-    private static int getNumberAtEnd(String s){
+    private int getNumberAtEnd(String s){
         int res = 0;
         int p = 1;
         int i = s.length() - 1;

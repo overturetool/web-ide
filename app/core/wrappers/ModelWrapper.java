@@ -1,5 +1,6 @@
 package core.wrappers;
 
+import core.utilities.ResourceCache;
 import core.vfs.IVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
@@ -20,27 +21,36 @@ import java.util.concurrent.Semaphore;
 
 public class ModelWrapper {
     private ModuleInterpreter interpreter;
-    private String targetModuleName;
 
     private static final int MAX_AVAILABLE = 1;
     private static final Semaphore available = new Semaphore(MAX_AVAILABLE, true);
 
     public ModelWrapper(IVFS<FileObject> file) {
         available.acquireUninterruptibly();
-        List<File> files = Collections.synchronizedList(new ArrayList<>());
-        files.add(file.getIOFile());
 
-        List<File> siblings = file.getSiblings();
-        if (siblings != null && !siblings.isEmpty())
-            files.addAll(siblings);
-        else if (file.isDirectory())
-            files.addAll(file.readdirAsIOFile(-1));
+        if (ResourceCache.getInstance().existsAndNotModified(file)) {
+            this.interpreter = ResourceCache.getInstance().get(file).getInterpreter();
+            this.interpreter.init(null);
+        } else {
+            List<File> files = Collections.synchronizedList(new ArrayList<>());
+            files.add(file.getIOFile());
 
-        init(files);
+            List<File> siblings = file.getSiblings();
+            if (siblings != null && !siblings.isEmpty())
+                files.addAll(siblings);
+            else if (file.isDirectory())
+                files.addAll(file.readdirAsIOFile(-1));
+
+            init(files);
+
+            ResourceCache.getInstance().add(file, this.interpreter);
+        }
+
         available.release();
     }
 
     public ModelWrapper(List<File> files) {
+        Logger.debug("Here");
         available.acquireUninterruptibly();
         init(files);
         available.release();
@@ -56,7 +66,7 @@ public class ModelWrapper {
     }
 
     public String getTargetModuleName() {
-        return this.targetModuleName;
+        return this.interpreter.getDefaultName();
     }
 
     public ModuleList getAst() {
@@ -91,7 +101,6 @@ public class ModelWrapper {
                 try {
                     this.interpreter = vdmsl.getInterpreter();
                     this.interpreter.init(null);
-                    this.targetModuleName = this.interpreter.getDefaultName();
                 } catch (Exception e) {
                     Logger.error(e.getMessage(), e);
                     e.printStackTrace();
