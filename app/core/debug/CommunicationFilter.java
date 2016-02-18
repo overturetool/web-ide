@@ -6,7 +6,7 @@ import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
 
-public class DebugCommunicationFilter {
+public class CommunicationFilter {
     public static String ConvertPathToAbsolute(String message) {
         String[] stringArray = message.split("\\s");
 
@@ -14,7 +14,7 @@ public class DebugCommunicationFilter {
             String str = stringArray[i];
             if (str.equals("-f")) {
                 String path = stringArray[++i];
-                stringArray[i] = "file:" + new File(ServerConfigurations.basePath + "/" + path).getAbsolutePath();
+                stringArray[i] = new File(ServerConfigurations.basePath + "/" + path).toURI().toString();
             }
         }
 
@@ -22,13 +22,22 @@ public class DebugCommunicationFilter {
     }
 
     public static String ConvertPathsToRelative(String message) {
-        boolean scan = true;
-        int scanStartIndex = 0;
         int index = message.indexOf("<");
         message = message.substring(index);
-        String pattern = "filename=\"file:";
 
-        while (scan) {
+        String[] patterns = {"filename=\"file:", "fileuri=\"file:"};
+
+        for (String pattern : patterns)
+            message = scanAndReplace(message, pattern);
+
+        return (message.length() + 1) + message;
+    }
+
+    private static String scanAndReplace(String message, String pattern) {
+        boolean scan = true;
+        int scanStartIndex = 0;
+
+        while (scan && scanStartIndex + pattern.length() < message.length()) {
             String subString = message.substring(scanStartIndex);
             if (subString.contains(pattern)) {
                 int startIndex = message.indexOf(pattern, scanStartIndex) + pattern.length();
@@ -38,10 +47,9 @@ public class DebugCommunicationFilter {
                 File file = new File(absolutePath);
 
                 if (file.isAbsolute()) {
-                    String relativePath = PathHelper.RelativePath(absolutePath);
-                    relativePath = relativePath.substring(ServerConfigurations.basePath.length() + 2);
-                    message = message.replaceFirst("file:" + absolutePath, relativePath);
-                    scanStartIndex = startIndex + relativePath.length();
+                    String relativePath = PathHelper.RemoveBase(file.getPath());
+                    message = message.replaceFirst(file.toURI().toString(), relativePath);
+                    scanStartIndex = (startIndex + relativePath.length()) - 4;
                 } else {
                     scanStartIndex = endIndex;
                 }
@@ -50,6 +58,6 @@ public class DebugCommunicationFilter {
             }
         }
 
-        return message.length() + message;
+        return message;
     }
 }

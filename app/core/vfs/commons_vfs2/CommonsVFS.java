@@ -3,7 +3,6 @@ package core.vfs.commons_vfs2;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.ServerConfigurations;
 import core.vfs.CollisionPolicy;
-import core.vfs.FSSchemes;
 import core.vfs.IVFS;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.FileObject;
@@ -15,6 +14,8 @@ import play.Logger;
 import play.libs.Json;
 
 import java.io.*;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,23 +23,28 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class CommonsVFS implements IVFS<FileObject> {
-    private StandardFileSystemManager fsManager;
+    private FileObject vfs;
+    private String account;
     private String relativePath;
+    private FileObject baseFileObject;
 
-    public CommonsVFS(String path) {
-        relativePath = path;
-        fsManager = new StandardFileSystemManager();
+    public CommonsVFS(String account, String path) {
+        StandardFileSystemManager fsManager = new StandardFileSystemManager();
+
+        this.account = account;
+        this.relativePath = path;
+        String basePath = ServerConfigurations.basePath;
+
+        if (account != null)
+            basePath += File.separator + account;
 
         try {
             fsManager.init();
-
-            //fsManager.toFileObject()
-            //fsManager.setCacheStrategy(CacheStrategy.ON_RESOLVE);
-
-            //fsManager.setBaseFile(new File(ServerConfigurations.basePath));
-            //FileObject baseFileObject = fsManager.getBaseFile();
-            //FileObject fileObject = fsManager.resolveFile(baseFileObject, "rsreimer/bom/bom.vdmsl");
+            fsManager.setBaseFile(new File(basePath));
+            this.baseFileObject = fsManager.getBaseFile();
+            this.vfs = fsManager.createVirtualFileSystem(this.baseFileObject);
         } catch (FileSystemException e) {
+            Logger.error(e.getMessage(), e);
             e.printStackTrace();
         }
     }
@@ -118,9 +124,8 @@ public class CommonsVFS implements IVFS<FileObject> {
 
                     if (depth == -1)
                         fileObjects.addAll(readdir(subPath, depth));
-                    else if (depth > 0) {
+                    else if (depth > 0)
                         fileObjects.addAll(readdir(subPath, depth - 1));
-                    }
                 }
             }
         } catch (IOException e) {
@@ -144,7 +149,7 @@ public class CommonsVFS implements IVFS<FileObject> {
             try {
                 for (FileObject fo : fileObjects) {
                     if (fo.getType() == FileType.FILE)
-                        files.add(new File(fo.getName().getPath()));
+                        files.add(new File(toAbsolutePath(fo.getName().getPath())));
                 }
             } catch (FileSystemException e) {
                 e.printStackTrace();
@@ -163,7 +168,7 @@ public class CommonsVFS implements IVFS<FileObject> {
 
     @Override
     public List<ObjectNode> readdirAsJSONTree(int depth) {
-        return readdirAsJSONTree(relativePath, depth);
+        return readdirAsJSONTree(this.relativePath, depth);
     }
 
     private List<ObjectNode> readdirAsJSONTree(String path, int depth) {
@@ -176,24 +181,26 @@ public class CommonsVFS implements IVFS<FileObject> {
 
             for (FileObject subFileObject : fileObject.getChildren()) {
                 ObjectNode jsonObject = Json.newObject();
-                jsonObject.put("name", subFileObject.getName().getBaseName());
-                jsonObject.put("type", subFileObject.getType() == FileType.FOLDER ? "directory" : "file");
-                jsonObject.put("path", filteredPath.substring(ServerConfigurations.basePath.length() + 1, filteredPath.length()) + "/" + subFileObject.getName().getBaseName());
 
-                if (subFileObject.getType() == FileType.FOLDER) {
-                    String subPath = filteredPath + "/" + subFileObject.getName().getBaseName();
+                String name = subFileObject.getName().getBaseName();
+                boolean isFolder = subFileObject.getType() == FileType.FOLDER;
+                String subPath = filteredPath + "/" + name;
 
-                    if (depth == -1) {
+                jsonObject.put("name", name);
+                jsonObject.put("type", isFolder ? "directory" : "file");
+                jsonObject.put("path", this.account + subPath); // TODO : Maybe omit account name
+
+                if (isFolder) {
+                    if (depth == -1)
                         jsonObject.putPOJO("children", readdirAsJSONTree(subPath, -1));
-                    }
-                    else if (depth > 0) {
+                    else if (depth > 0)
                         jsonObject.putPOJO("children", readdirAsJSONTree(subPath, depth - 1));
-                    }
                 }
 
                 nodes.add(jsonObject);
             }
         } catch (IOException e) {
+            Logger.error(e.getMessage(), e);
             e.printStackTrace();
         }
 
@@ -258,7 +265,7 @@ public class CommonsVFS implements IVFS<FileObject> {
 
     @Override
     public File getIOFile() {
-        return new File(relativePath);
+        return new File(getAbsolutePath());
     }
 
     @Override
@@ -274,18 +281,27 @@ public class CommonsVFS implements IVFS<FileObject> {
 
     @Override
     public String getRelativePath() {
-        return relativePath;
+        return this.relativePath;
+    }
+
+    @Override
+    public String getAbsoluteUrl() {
+        try {
+            URI baseUri = this.baseFileObject.getURL().toURI();
+            return baseUri + "/" + this.relativePath;
+        } catch (URISyntaxException | FileSystemException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
     public String getAbsolutePath() {
-        try {
-            return getFileObject().getURL().toString();
-        } catch (FileSystemException e) {
-            e.printStackTrace();
-        }
+        return toAbsolutePath(this.relativePath);
+    }
 
-        return null;
+    private String toAbsolutePath(String relativePath) {
+        return this.baseFileObject.getName().getPath() + "/" + relativePath;
     }
 
     @Override
@@ -313,7 +329,6 @@ public class CommonsVFS implements IVFS<FileObject> {
         } catch (FileSystemException e) {
             e.printStackTrace();
         }
-
         return null;
     }
 
@@ -324,13 +339,21 @@ public class CommonsVFS implements IVFS<FileObject> {
 
     @Override
     public String move(String destination, String collisionPolicy) {
-        int lastIndexOfSlash = destination.lastIndexOf('/');
-        String filename = destination.substring(lastIndexOfSlash + 1);
-        destination = destination.substring(0, lastIndexOfSlash);
+        String filename;
+        String newRelativePath;
+
+        int lastIndexOfSlash = destination.lastIndexOf(File.separator);
+        if (lastIndexOfSlash != -1) {
+            filename = destination.substring(lastIndexOfSlash + 1);
+            destination = destination.substring(0, lastIndexOfSlash);
+            newRelativePath = destination + File.separator + filename;
+        } else {
+            filename = destination;
+            newRelativePath = filename;
+        }
 
         try {
             FileObject src = getFileObject();
-            String newRelativePath = destination + "/" + filename;
             FileObject des = getFileObject(newRelativePath);
 
             if (src == des)
@@ -348,7 +371,7 @@ public class CommonsVFS implements IVFS<FileObject> {
             }
 
             src.moveTo(getFileObject(newRelativePath));
-            relativePath = newRelativePath;
+            this.relativePath = newRelativePath;
         } catch (FileSystemException e) {
             e.printStackTrace();
             return null;
@@ -372,7 +395,7 @@ public class CommonsVFS implements IVFS<FileObject> {
     public boolean rename(String name) {
         try {
             FileObject src = getFileObject();
-            FileObject des = getFileObject(src.getName().getParent().getPath() + "/" + name);
+            FileObject des = getFileObject(src.getName().getParent().getPath() + File.separator + name);
 
             if (!src.canRenameTo(des))
                 return false;
@@ -404,7 +427,7 @@ public class CommonsVFS implements IVFS<FileObject> {
 
             newFile = getFileObject(path);
             newFile.createFile();
-            relativePath = path;
+            this.relativePath = path;
         } catch (FileSystemException e) {
             e.printStackTrace();
             return null;
@@ -429,7 +452,7 @@ public class CommonsVFS implements IVFS<FileObject> {
 
             newdir = getFileObject(path);
             newdir.createFolder();
-            relativePath = path;
+            this.relativePath = path;
         } catch (FileSystemException e) {
             e.printStackTrace();
             return null;
@@ -441,12 +464,27 @@ public class CommonsVFS implements IVFS<FileObject> {
     @Override
     public IVFS<FileObject> getParent() {
         try {
-            return new CommonsVFS(getFileObject().getParent().getURL().getPath());
+            return new CommonsVFS(this.account, getFileObject().getParent().getName().getPath());
         } catch (FileSystemException e) {
+            Logger.error(e.getMessage(), e);
             e.printStackTrace();
-            Logger.error("Exception thrown when getting IVFS parent", e);
         }
         return null;
+    }
+
+    @Override
+    public long lastModifiedTime() {
+        try {
+            return getFileObject().getContent().getLastModifiedTime();
+        } catch (FileSystemException e) {
+            Logger.error(e.getMessage(), e);
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    public String pseudoIdentity() {
+        return this.relativePath + "@" + this.account;
     }
 
     private FileObject getFileObject() throws FileSystemException {
@@ -454,8 +492,9 @@ public class CommonsVFS implements IVFS<FileObject> {
     }
 
     private FileObject getFileObject(String path) throws FileSystemException {
-        String fullPath = FSSchemes.File + "://" + new File(path).getAbsolutePath();
-        return fsManager.resolveFile(fullPath);
+        //String fullPath = FSSchemes.File + "://" + new File(path).getAbsolutePath();
+        return this.vfs.resolveFile(path);
+        //return this.fsManager.resolveFile(this.baseFileObject, path);
     }
 
     private String handleCollision(FileObject src, FileObject des, String collisionPolicy) throws FileSystemException {
@@ -468,38 +507,56 @@ public class CommonsVFS implements IVFS<FileObject> {
             return null;
 
         if (collisionPolicy.equals(CollisionPolicy.KeepBoth)) {
-            if (src.getType() == FileType.FILE) {
-                String regex = "-?\\d+\\.";
-                Pattern p = Pattern.compile(regex);
-                Matcher m = p.matcher(filename);
-
-                if (m.find()) {
-                    String group = m.group().replace(".", "");
-                    int copyNumber = Integer.parseInt(group) + 1;
-                    filename = filename.replaceFirst(regex, copyNumber + ".");
-                } else {
-                    filename = filename.replace(".", "1.");
+            if (src.getName().getExtension().length() > 0) {
+                while (getFileObject(destination + File.separator + filename).exists()) {
+                    filename = filenameWithExtension(filename);
                 }
-            } else if (src.getType() == FileType.FOLDER) {
-                int len = filename.length();
-                boolean isDigit = Character.isDigit(filename.toCharArray()[len - 1]);
-
-                if (filename.length() > 1 && isDigit) {
-                    int num = getNumberAtEnd(filename);
-                    int numLen = Integer.toString(num).length();
-                    filename = filename.substring(0, filename.length() - numLen) + ++num;
-                } else {
-                    filename = filename.concat("1");
+            } else if (src.getName().getExtension().length() == 0) {
+                while (getFileObject(destination + File.separator + filename).exists()) {
+                    filename = filenameWithoutExtension(filename);
                 }
             }
 
-            newRelativePath = destination + "/" + filename;
+            newRelativePath = destination + File.separator + filename;
         }
 
         return newRelativePath;
     }
 
-    private static int getNumberAtEnd(String s){
+    private String filenameWithExtension(String filename) {
+        String regex = "-?\\d+\\.";
+        Pattern p = Pattern.compile(regex);
+        Matcher m = p.matcher(filename);
+        String newFilename;
+
+        if (m.find()) {
+            String group = m.group().replace(".", "");
+            int copyNumber = Integer.parseInt(group) + 1;
+            newFilename = filename.replaceFirst(regex, copyNumber + ".");
+        } else {
+            newFilename = filename.replace(".", "1.");
+        }
+
+        return newFilename;
+    }
+
+    private String filenameWithoutExtension(String filename) {
+        int len = filename.length();
+        boolean isDigit = Character.isDigit(filename.toCharArray()[len - 1]);
+        String newFilename;
+
+        if (filename.length() > 1 && isDigit) {
+            int num = getNumberAtEnd(filename);
+            int numLen = Integer.toString(num).length();
+            newFilename = filename.substring(0, filename.length() - numLen) + ++num;
+        } else {
+            newFilename = filename.concat("1");
+        }
+
+        return newFilename;
+    }
+
+    private int getNumberAtEnd(String s){
         int res = 0;
         int p = 1;
         int i = s.length() - 1;

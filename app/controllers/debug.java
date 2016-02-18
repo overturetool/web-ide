@@ -1,9 +1,8 @@
 package controllers;
 
-import core.debug.DebugCommunicationFilter;
+import core.debug.CommunicationFilter;
 import core.debug.ProxyClient;
 import core.debug.ProxyServer;
-import core.utilities.PathHelper;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import org.apache.commons.codec.binary.StringUtils;
@@ -12,7 +11,7 @@ import play.mvc.WebSocket;
 import java.util.Base64;
 
 public class debug extends Application {
-    public WebSocket<String> ws(String path) {
+    public WebSocket<String> ws(String account, String path) {
         String type = request().getQueryString("type");
         String entryEncoded = request().getQueryString("entry");
         String entryDecoded = StringUtils.newStringUtf8(Base64.getDecoder().decode(entryEncoded));
@@ -26,7 +25,7 @@ public class debug extends Application {
 
         int port = -1;
 
-        IVFS file = new CommonsVFS(PathHelper.JoinPath(path));
+        IVFS file = new CommonsVFS(account, path);
 
         if (!file.exists())
             return errorResponse("file not found");
@@ -53,13 +52,14 @@ public class debug extends Application {
         return new WebSocket<String>() {
             // Called when the Websocket Handshake is done
             public void onReady(WebSocket.In<String> in, WebSocket.Out<String> out) {
-                out.write(initialResponse.replace("\u0000", ""));
+                String initialResponseFiltered = CommunicationFilter.ConvertPathsToRelative(initialResponse.replace("\u0000", ""));
+                out.write(initialResponseFiltered);
 
                 // For each event received on the socket
                 in.onMessage(event -> {
-                    String filteredEvent = DebugCommunicationFilter.ConvertPathToAbsolute(event);
+                    String filteredEvent = CommunicationFilter.ConvertPathToAbsolute(event);
                     String overtureResult = proxyClient.sendAndRead(filteredEvent).replace("\u0000", "");
-                    String filteredOvertureResult = DebugCommunicationFilter.ConvertPathsToRelative(overtureResult);
+                    String filteredOvertureResult = CommunicationFilter.ConvertPathsToRelative(overtureResult);
                     out.write(filteredOvertureResult);
                 });
 
@@ -74,7 +74,7 @@ public class debug extends Application {
             @Override
             public void onReady(In<String> in, Out<String> out) {
                 out.write(message);
-                //out.close();
+                out.close();
             }
         };
     }

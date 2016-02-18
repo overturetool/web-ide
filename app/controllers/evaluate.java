@@ -1,7 +1,6 @@
 package controllers;
 
 import core.StatusCode;
-import core.utilities.PathHelper;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import core.wrappers.ModelWrapper;
@@ -16,7 +15,7 @@ public class evaluate extends Application {
         String inputEncoded = request().getQueryString("input");
         String inputDecoded = StringUtils.newStringUtf8(Base64.getDecoder().decode(inputEncoded));
 
-        IVFS<FileObject> file = new CommonsVFS(PathHelper.JoinPath(account, path));
+        IVFS<FileObject> file = new CommonsVFS(account, path);
 
         if (!file.exists())
             return status(StatusCode.UnprocessableEntity, "File not found");

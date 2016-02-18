@@ -20,11 +20,11 @@ public class ProxyServer {
     private String absolutePath;
 
     public ProxyServer(int port, String entry, String defaultName, IVFS file) {
-        this(port, entry, file.getExtension(), defaultName, file.getAbsolutePath());
+        this(port, entry, file.getExtension(), defaultName, file.getAbsoluteUrl());
     }
 
     public ProxyServer(int port, String entry, String type, String defaultName, IVFS dir) {
-        this(port, entry, type, defaultName, dir.getAbsolutePath());
+        this(port, entry, type, defaultName, dir.getAbsoluteUrl());
     }
 
     public ProxyServer(int port, String entry, String type, String defaultName, String absolutePath) {
