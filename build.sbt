@@ -31,7 +31,6 @@ javaOptions ++= Seq(
   "Xms256M",
   "Xmx1280M",
   "XX:MaxPermSize=1280M",
-  //"XX:PermSize=128M",
   "XX:+CMSClassUnloadingEnabled"
 )
 
