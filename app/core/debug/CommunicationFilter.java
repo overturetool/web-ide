@@ -47,7 +47,7 @@ public class CommunicationFilter {
                 File file = new File(absolutePath);
 
                 if (file.isAbsolute()) {
-                    String relativePath = PathHelper.RemoveBase(file.getPath());
+                    String relativePath = PathHelper.RemoveBase(file.getPath()).substring(1); // TODO : Tmp fix
                     message = message.replaceFirst(file.toURI().toString(), relativePath);
                     scanStartIndex = (startIndex + relativePath.length()) - 4;
                 } else {
