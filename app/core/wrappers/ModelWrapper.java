@@ -33,7 +33,7 @@ public class ModelWrapper {
             this.interpreter.init(null);
         } else {
             List<File> files = Collections.synchronizedList(new ArrayList<>());
-            files.add(file.getIOFile());
+            files.add(file.getIOFile()); // TODO : should not be done if file is a directory, but overture core takes care of it.
 
             List<File> siblings = file.getSiblings();
             if (siblings != null && !siblings.isEmpty())
@@ -54,6 +54,17 @@ public class ModelWrapper {
         available.acquireUninterruptibly();
         init(files);
         available.release();
+    }
+
+    public ModelWrapper() {
+        try {
+            if (this.interpreter == null) {
+                this.interpreter = new ModuleInterpreter(new ModuleList());
+                this.interpreter.init(null);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public synchronized String evaluate(String input) {

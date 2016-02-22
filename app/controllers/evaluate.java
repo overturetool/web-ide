@@ -11,9 +11,17 @@ import play.mvc.Result;
 import java.util.Base64;
 
 public class evaluate extends Application {
-    public Result execute(String account, String path) {
-        String inputEncoded = request().getQueryString("input");
-        String inputDecoded = StringUtils.newStringUtf8(Base64.getDecoder().decode(inputEncoded));
+
+    public Result expression(String input) {
+        String inputDecoded = StringUtils.newStringUtf8(Base64.getDecoder().decode(input));
+
+        ModelWrapper modelWrapper = new ModelWrapper();
+
+        return ok(modelWrapper.evaluate(inputDecoded));
+    }
+
+    public Result project(String input, String account, String path) {
+        String inputDecoded = StringUtils.newStringUtf8(Base64.getDecoder().decode(input));
 
         IVFS<FileObject> file = new CommonsVFS(account, path);
 

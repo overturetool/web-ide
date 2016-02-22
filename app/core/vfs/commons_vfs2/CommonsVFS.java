@@ -306,6 +306,9 @@ public class CommonsVFS implements IVFS<FileObject> {
 
     @Override
     public List<File> getSiblings() {
+        if (isDirectory())
+            return null;
+
         IVFS<FileObject> parent = getParent();
 
         if (parent == null)
