@@ -1,7 +1,8 @@
-FROM ingensi/play-framework:latest
+FROM 1science/sbt:latest
 MAINTAINER Kasper Saaby <kdsaaby@gmail.com>
 
 ADD . /app
 
-RUN yum install -y attr
-RUN setfattr -n user.pax.flags -v "mr" /usr/bin/java
+RUN sbt clean compile stage
+
+CMD ["target/universal/stage/bin/overture_webide"]

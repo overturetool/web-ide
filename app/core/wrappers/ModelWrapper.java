@@ -30,7 +30,7 @@ public class ModelWrapper {
 
         if (ResourceCache.getInstance().existsAndNotModified(file)) {
             this.interpreter = ResourceCache.getInstance().get(file).getInterpreter();
-            this.interpreter.init(null);
+            this.interpreter.init(null); // TODO : Is this already initialized?
         } else {
             List<File> files = Collections.synchronizedList(new ArrayList<>());
             files.add(file.getIOFile()); // TODO : should not be done if file is a directory, but overture core takes care of it.

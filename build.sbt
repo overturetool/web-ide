@@ -27,12 +27,12 @@ libraryDependencies ++= Seq(
   "org.glassfish.tyrus" % "tyrus-container-grizzly-client" % "1.12" % "test"
 )
 
-javaOptions ++= Seq(
-  "Xms256M",
-  "Xmx1280M",
-  "XX:MaxPermSize=1280M",
-  "XX:+CMSClassUnloadingEnabled"
-)
+//javaOptions ++= Seq(
+//  "Xms512M",
+//  "Xmx1024M",
+//  "Xss1M",
+//  "XX:+CMSClassUnloadingEnabled"
+//)
 
 // Play provides two styles of routers, one expects its actions to be injected, the
 // other, legacy style, accesses its actions statically.
