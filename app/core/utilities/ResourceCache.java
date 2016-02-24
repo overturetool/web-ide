@@ -23,7 +23,7 @@ public class ResourceCache {
     }
 
     public void add(IVFS file, ModuleInterpreter interpreter) {
-        map.putIfAbsent(file.pseudoIdentity(), new Resource(file.lastModifiedTime(), interpreter));
+        map.put(file.pseudoIdentity(), new Resource(file.lastModifiedTime(), interpreter));
     }
 
     public Resource get(IVFS file) {
