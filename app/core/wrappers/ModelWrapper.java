@@ -8,7 +8,6 @@ import org.overture.ast.util.modules.ModuleList;
 import org.overture.interpreter.VDMSL;
 import org.overture.interpreter.runtime.ModuleInterpreter;
 import org.overture.interpreter.util.ExitStatus;
-import org.overture.interpreter.values.Value;
 import org.overture.pog.obligation.ProofObligationList;
 import org.overture.pog.pub.IProofObligationList;
 import play.Logger;
@@ -30,7 +29,7 @@ public class ModelWrapper {
 
         if (ResourceCache.getInstance().existsAndNotModified(file)) {
             this.interpreter = ResourceCache.getInstance().get(file).getInterpreter();
-            this.interpreter.init(null); // TODO : Is this already initialized?
+            //this.interpreter.init(null);
         } else {
             List<File> files = Collections.synchronizedList(new ArrayList<>());
             files.add(file.getIOFile()); // TODO : should not be done if file is a directory, but overture core takes care of it.
@@ -68,12 +67,8 @@ public class ModelWrapper {
     }
 
     public synchronized String evaluate(String input) {
-        try {
-            Value value = this.interpreter.execute(input.trim(), null);
-            return value.toString();
-        } catch (Exception e) {
-            return e.toString();
-        }
+        Evaluator evaluator = new Evaluator(this.interpreter);
+        return evaluator.evaluate(input);
     }
 
     public String getTargetModuleName() {
@@ -111,6 +106,7 @@ public class ModelWrapper {
             if (typeCheckStatus == ExitStatus.EXIT_OK) {
                 try {
                     this.interpreter = vdmsl.getInterpreter();
+                    this.interpreter.defaultModule.setTypeChecked(true);
                     this.interpreter.init(null);
                 } catch (Exception e) {
                     Logger.error(e.getMessage(), e);
@@ -123,6 +119,7 @@ public class ModelWrapper {
         try {
             if (this.interpreter == null) {
                 this.interpreter = new ModuleInterpreter(new ModuleList());
+                this.interpreter.init(null);
             }
         } catch (Exception e) {
             e.printStackTrace();
