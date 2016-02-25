@@ -4,24 +4,10 @@ import core.utilities.ResourceCache;
 import core.vfs.IVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
-import org.overture.ast.definitions.AValueDefinition;
-import org.overture.ast.definitions.PDefinition;
-import org.overture.ast.expressions.PExp;
-import org.overture.ast.factory.AstFactory;
-import org.overture.ast.intf.lex.ILexLocation;
-import org.overture.ast.lex.Dialect;
-import org.overture.ast.lex.LexLocation;
-import org.overture.ast.lex.LexNameToken;
-import org.overture.ast.typechecker.NameScope;
-import org.overture.ast.types.PType;
 import org.overture.ast.util.modules.ModuleList;
 import org.overture.interpreter.VDMSL;
-import org.overture.interpreter.messages.Console;
 import org.overture.interpreter.runtime.ModuleInterpreter;
 import org.overture.interpreter.util.ExitStatus;
-import org.overture.interpreter.values.Value;
-import org.overture.parser.lex.LexTokenReader;
-import org.overture.parser.syntax.ExpressionReader;
 import org.overture.pog.obligation.ProofObligationList;
 import org.overture.pog.pub.IProofObligationList;
 import play.Logger;
@@ -29,7 +15,6 @@ import play.Logger;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
@@ -82,81 +67,8 @@ public class ModelWrapper {
     }
 
     public synchronized String evaluate(String input) {
-        input = input.trim();
-
-        String methodPrefix = "&";
-        String assignmentOperator = ":=";
-        String setDefault = methodPrefix + "setDefault";
-        String getDefault = methodPrefix + "getDefault";
-        String help = methodPrefix + "help";
-        String space = " ";
-
-        try {
-            if (!input.startsWith(methodPrefix) && input.contains(assignmentOperator)) {
-                String[] strings = input.replaceAll(space, "").split(assignmentOperator);
-
-                if (strings.length != 2)
-                    return "Error: invalid assignment format";
-
-                String var = strings[0];
-                String exp = strings[1];
-                create(var, exp);
-                return this.interpreter.evaluate(input, this.interpreter.initialContext).toString();
-            } else if (input.startsWith(setDefault, 0) && input.contains(assignmentOperator)) {
-                String[] strings = input.replaceAll(space, "").split(assignmentOperator);
-                String defaultName = strings[1];
-                String oldDefaultName = this.interpreter.getDefaultName();
-                this.interpreter.setDefaultName(defaultName);
-                return "Default changed from " + oldDefaultName + " to " + defaultName;
-            } else if (input.startsWith(getDefault, 0)) {
-                return this.interpreter.getDefaultName();
-            } else if (input.equals(help)) {
-                StringBuilder helpString = new StringBuilder();
-                helpString.append("These are the Overture webIDE REPL commands:")
-                        .append(System.lineSeparator());
-                helpString.append("   Get default module name:        ").append(getDefault)
-                        .append(System.lineSeparator());
-                helpString.append("   Set default module name:        ").append(setDefault).append(" ").append(assignmentOperator).append(" <module_name>")
-                        .append(System.lineSeparator());
-                helpString.append("   Define variable:                <var_name> ")
-                        .append(assignmentOperator).append(" <value>");
-                return helpString.toString();
-            } else {
-                return this.interpreter.evaluate(input, this.interpreter.initialContext).toString();
-            }
-        } catch (Exception e) {
-            return e.toString();
-        }
-    }
-
-    private void create(String var, String exp) throws Exception {
-        PExp pExp = parseExpression(exp);
-        PType type = pExp.getType();
-
-        Value value = this.interpreter.evaluate(exp, this.interpreter.initialContext);
-
-        ILexLocation location = new LexLocation(
-                this.interpreter.getDefaultFile().getPath(),
-                this.getTargetModuleName(), 0, 0, 0, 0, 0, 0);
-
-        LexNameToken name = new LexNameToken(getTargetModuleName(), var, location);
-
-        this.interpreter.initialContext.put(name, value);
-
-        AValueDefinition def = AstFactory.newAValueDefinition(
-                AstFactory.newAIdentifierPattern(name),
-                NameScope.GLOBAL, type, pExp);
-
-        LinkedList<PDefinition> defs = this.interpreter.defaultModule.getDefs();
-        defs.add(def);
-        this.interpreter.defaultModule.setDefs(defs);
-    }
-
-    private PExp parseExpression(String exp) throws Exception {
-        LexTokenReader ltr = new LexTokenReader(exp, Dialect.VDM_SL, Console.charset);
-        ExpressionReader reader = new ExpressionReader(ltr);
-        reader.setCurrentModule(this.interpreter.getDefaultName());
-        return reader.readExpression();
+        Evaluator evaluator = new Evaluator(this.interpreter);
+        return evaluator.evaluate(input);
     }
 
     public String getTargetModuleName() {
