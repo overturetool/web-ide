@@ -82,15 +82,47 @@ public class ModelWrapper {
     }
 
     public synchronized String evaluate(String input) {
+        input = input.trim();
+
+        String methodPrefix = "&";
+        String assignmentOperator = ":=";
+        String setDefault = methodPrefix + "setDefault";
+        String getDefault = methodPrefix + "getDefault";
+        String help = methodPrefix + "help";
+        String space = " ";
+
         try {
-            if (input.contains(":=")) {
-                String[] strings = input.replaceAll(" ", "").split(":=");
+            if (!input.startsWith(methodPrefix) && input.contains(assignmentOperator)) {
+                String[] strings = input.replaceAll(space, "").split(assignmentOperator);
+
+                if (strings.length != 2)
+                    return "Error: invalid assignment format";
+
                 String var = strings[0];
                 String exp = strings[1];
                 create(var, exp);
-                return this.interpreter.evaluate(input.trim(), this.interpreter.initialContext).toString();
+                return this.interpreter.evaluate(input, this.interpreter.initialContext).toString();
+            } else if (input.startsWith(setDefault, 0) && input.contains(assignmentOperator)) {
+                String[] strings = input.replaceAll(space, "").split(assignmentOperator);
+                String defaultName = strings[1];
+                String oldDefaultName = this.interpreter.getDefaultName();
+                this.interpreter.setDefaultName(defaultName);
+                return "Default changed from " + oldDefaultName + " to " + defaultName;
+            } else if (input.startsWith(getDefault, 0)) {
+                return this.interpreter.getDefaultName();
+            } else if (input.equals(help)) {
+                StringBuilder helpString = new StringBuilder();
+                helpString.append("These are the Overture webIDE REPL commands:")
+                        .append(System.lineSeparator());
+                helpString.append("   Get default module name:        ").append(getDefault)
+                        .append(System.lineSeparator());
+                helpString.append("   Set default module name:        ").append(setDefault).append(" ").append(assignmentOperator).append(" <module_name>")
+                        .append(System.lineSeparator());
+                helpString.append("   Define variable:                <var_name> ")
+                        .append(assignmentOperator).append(" <value>");
+                return helpString.toString();
             } else {
-                return this.interpreter.evaluate(input.trim(), this.interpreter.initialContext).toString();
+                return this.interpreter.evaluate(input, this.interpreter.initialContext).toString();
             }
         } catch (Exception e) {
             return e.toString();
@@ -101,7 +133,6 @@ public class ModelWrapper {
         PExp pExp = parseExpression(exp);
         PType type = pExp.getType();
 
-        //PType type = this.interpreter.typeCheck(exp);//(pExp, created);
         Value value = this.interpreter.evaluate(exp, this.interpreter.initialContext);
 
         ILexLocation location = new LexLocation(
@@ -112,7 +143,9 @@ public class ModelWrapper {
 
         this.interpreter.initialContext.put(name, value);
 
-        AValueDefinition def = AstFactory.newAValueDefinition(AstFactory.newAIdentifierPattern(name), NameScope.GLOBAL, type, pExp);
+        AValueDefinition def = AstFactory.newAValueDefinition(
+                AstFactory.newAIdentifierPattern(name),
+                NameScope.GLOBAL, type, pExp);
 
         LinkedList<PDefinition> defs = this.interpreter.defaultModule.getDefs();
         defs.add(def);
