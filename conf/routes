@@ -7,7 +7,7 @@ GET     /                                                                   cont
 
 # vfs
 PUT     /vfs/appendFile/:account/*path                                      controllers.vfs.appendFile(account, path)
-GET     /vfs/readFile/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>  controllers.vfs.readFile(account, path)
+GET     /vfs/readFile/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>     controllers.vfs.readFile(account, path)
 GET     /vfs/readdir/:account                                               controllers.vfs.readdir(account, path = "", depth ?= "0")
 GET     /vfs/readdir/:account/$path<[a-zA-Z0-9./_-]+>                       controllers.vfs.readdir(account, path, depth ?= "0")
 POST    /vfs/writeFile/:account/$path<[a-zA-Z0-9/_-]+([.]{1}[a-zA-Z0-9]+)?> controllers.vfs.writeFile(account, path)
