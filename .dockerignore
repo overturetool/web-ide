@@ -3,7 +3,7 @@
 # Simple Build Tool
 # http://www.scala-sbt.org/release/docs/Getting-Started/Directories.html#configuring-version-control
 
-target/
+#target/
 lib_managed/
 src_managed/
 project/boot/
@@ -48,3 +48,17 @@ project/plugins/project/
 .scala_dependencies
 .worksheet
 
+# Pruning app
+*.md
+Dockerfile*
+activator
+activator-launch-*.jar
+build.sbt
+Filters.java
+
+app/
+public/
+project/
+conf/
+test/
+scripts/

@@ -35,6 +35,9 @@ public class vfs extends Application {
 
         String result = vfs.readFile();
 
+        response().setCookie("sessionid", "token_that_must_be_sent_with_all_following_requests");
+        response().setCookie("SRVNAME", "S1"); // Added by haproxy
+
         return ok(result);
     }
 
