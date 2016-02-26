@@ -15,6 +15,11 @@ libraryDependencies ++= Seq(
   "commons-io" % "commons-io" % "2.4",
   "org.overturetool.core" % "interpreter" % "2.3.0",
 
+  "com.google.identitytoolkit" % "gitkitclient" % "1.2.5",
+
+//  "com.google.oauth-client" % "google-oauth-client" % "1.21.0",
+//  "com.google.http-client" % "google-http-client-jackson2" % "1.21.0",
+
   "com.jayway.restassured" % "rest-assured" % "2.8.0" % "test",
   "com.jayway.restassured" % "scala-support" % "2.8.0" % "test",
   "com.jayway.restassured" % "json-path" % "2.8.0" % "test",

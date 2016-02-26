@@ -1,0 +1,8 @@
+{
+  "clientId": "599797188341-l9ku3p2u1v2mml9reh6lcncj2qam02hf.apps.googleusercontent.com",
+  "projectId": "overturewebide",
+  "serviceAccountEmail": "overturewebide@appspot.gserviceaccount.com",
+  "serviceAccountPrivateKeyFile": "/gitkit/OvertureWebIde-1a93a01585c5.p12",
+  "widgetUrl": "http://localhost:9000/gitkit",
+  "cookieName": "gtoken"
+}
