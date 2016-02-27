@@ -18,14 +18,20 @@ import play.libs.Json;
 import play.mvc.Result;
 
 public class auth extends Application {
+    public static final String githubClientId =  "e8c97a27f3858b4370ef";
+    public static final String githubClientSecret = "3d45a6b5666c0f16d4fd04f3a2f03c9705f1da4f";
+    public static final String githubBaseUrl = "https://api.github.com";
+
+    public static final String callbackUrl =  "http://localhost:9000/callback";
+
     public Result login() {
         OAuthClientRequest request;
 
         try {
             request = OAuthClientRequest
                     .authorizationProvider(OAuthProviderType.GITHUB)
-                    .setClientId("e8c97a27f3858b4370ef")
-                    .setRedirectURI("http://localhost:9000/callback")
+                    .setClientId(githubClientId)
+                    .setRedirectURI(callbackUrl)
                     .setScope("user,user:email")
                     .setParameter("token_type", "bearer")
                     .buildQueryMessage();
@@ -45,9 +51,9 @@ public class auth extends Application {
             request = OAuthClientRequest
                     .tokenProvider(OAuthProviderType.GITHUB)
                     .setGrantType(GrantType.AUTHORIZATION_CODE)
-                    .setClientId("e8c97a27f3858b4370ef")
-                    .setClientSecret("3d45a6b5666c0f16d4fd04f3a2f03c9705f1da4f")
-                    .setRedirectURI("http://localhost:9000/callback")
+                    .setClientId(githubClientId)
+                    .setClientSecret(githubClientSecret)
+                    .setRedirectURI(callbackUrl)
                     .setCode(code)
                     .buildQueryMessage();
 
@@ -94,7 +100,6 @@ public class auth extends Application {
     }
 
     public Result authorizations() {
-        String githubBaseUrl = "https://api.github.com";
         String accessToken = request().getQueryString("accessToken");
         String body;
 
