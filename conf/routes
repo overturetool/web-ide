@@ -34,6 +34,11 @@ GET     /pog/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>              cont
 GET     /eval/:input                                                        controllers.evaluate.expression(input)
 GET     /eval/:input/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>      controllers.evaluate.project(input, account, path)
 
+GET     /login                                                              controllers.auth.login()
+GET     /callback                                                           controllers.auth.callback()
+GET     /authorizations                                                     controllers.auth.authorizations()
+GET     /access                                                             controllers.auth.access()
+
 # Web Socket management
 GET     /debug/:account/$path<[a-zA-Z0-9/_-]+.*>                            controllers.debug.ws(account, path)
 
