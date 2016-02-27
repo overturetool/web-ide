@@ -22,6 +22,15 @@ public class auth extends Application {
     public static final String githubClientSecret = "3d45a6b5666c0f16d4fd04f3a2f03c9705f1da4f";
     public static final String githubBaseUrl = "https://api.github.com";
 
+    public static final String facebookClientId =  "1028520697189440";
+    public static final String facebookClientSecret = "c990b0559c1dc7a21c814ce6d968e9f2";
+    public static final String facebookBaseUrl = "https://graph.facebook.com";
+
+    public static final String clientId =  facebookClientId;
+    public static final String clientSecret = facebookClientSecret;
+    public static final String baseUrl = facebookBaseUrl;
+    public static final OAuthProviderType providerType = OAuthProviderType.FACEBOOK;
+
     public static final String callbackUrl =  "http://localhost:9000/callback";
 
     public Result login() {
@@ -29,11 +38,11 @@ public class auth extends Application {
 
         try {
             request = OAuthClientRequest
-                    .authorizationProvider(OAuthProviderType.GITHUB)
-                    .setClientId(githubClientId)
+                    .authorizationProvider(providerType)
+                    .setClientId(clientId)
                     .setRedirectURI(callbackUrl)
-                    .setScope("user,user:email")
-                    .setParameter("token_type", "bearer")
+//                    .setScope("user,user:email")
+//                    .setParameter("token_type", "bearer")
                     .buildQueryMessage();
         } catch (OAuthSystemException e) {
             e.printStackTrace();
@@ -49,10 +58,10 @@ public class auth extends Application {
 
         try {
             request = OAuthClientRequest
-                    .tokenProvider(OAuthProviderType.GITHUB)
+                    .tokenProvider(providerType)
                     .setGrantType(GrantType.AUTHORIZATION_CODE)
-                    .setClientId(githubClientId)
-                    .setClientSecret(githubClientSecret)
+                    .setClientId(clientId)
+                    .setClientSecret(clientSecret)
                     .setRedirectURI(callbackUrl)
                     .setCode(code)
                     .buildQueryMessage();
@@ -107,7 +116,8 @@ public class auth extends Application {
             //create OAuth client that uses custom http client under the hood
             OAuthClient oAuthClient = new OAuthClient(new URLConnectionClient());
 
-            OAuthClientRequest bearerClientRequest = new OAuthBearerClientRequest(githubBaseUrl + "/user")
+            //OAuthClientRequest bearerClientRequest = new OAuthBearerClientRequest(githubBaseUrl + "/user")
+            OAuthClientRequest bearerClientRequest = new OAuthBearerClientRequest(baseUrl + "/me")
                     .setAccessToken(accessToken).buildHeaderMessage();
 
             OAuthResourceResponse resourceResponse = oAuthClient
