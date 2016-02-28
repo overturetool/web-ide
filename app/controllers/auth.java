@@ -14,11 +14,7 @@ import java.io.IOException;
 import java.util.Collections;
 
 public class auth extends Application {
-    /** Global instance of the HTTP transport. */
     private static final HttpTransport httpTransport = new NetHttpTransport();
-
-    /** Global instance of the JSON factory. */
-    private static final JsonFactory jsonFactory = new JacksonFactory();
 
     private static final String authorizationServerUrl = "https://github.com/login/oauth/authorize";
     private static final String tokenServerUrl = "https://github.com/login/oauth/access_token";
@@ -53,7 +49,6 @@ public class auth extends Application {
                     .setScopes(Collections.singletonList("user:email"))
                     .setRequestInitializer(request -> request.getHeaders().setAccept("application/json")).execute();
         } catch (IOException e) {
-            e.printStackTrace();
             return status(StatusCode.UnprocessableEntity, e.toString());
         }
 
@@ -64,6 +59,8 @@ public class auth extends Application {
         node.put("Scope", tokenResponse.getScope());
         node.put("TokenType", tokenResponse.getTokenType());
 
+        //String state = request().getQueryString("state");
+
         return ok(node);
     }
 
@@ -73,12 +70,7 @@ public class auth extends Application {
 
         Credential credential = new Credential(BearerToken.authorizationHeaderAccessMethod());
         credential.setAccessToken(accessToken);
-
         HttpRequestFactory requestFactory = httpTransport.createRequestFactory(credential::initialize);
-//        HttpRequestFactory requestFactory = httpTransport.createRequestFactory(request -> {
-//            credential.initialize(request);
-//            //request.setParser(new JsonObjectParser(jsonFactory));
-//        });
 
         String content;
         try {
@@ -86,7 +78,6 @@ public class auth extends Application {
             HttpResponse response = request.execute();
             content = response.parseAsString();
         } catch (IOException e) {
-            e.printStackTrace();
             return status(StatusCode.UnprocessableEntity, e.toString());
         }
 

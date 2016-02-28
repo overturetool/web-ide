@@ -1,11 +1,9 @@
 package controllers;
 
+import actions.SecuredAction;
 import play.mvc.Controller;
-import play.mvc.Result;
-import views.html.index;
+import play.mvc.With;
 
-public class Application extends Controller {
-    public Result index() {
-        return ok(index.render("default"));
-    }
+@With(SecuredAction.class)
+public abstract class Application extends Controller {
 }
