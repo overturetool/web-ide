@@ -35,7 +35,7 @@ GET     /eval/:input                                                        cont
 GET     /eval/:input/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>      controllers.evaluate.project(input, account, path)
 
 # auth
-GET     /gitkit                                                             controllers.auth.authCallback(String token)
+GET     /gitkit                                                             controllers.auth.authCallback(token)
 
 # Web Socket management
 GET     /debug/:account/$path<[a-zA-Z0-9/_-]+.*>                            controllers.debug.ws(account, path)
