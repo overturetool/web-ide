@@ -7,7 +7,7 @@
 
 # vfs
 PUT     /vfs/appendFile/:account/*path                                      controllers.vfs.appendFile(account, path)
-GET     /vfs/readFile/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>  controllers.vfs.readFile(account, path)
+GET     /vfs/readFile/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>     controllers.vfs.readFile(account, path)
 GET     /vfs/readdir/:account                                               controllers.vfs.readdir(account, path = "", depth ?= "0")
 GET     /vfs/readdir/:account/$path<[a-zA-Z0-9./_-]+>                       controllers.vfs.readdir(account, path, depth ?= "0")
 POST    /vfs/writeFile/:account/$path<[a-zA-Z0-9/_-]+([.]{1}[a-zA-Z0-9]+)?> controllers.vfs.writeFile(account, path)
@@ -35,9 +35,6 @@ GET     /eval/:input                                                        cont
 GET     /eval/:input/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>      controllers.evaluate.project(input, account, path)
 
 GET     /verify                                                             controllers.auth.verify(tokenId)
-GET     /login                                                              controllers.auth.login()
-GET     /callback                                                           controllers.auth.callback()
-#GET     /user                                                               controllers.auth.user()
 
 # Web Socket management
 GET     /debug/:account/$path<[a-zA-Z0-9/_-]+.*>                            controllers.debug.ws(account, path)

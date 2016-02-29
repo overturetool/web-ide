@@ -13,8 +13,8 @@ public class SecuredAction extends Action.Simple {
     public F.Promise<Result> call(Http.Context ctx) throws Throwable {
         String receivedToken = getTokenFromHeader(ctx);
         if (receivedToken != null) {
-            String username = session(receivedToken);
-            if (username != null) {
+            String userId = session(receivedToken);
+            if (userId != null) {
                 return delegate.call(ctx);
             }
         }
