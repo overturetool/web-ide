@@ -7,6 +7,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import core.StatusCode;
+import play.Logger;
 import play.libs.Json;
 import play.mvc.Result;
 
@@ -20,9 +21,10 @@ public class auth extends Application {
     private static final String tokenServerUrl = "https://github.com/login/oauth/access_token";
     private static final String clientId = "e8c97a27f3858b4370ef";
     private static final String clientSecret = "3d45a6b5666c0f16d4fd04f3a2f03c9705f1da4f";
-    private static final String callbackUrl = "http://localhost:9000/callback";
+    //private static final String callbackUrl = "http://localhost:9000/callback";
 
     public Result login() {
+        String callbackUrl = controllers.routes.auth.callback().absoluteURL(request());
         String url = new BrowserClientRequestUrl(authorizationServerUrl, clientId).setRedirectUri(callbackUrl).build();
         return redirect(url);
     }
