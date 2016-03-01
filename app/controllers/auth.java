@@ -94,8 +94,8 @@ public class auth extends Controller {
     }
 
     public Result signout(String accessToken) {
-        if (SessionStore.getInstance().exists(accessToken))
-            return ok("Access token not found");
+        if (!SessionStore.getInstance().exists(accessToken))
+            return status(StatusCode.UnprocessableEntity, "Access token not found");
 
         SessionStore.getInstance().remove(accessToken);
 
