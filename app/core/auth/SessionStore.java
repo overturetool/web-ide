@@ -32,6 +32,6 @@ public class SessionStore {
     }
 
     public synchronized boolean exists(String accessToken) {
-        return map.contains(accessToken);
+        return map.containsKey(accessToken);
     }
 }
