@@ -16,6 +16,7 @@ import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import play.libs.Json;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 
 import java.io.IOException;
@@ -27,11 +28,10 @@ public class auth extends Controller {
     private static final String clientId = "915544938368-etbmhsu4bk7illn6eriesf60v6q059kh.apps.googleusercontent.com";
 
     public Result verify(String tokenId) {
-        String accessToken = request().getHeader("Authorization");
-        String tokenPrefix = "Bearer ";
+        String accessToken = getAccessToken(request());
 
-        if (accessToken.startsWith(tokenPrefix) && accessToken.length() > tokenPrefix.length())
-            accessToken = accessToken.substring(tokenPrefix.length()); // remove token prefix 'Bearer'
+        if (accessToken == null)
+            return status(StatusCode.UnprocessableEntity, "Missing access token");
 
         JsonFactory jsonFactory = new JacksonFactory();
         HttpTransport transport = new NetHttpTransport();
@@ -93,9 +93,14 @@ public class auth extends Controller {
         }
     }
 
-    public Result signout(String accessToken) {
+    public Result signout() {
+        String accessToken = getAccessToken(request());
+
+        if (accessToken == null)
+            return status(StatusCode.UnprocessableEntity, "Missing access token");
+
         if (!SessionStore.getInstance().exists(accessToken))
-            return status(StatusCode.UnprocessableEntity, "Access token not found");
+            return status(StatusCode.UnprocessableEntity, "Access token not found in store");
 
         SessionStore.getInstance().remove(accessToken);
 
@@ -116,5 +121,18 @@ public class auth extends Controller {
         } catch (IOException e) {
             return null;
         }
+    }
+
+    private String getAccessToken(Http.Request request) {
+        String accessToken = request.getHeader("Authorization");
+        String tokenPrefix = "Bearer ";
+
+        if (accessToken == null)
+            return null;
+
+        if (accessToken.startsWith(tokenPrefix) && accessToken.length() > tokenPrefix.length())
+            accessToken = accessToken.substring(tokenPrefix.length()); // remove token prefix 'Bearer'
+
+        return accessToken;
     }
 }

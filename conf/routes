@@ -36,7 +36,7 @@ GET     /eval/:input/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>      cont
 
 # authorization
 GET     /verify                                                             controllers.auth.verify(tokenId)
-GET     /signout                                                            controllers.auth.signout(accessToken)
+GET     /signout                                                            controllers.auth.signout()
 
 # Web Socket management
 GET     /debug/:account/$path<[a-zA-Z0-9/_-]+.*>                            controllers.debug.ws(account, path)
