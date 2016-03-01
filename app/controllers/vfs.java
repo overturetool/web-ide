@@ -31,7 +31,7 @@ public class vfs extends Application {
         IVFS vfs = new CommonsVFS(account, path);
 
         if (!vfs.exists())
-            return status(StatusCode.UnprocessableEntity, "File does not exists");
+            return ok();
 
         String result = vfs.readFile();
 

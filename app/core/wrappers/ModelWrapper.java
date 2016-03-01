@@ -47,9 +47,10 @@ public class ModelWrapper {
                     filteredFiles.add(f);
             }
 
-            init(filteredFiles);
+            boolean success = init(filteredFiles);
 
-            ResourceCache.getInstance().add(file, this.interpreter);
+            if (success)
+                ResourceCache.getInstance().add(file, this.interpreter);
         }
 
         available.release();
@@ -91,7 +92,7 @@ public class ModelWrapper {
 
     public IProofObligationList getPog() {
         try {
-            if (this.interpreter != null)
+            if (this.interpreter != null && this.interpreter.defaultModule.getTypeChecked())
                 return this.interpreter.getProofObligations();
         } catch (AnalysisException e) {
             e.printStackTrace();
@@ -99,7 +100,9 @@ public class ModelWrapper {
         return new ProofObligationList();
     }
 
-    private synchronized void init(List<File> files) {
+    private synchronized boolean init(List<File> files) {
+        boolean success = false;
+
         // Look into using the VDMJ class instead
         VDMSL vdmsl = new VDMSL();
         vdmsl.setWarnings(false);
@@ -108,6 +111,12 @@ public class ModelWrapper {
         ExitStatus parseStatus = vdmsl.parse(files);
 
         if (parseStatus == ExitStatus.EXIT_OK) {
+            try {
+                this.interpreter = vdmsl.getInterpreter();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
             ExitStatus typeCheckStatus = vdmsl.typeCheck();
 
             if (typeCheckStatus == ExitStatus.EXIT_OK) {
@@ -115,6 +124,7 @@ public class ModelWrapper {
                     this.interpreter = vdmsl.getInterpreter();
                     this.interpreter.defaultModule.setTypeChecked(true);
                     this.interpreter.init(null);
+                    success = true;
                 } catch (Exception e) {
                     Logger.error(e.getMessage(), e);
                     e.printStackTrace();
@@ -131,5 +141,7 @@ public class ModelWrapper {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return success;
     }
 }

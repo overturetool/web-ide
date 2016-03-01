@@ -76,14 +76,14 @@ public class OutlineTreeContentProvider {
                     resolvedParam.add(param.toString());
                 }
 
-                String expectedResult = definition.getExpectedResult().toString();
-                String actualResult = definition.getActualResult().toString();
+                PType expectedResult = definition.getExpectedResult();
+                PType actualResult = definition.getActualResult();
 
                 json.put("name", name);
                 json.put("type", type);
                 json.set("parameters", resolvedParam);
-                json.put("expectedResult", expectedResult);
-                json.put("actualResult", actualResult);
+                json.put("expectedResult",  expectedResult != null ? expectedResult.toString() : "");
+                json.put("actualResult", actualResult != null ? actualResult.toString() : "");
 
                 location = ((AExplicitFunctionDefinition) node).getName().getLocation();
             }
