@@ -23,7 +23,7 @@ libraryDependencies ++= Seq(
   "com.jayway.restassured" % "json-path" % "2.8.0" % "test",
   "com.jayway.restassured" % "xml-path" % "2.8.0" % "test",
   "com.jayway.restassured" % "json-schema-validator" % "2.8.0" % "test",
-  "org.hamcrest" % "hamcrest-all" % "1.3",
+  "org.hamcrest" % "hamcrest-all" % "1.3" % "test",
 
   "javax.websocket" % "javax.websocket-api" % "1.1" % "test",
   "org.glassfish.tyrus" % "tyrus-client" % "1.12" % "test",
