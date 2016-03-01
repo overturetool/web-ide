@@ -1,19 +1,19 @@
 package actions;
 
+import core.auth.SessionStore;
 import play.libs.F;
 import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.mvc.Results;
 
-import static play.mvc.Controller.session;
-
 public class SecuredAction extends Action.Simple {
     @Override
     public F.Promise<Result> call(Http.Context ctx) throws Throwable {
         String receivedToken = getTokenFromHeader(ctx);
         if (receivedToken != null) {
-            String userId = session(receivedToken);
+            //String userId = ctx.session().get(receivedToken);
+            String userId = SessionStore.getInstance().get(receivedToken);
             if (userId != null) {
                 return delegate.call(ctx);
             }

@@ -2,7 +2,8 @@ package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.api.client.auth.oauth2.*;
+import com.google.api.client.auth.oauth2.BearerToken;
+import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.*;
@@ -10,6 +11,9 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import core.StatusCode;
+import core.auth.SessionStore;
+import core.vfs.IVFS;
+import core.vfs.commons_vfs2.CommonsVFS;
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -58,6 +62,10 @@ public class auth extends Controller {
             if (!credential.get("sub").asText().equals(userId))
                 return status(StatusCode.UnprocessableEntity, "Id mismatch");
 
+            IVFS vfs = new CommonsVFS(userId, "");
+            if (!vfs.exists())
+                vfs.mkdir();
+
             String email = payload.getEmail();
             boolean emailVerified = payload.getEmailVerified();
             String name = (String) payload.get("name");
@@ -76,12 +84,22 @@ public class auth extends Controller {
             node.put("locale", locale);
             node.put("pictureUrl", pictureUrl);
 
-            session(accessToken, userId);
+            //session(accessToken, userId);
+            SessionStore.getInstance().set(accessToken, userId);
 
             return ok(node);
         } else {
             return status(StatusCode.UnprocessableEntity, "Invalid ID token.");
         }
+    }
+
+    public Result signout(String accessToken) {
+        if (SessionStore.getInstance().exists(accessToken))
+            return ok("Access token not found");
+
+        SessionStore.getInstance().remove(accessToken);
+
+        return ok();
     }
 
     private JsonNode getTokenInfo(String accessToken) {
