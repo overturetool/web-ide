@@ -15,16 +15,19 @@ libraryDependencies ++= Seq(
   "commons-io" % "commons-io" % "2.4",
   "org.overturetool.core" % "interpreter" % "2.3.0",
 
+  "com.google.oauth-client" % "google-oauth-client" % "1.21.0",
+  "com.google.api-client" % "google-api-client" % "1.21.0",
+
   "com.jayway.restassured" % "rest-assured" % "2.8.0" % "test",
   "com.jayway.restassured" % "scala-support" % "2.8.0" % "test",
-  "com.jayway.restassured" % "json-path" % "2.8.0",
-  "com.jayway.restassured" % "xml-path" % "2.8.0",
+  "com.jayway.restassured" % "json-path" % "2.8.0" % "test",
+  "com.jayway.restassured" % "xml-path" % "2.8.0" % "test",
   "com.jayway.restassured" % "json-schema-validator" % "2.8.0" % "test",
-  "org.hamcrest" % "hamcrest-all" % "1.3",
+  "org.hamcrest" % "hamcrest-all" % "1.3" % "test",
 
-  "javax.websocket" % "javax.websocket-api" % "1.1",
-  "org.glassfish.tyrus" % "tyrus-client" % "1.12",
-  "org.glassfish.tyrus" % "tyrus-container-grizzly-client" % "1.12"
+  "javax.websocket" % "javax.websocket-api" % "1.1" % "test",
+  "org.glassfish.tyrus" % "tyrus-client" % "1.12" % "test",
+  "org.glassfish.tyrus" % "tyrus-container-grizzly-client" % "1.12" % "test"
 )
 
 // Play provides two styles of routers, one expects its actions to be injected, the
