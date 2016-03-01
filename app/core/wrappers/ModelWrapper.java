@@ -40,7 +40,14 @@ public class ModelWrapper {
             else if (file.isDirectory())
                 files.addAll(file.readdirAsIOFile(-1));
 
-            init(files);
+            List<File> filteredFiles = Collections.synchronizedList(new ArrayList<>());
+            for (File f : files) {
+                boolean keep = f.getName().endsWith(".vdmsl");
+                if (keep)
+                    filteredFiles.add(f);
+            }
+
+            init(filteredFiles);
 
             ResourceCache.getInstance().add(file, this.interpreter);
         }
