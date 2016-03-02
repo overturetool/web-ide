@@ -12,11 +12,11 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import core.StatusCode;
 import core.auth.SessionStore;
+import core.utilities.ServerUtils;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import play.libs.Json;
 import play.mvc.Controller;
-import play.mvc.Http;
 import play.mvc.Result;
 
 import java.io.IOException;
@@ -28,7 +28,7 @@ public class auth extends Controller {
     private static final String clientId = "915544938368-etbmhsu4bk7illn6eriesf60v6q059kh.apps.googleusercontent.com";
 
     public Result verify(String tokenId) {
-        String accessToken = getAccessToken(request());
+        String accessToken = ServerUtils.extractAccessToken(request());
 
         if (accessToken == null)
             return status(StatusCode.UnprocessableEntity, "Missing access token");
@@ -94,7 +94,7 @@ public class auth extends Controller {
     }
 
     public Result signout() {
-        String accessToken = getAccessToken(request());
+        String accessToken = ServerUtils.extractAccessToken(request());
 
         if (accessToken == null)
             return status(StatusCode.UnprocessableEntity, "Missing access token");
@@ -121,18 +121,5 @@ public class auth extends Controller {
         } catch (IOException e) {
             return null;
         }
-    }
-
-    private String getAccessToken(Http.Request request) {
-        String accessToken = request.getHeader("Authorization");
-        String tokenPrefix = "Bearer ";
-
-        if (accessToken == null)
-            return null;
-
-        if (accessToken.startsWith(tokenPrefix) && accessToken.length() > tokenPrefix.length())
-            accessToken = accessToken.substring(tokenPrefix.length()); // remove token prefix 'Bearer'
-
-        return accessToken;
     }
 }
