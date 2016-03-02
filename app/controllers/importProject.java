@@ -1,20 +1,26 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.CaseFormat;
 import core.ServerConfigurations;
 import core.StatusCode;
 import core.auth.SessionStore;
 import core.utilities.FileOperations;
 import core.utilities.ServerUtils;
-import play.libs.Json;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import play.mvc.Result;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.util.*;
 
 public class importProject extends Application {
-    public Result get(String projectUrl) {
+    public Result getFromGithubApi(String projectUrl) {
         String accessToken = ServerUtils.extractAccessToken(request());
         String userId = SessionStore.getInstance().get(accessToken);
 
@@ -41,58 +47,134 @@ public class importProject extends Application {
         return ok(baseDirectoryName);
     }
 
-    public Result list() {
-        // https://api.github.com/repos/overturetool/documentation/contents/examples/VDMSL?ref=editing
-        ArrayNode node = Json.newArray();
-        node.add("http://overturetool.org/download/examples/VDMSL/AbstractPacemakerSL/AbstractPacemaker.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/AccountSysSL/AccountSys.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/ACSSL/ACS.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/ADTSL/ADT.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/AlarmErrSL/AlarmErr.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/AlarmSL/Alarm.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/ATCSL/ATC.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/barSL/Bar.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/ATCSL/ATC.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/BOMSL/BOM.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/cashdispenserSL/Cashdispenser.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/CMSL/CM.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/ConwayGameLifeSL/ConwayGameLife.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/CountryColouringSL/CountryColouring.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/crosswordSL/Crossword.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/DFDexampleSL/DFDexample.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/DigraphSL/Digraph.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/dwarfSL/Dwarf.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/EngineSL/Engine.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/expressSL/Express.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/gatewaySL/Gateway.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/graph-edSL/Graph-ed.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/HASLSL/HASL.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/hotelSL/Hotel.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/librarySL/Library.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/looseSL/Loose.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/LUHNSL/LUHN.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/LUPSL/LUP.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/MAASL/MAA.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/metroSL/Metro.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/monitorSL/Monitor.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/NDBSL/NDB.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/newspeakSL/Newspeak.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/pacemakerSL/Pacemaker.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/PlannerSL/Planner.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/ProgLangSL/ProgLang.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/raildirSL/Raildir.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/realmSL/Realm.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/recursiveSL/Recursive.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/SAFERSL/SAFER.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/shmemSL/Shmem.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/simulatorSL/Simulator.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/soccerSL/Soccer.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/STVSL/STV.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/telephoneSL/Telephone.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/Tic-tac-toeSL/Tic-tac-toe.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/TrackerSL/Tracker.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/trafficSL/Traffic.zip");
-        node.add("http://overturetool.org/download/examples/VDMSL/VCParser-masterSL/VCParser-master.zip");
-        return ok(node);
+    public Result listFromGithubApi() {
+        String url = "https://api.github.com/repos/overturetool/documentation/contents/examples/VDMSL?ref=editing";
+        JsonNode jsonNodes = FileOperations.getContentAsJson(url);
+
+        if (jsonNodes == null)
+            return status(StatusCode.UnprocessableEntity, "Could not get content from url");
+
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode jsonArray = mapper.createArrayNode();
+
+        for (JsonNode node : jsonNodes) {
+            String exampleUrl = node.get("url").asText();
+            JsonNode exampleNode = FileOperations.getContentAsJson(exampleUrl);
+
+            if (exampleNode == null)
+                continue;
+
+            JsonNode exampleReadMeNode = exampleNode.get(0);
+            //JsonNode exampleReadMeNode = mapper.createObjectNode();
+            JsonNode readMeNode = FileOperations.getContentAsJson(exampleReadMeNode.get("url").asText());
+
+            if (readMeNode == null)
+                continue;
+
+            String contentBase64 = readMeNode.get("content").asText();
+            String[] split = contentBase64.split("\n");
+
+            String content = "";
+            for (String s : split) {
+                byte[] decode = Base64.getDecoder().decode(s);
+                content += new String(decode);
+                //content += StringUtils.newStringUtf8(decode);
+            }
+
+            ObjectNode projectExampleNode = mapper.createObjectNode();
+            projectExampleNode.put("name", node.get("name").asText());
+            projectExampleNode.put("url", exampleUrl);
+            projectExampleNode.put("description", content);
+
+//            HashMap<String, String> map = extractKeywords(content, new String[]{"AUTHOR=", "ENTRY_POINT="});
+//            Iterator it = map.entrySet().iterator();
+//            while (it.hasNext()) {
+//                Map.Entry pair = (Map.Entry)it.next();
+//                projectExampleNode.put(pair.getKey().toString(), pair.getValue().toString());
+//                it.remove(); // avoids a ConcurrentModificationException
+//            }
+
+            jsonArray.add(projectExampleNode);
+        }
+
+        return ok(jsonArray);
+    }
+
+    private HashMap<String, List<String>> extractKeywords(String content, String[] keywords) {
+        HashMap<String, List<String>> map = new HashMap<>();
+        int start;
+        int end;
+        int scan;
+
+        for (String keyword : keywords) {
+            int matches = StringUtils.countMatches(content, keyword);
+            scan = 0;
+            List<String> values = new ArrayList<>();
+            String key = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, keyword.toUpperCase().replaceAll(" ", "_"));
+            while (matches > 0) {
+                start = content.indexOf(keyword, scan) + keyword.length();
+                end = content.indexOf("\n", start);
+                String value = content.substring(start, end).replaceAll(":", "").trim();
+                values.add(value);
+                matches = matches - 1;
+                scan = end;
+            }
+            map.put(key, values);
+        }
+        return map;
+    }
+
+    public Result getFromLocalRepository(String projectName) {
+        String accessToken = ServerUtils.extractAccessToken(request());
+        String userId = SessionStore.getInstance().get(accessToken);
+
+        // TODO : Remember to remove!
+        //userId = userId == null ? "111425625270532893915" : userId;
+
+        try {
+            FileUtils.copyDirectory(
+                    Paths.get("OvertureExamples", "VDMSL", projectName).toFile(),
+                    Paths.get(ServerConfigurations.basePath, userId, projectName).toFile()
+            );
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return ok();
+    }
+
+    public Result listFromLocalRepository() {
+        File[] repository = new File(Paths.get("OvertureExamples", "VDMSL").toString())
+                .listFiles((dir, name) -> !name.startsWith("."));
+
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode arrayNode = mapper.createArrayNode();
+
+        for (File file : repository) {
+            FileOperations.filterDirectoryContent(file, new String[]{"vdmsl", "txt"});
+            File readme = file.listFiles((dir, name) -> name.equals("README.txt"))[0];
+            String content = FileOperations.readFileContent(readme);
+
+            ObjectNode projectExampleNode = mapper.createObjectNode();
+            projectExampleNode.put("name", file.getName());
+            projectExampleNode.put("description", content);
+
+            HashMap<String, List<String>> map = extractKeywords(content, new String[]{"Author", "Entry point"});
+            Set<Map.Entry<String, List<String>>> entries = map.entrySet();
+            Iterator<Map.Entry<String, List<String>>> it = entries.iterator();
+            while (it.hasNext()) {
+                Map.Entry<String, List<String>> next = it.next();
+                ArrayNode valuesNode = mapper.createArrayNode();
+                for (String value : next.getValue())
+                    valuesNode.add(value);
+
+                projectExampleNode.put(next.getKey(), valuesNode);
+                it.remove(); // avoids a ConcurrentModificationException
+            }
+
+            arrayNode.add(projectExampleNode);
+        }
+
+        return ok(arrayNode);
     }
 }
