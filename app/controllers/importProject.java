@@ -100,28 +100,32 @@ public class importProject extends Application {
         return ok(jsonArray);
     }
 
-    private HashMap<String, List<String>> extractKeywords(String content, String[] keywords) {
-        HashMap<String, List<String>> map = new HashMap<>();
-        int start;
-        int end;
-        int scan;
+    private ObjectNode parseReadme(String content) {
+        ObjectMapper mapper = new ObjectMapper();
+        ArrayNode entryPoints = mapper.createArrayNode();
+        ObjectNode project = mapper.createObjectNode();
 
-        for (String keyword : keywords) {
-            int matches = StringUtils.countMatches(content, keyword);
-            scan = 0;
-            List<String> values = new ArrayList<>();
-            String key = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, keyword.toUpperCase().replaceAll(" ", "_"));
-            while (matches > 0) {
-                start = content.indexOf(keyword, scan) + keyword.length();
-                end = content.indexOf("\n", start);
-                String value = content.substring(start, end).replaceAll(":", "").trim();
-                values.add(value);
-                matches = matches - 1;
-                scan = end;
-            }
-            map.put(key, values);
+        String description = "";
+
+        for (String line : content.split("\n")) {
+            boolean containsColon = StringUtils.countMatches(line, ":") == 1;
+
+            if (line.indexOf("Author") == 0 && containsColon)
+                project.put("author", line.split(":")[1].trim());
+
+            else if (line.indexOf("Language Version") == 0 && containsColon)
+                project.put("languageVersion", line.split(":")[1].trim());
+
+            else if (line.indexOf("Entry point") == 0 && containsColon)
+                entryPoints.add(line.split(":")[1].trim());
+            else
+                description += line + "\n";
         }
-        return map;
+
+        project.put("entryPoints", entryPoints);
+        project.put("description", description.trim());
+
+        return project;
     }
 
     public Result getFromLocalRepository(String projectName) {
@@ -155,24 +159,10 @@ public class importProject extends Application {
             File readme = file.listFiles((dir, name) -> name.equals("README.txt"))[0];
             String content = FileOperations.readFileContent(readme);
 
-            ObjectNode projectExampleNode = mapper.createObjectNode();
-            projectExampleNode.put("name", file.getName());
-            projectExampleNode.put("description", content);
+            ObjectNode project = parseReadme(content);
+            project.put("name", file.getName());
 
-            HashMap<String, List<String>> map = extractKeywords(content, new String[]{"Author", "Entry point"});
-            Set<Map.Entry<String, List<String>>> entries = map.entrySet();
-            Iterator<Map.Entry<String, List<String>>> it = entries.iterator();
-            while (it.hasNext()) {
-                Map.Entry<String, List<String>> next = it.next();
-                ArrayNode valuesNode = mapper.createArrayNode();
-                for (String value : next.getValue())
-                    valuesNode.add(value);
-
-                projectExampleNode.put(next.getKey(), valuesNode);
-                it.remove(); // avoids a ConcurrentModificationException
-            }
-
-            arrayNode.add(projectExampleNode);
+            arrayNode.add(project);
         }
 
         return ok(arrayNode);
