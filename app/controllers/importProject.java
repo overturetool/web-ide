@@ -4,20 +4,21 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.CaseFormat;
 import core.ServerConfigurations;
 import core.StatusCode;
 import core.auth.SessionStore;
 import core.utilities.FileOperations;
 import core.utilities.ServerUtils;
-import org.apache.commons.io.FileUtils;
+import core.vfs.IVFS;
+import core.vfs.commons_vfs2.CommonsVFSUnsafe;
 import org.apache.commons.lang3.StringUtils;
 import play.mvc.Result;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.*;
-import java.util.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Base64;
 
 public class importProject extends Application {
     public Result getFromGithubApi(String projectUrl) {
@@ -132,23 +133,14 @@ public class importProject extends Application {
         String accessToken = ServerUtils.extractAccessToken(request());
         String userId = SessionStore.getInstance().get(accessToken);
 
-        // TODO : Remember to remove!
-        //userId = userId == null ? "111425625270532893915" : userId;
-
-        try {
-            FileUtils.copyDirectory(
-                    Paths.get("OvertureExamples", "VDMSL", projectName).toFile(),
-                    Paths.get(ServerConfigurations.basePath, userId, projectName).toFile()
-            );
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        IVFS vfs = new CommonsVFSUnsafe(Paths.get("OvertureExamples", "VDMSL", projectName).toString());
+        vfs.move(Paths.get(userId, projectName).toString());
 
         return ok();
     }
 
     public Result listFromLocalRepository() {
-        File[] repository = new File(Paths.get("OvertureExamples", "VDMSL").toString())
+        File[] repository = new File(Paths.get(ServerConfigurations.basePath, "OvertureExamples", "VDMSL").toString())
                 .listFiles((dir, name) -> !name.startsWith("."));
 
         ObjectMapper mapper = new ObjectMapper();

@@ -30,6 +30,23 @@ public class CommonsVFS implements IVFS<FileObject> {
     private String relativePath;
     private FileObject baseFileObject;
 
+    protected CommonsVFS(String path) {
+        StandardFileSystemManager fsManager = new StandardFileSystemManager();
+
+        this.account = ServerConfigurations.basePath;
+        this.relativePath = path;
+
+        try {
+            fsManager.init();
+            fsManager.setBaseFile(new File(account));
+            this.baseFileObject = fsManager.getBaseFile();
+            this.vfs = fsManager.createVirtualFileSystem(this.baseFileObject);
+        } catch (FileSystemException e) {
+            Logger.error(e.getMessage(), e);
+            e.printStackTrace();
+        }
+    }
+
     public CommonsVFS(String account, String path) {
         StandardFileSystemManager fsManager = new StandardFileSystemManager();
 
