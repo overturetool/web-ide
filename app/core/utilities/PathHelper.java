@@ -2,57 +2,18 @@ package core.utilities;
 
 import core.ServerConfigurations;
 
+import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 public class PathHelper {
-    public static synchronized String JoinPath(String account, String path) {
-        return account + "/" + path;
-    }
-
     public static synchronized String RemoveBase(String absolute) {
-        String[] split = absolute.split("/");
-        String relative = "";
-        int baseIndex = -1;
+        Path basePath = Paths.get(ServerConfigurations.basePath);
+        Path absolutePath = Paths.get(absolute);
 
-        for (int i = 0; i < split.length; i++) {
-            if (split[i].equals(ServerConfigurations.basePath)) {
-                baseIndex = i;
-                break;
-            }
-        }
+        URI relativeUri = basePath.toUri().relativize(absolutePath.toUri());
+        Path relativePath = Paths.get(relativeUri.getPath());
 
-        if (baseIndex == -1)
-            return relative;
-
-        for (int i = baseIndex + 1; i < split.length; i++)
-            relative += "/" + split[i];
-
-        return relative;
-    }
-
-    public static synchronized String RelativePath(String absolute) {
-        String[] split = absolute.split("/");
-        String relative = "";
-        int baseIndex = -1;
-        boolean firstIndex = true;
-
-        for (int i = 0; i < split.length; i++) {
-            if (split[i].equals(ServerConfigurations.basePath)) {
-                baseIndex = i;
-                break;
-            }
-        }
-
-        if (baseIndex == -1)
-            return relative;
-
-        for (int i = baseIndex + 1; i < split.length; i++) {
-            if (firstIndex) {
-                relative = split[i];
-                firstIndex = false;
-            } else {
-                relative += "/" + split[i];
-            }
-        }
-
-        return relative;
+        return relativePath.toString();
     }
 }

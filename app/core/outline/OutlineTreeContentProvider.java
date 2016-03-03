@@ -1,5 +1,6 @@
 package core.outline;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.utilities.PathHelper;
@@ -33,19 +34,25 @@ public class OutlineTreeContentProvider {
         List<ObjectNode> jsonList = new ArrayList<>();
 
         for (Object node : objectList) {
-            ObjectNode json = Json.newObject();
+            ObjectMapper mapper = new ObjectMapper();
+            ObjectNode json = mapper.createObjectNode();
             ILexLocation location = null;
 
             if (node instanceof ATypeDefinition) {
                 String name = ((ATypeDefinition) node).getName().getName();
                 String module = ((ATypeDefinition) node).getName().getModule();
 
-                ANamedInvariantType subType = (ANamedInvariantType) ((ATypeDefinition) node).getInvType();
-                String type = subType.getType().toString();
+                String type;
+                try {
+                    ANamedInvariantType subType = (ANamedInvariantType) ((ATypeDefinition) node).getInvType();
+                    type = subType.getType().toString();
+                } catch (ClassCastException e) {
+                    type = ((ATypeDefinition) node).getInvType().toString();
+                }
 
                 json.put("name", name);
-                json.put("type", type);
                 json.put("module", module);
+                json.put("type", type);
 
                 location = ((ATypeDefinition) node).getName().getLocation();
 
@@ -55,7 +62,12 @@ public class OutlineTreeContentProvider {
                 String name = definition.getName().toString();
                 String type = definition.getType().toString();
 
-                String expression = ((AValueDefinition) definition.parent()).getExpression().toString();
+                String expression;
+                try {
+                    expression = ((AValueDefinition) definition.parent()).getExpression().toString();
+                } catch (ClassCastException e) {
+                    expression = definition.parent().toString();
+                }
 
                 json.put("name", name);
                 json.put("type", type);
@@ -70,7 +82,7 @@ public class OutlineTreeContentProvider {
                 String type = definition.getType().toString();
 
                 LinkedList<PType> params = definition.getType().getParameters();
-                ArrayNode resolvedParam = Json.newArray();
+                ArrayNode resolvedParam = mapper.createArrayNode();
 
                 for (PType param : params) {
                     resolvedParam.add(param.toString());

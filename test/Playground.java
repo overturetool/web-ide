@@ -1,9 +1,10 @@
-import core.utilities.PathHelper;
 import core.vfs.CollisionPolicy;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import core.wrappers.ModelWrapper;
 import org.junit.Test;
+
+import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
 
@@ -50,14 +51,14 @@ public class Playground {
 
         IVFS vfs = new CommonsVFS(account, path);
 
-        vfs.move(PathHelper.JoinPath(account, "test_ws/1"));
+        vfs.move(Paths.get(account, "test_ws/1").toString());
 
         String relativePath = vfs.getRelativePath();
 
         // Clean up
-        vfs.move(PathHelper.JoinPath(account, "test_ws"));
+        vfs.move(Paths.get(account, "test_ws").toString());
 
-        assertEquals(relativePath, PathHelper.JoinPath(account, "test_ws/1/" + filename));
+        assertEquals(relativePath, Paths.get(account, "test_ws/1/" + filename).toString());
     }
 
     //@Test
@@ -68,14 +69,14 @@ public class Playground {
 
         IVFS vfs = new CommonsVFS(account, path);
 
-        vfs.move(PathHelper.JoinPath(account, "test_ws/1/2a"));
+        vfs.move(Paths.get(account, "test_ws/1/2a").toString());
 
         String relativePath = vfs.getRelativePath();
 
         // Clean up
         //vfs.moveFile(PathHelper.JoinPath(account, "test_ws"));
 
-        assertEquals(relativePath, PathHelper.JoinPath(account, "test_ws/1/2a/" + dirname));
+        assertEquals(relativePath, Paths.get(account, "test_ws/1/2a/" + dirname).toString());
     }
 
     //@Test
@@ -86,13 +87,13 @@ public class Playground {
 
         IVFS vfs = new CommonsVFS(account, path);
 
-        vfs.move(PathHelper.JoinPath(account, "test_ws/1/bom1.vdmsl"), CollisionPolicy.KeepBoth);
+        vfs.move(Paths.get(account, "test_ws/1/bom1.vdmsl").toString(), CollisionPolicy.KeepBoth);
 
         String relativePath = vfs.getRelativePath();
 
         // Clean up
 //        vfs.moveFile(PathHelper.JoinPath(account, "test_ws"));
 
-        assertEquals(relativePath, PathHelper.JoinPath(account, "test_ws/1/2a/" + filename.replace(".", "1.")));
+        assertEquals(relativePath, Paths.get(account, "test_ws/1/2a/" + filename.replace(".", "1.")).toString());
     }
 }
