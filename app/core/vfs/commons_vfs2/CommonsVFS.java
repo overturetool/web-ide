@@ -6,10 +6,7 @@ import core.ServerConfigurations;
 import core.vfs.CollisionPolicy;
 import core.vfs.IVFS;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.FileType;
-import org.apache.commons.vfs2.Selectors;
+import org.apache.commons.vfs2.*;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import play.Logger;
 
@@ -494,6 +491,53 @@ public class CommonsVFS implements IVFS<FileObject> {
 
     public String pseudoIdentity() {
         return this.relativePath + "@" + this.account;
+    }
+
+    @Override
+    public String copy(String destination) {
+        return copy(destination, CollisionPolicy.KeepBoth);
+    }
+
+    @Override
+    public String copy(String destination, String collisionPolicy) {
+        String filename = Paths.get(destination).getFileName().toString();
+        String newRelativePath = destination;
+
+        try {
+            FileObject src = getFileObject();
+            FileObject des = getFileObject(newRelativePath);
+
+            if (!src.exists() || src == des || des.getParent().getType() != FileType.FOLDER)
+                return null;
+
+            // A file with the same name exists - handle collision according to policy
+            if (des.exists()) {
+                newRelativePath = handleCollision(src, des, collisionPolicy);
+
+                if (newRelativePath == null)
+                    return null;
+
+                filename = Paths.get(newRelativePath).getFileName().toString();
+            }
+
+            des.copyFrom(src, new FileSelector() {
+                @Override
+                public boolean includeFile(FileSelectInfo fileInfo) throws Exception {
+                    return true;
+                }
+
+                @Override
+                public boolean traverseDescendents(FileSelectInfo fileInfo) throws Exception {
+                    return true;
+                }
+            });
+            this.relativePath = newRelativePath;
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return filename;
     }
 
     private FileObject getFileObject() throws FileSystemException {

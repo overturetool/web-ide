@@ -83,6 +83,16 @@ public class CommonsVFSUnsafe extends CommonsVFS {
     }
 
     @Override
+    public String move(String destination) {
+        return null;
+    }
+
+    @Override
+    public String move(String destination, String collisionPolicy) {
+        return null;
+    }
+
+    @Override
     public String getAbsolutePath() {
         return null;
     }

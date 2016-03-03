@@ -134,7 +134,7 @@ public class importProject extends Application {
         String userId = SessionStore.getInstance().get(accessToken);
 
         IVFS vfs = new CommonsVFSUnsafe(Paths.get("OvertureExamples", "VDMSL", projectName).toString());
-        vfs.move(Paths.get(userId, projectName).toString());
+        vfs.copy(Paths.get(userId, projectName).toString());
 
         return ok();
     }

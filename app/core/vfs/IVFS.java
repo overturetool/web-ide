@@ -46,6 +46,10 @@ public interface IVFS<T> {
 
     String move(String destination, String collisionPolicy);
 
+    String copy(String destination);
+
+    String copy(String destination, String collisionPolicy);
+
     boolean delete();
 
     boolean rename(String name);
