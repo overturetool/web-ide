@@ -3,7 +3,6 @@ package controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.StatusCode;
-import core.vfs.CollisionPolicy;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import org.apache.commons.vfs2.FileObject;
@@ -11,7 +10,6 @@ import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 
-import java.io.File;
 import java.util.List;
 
 public class vfs extends Application {
@@ -65,22 +63,17 @@ public class vfs extends Application {
         if (request == null)
             return status(StatusCode.UnprocessableEntity, "Request body empty or not valid JSON");
 
-        JsonNode destination = request.get("destination");
-        JsonNode collisionPolicy = request.get("collisionPolicy");
+        JsonNode destinationNode = request.get("destination");
+        JsonNode collisionPolicyNode = request.get("collisionPolicy");
 
-        if (destination == null)
-            return status(StatusCode.UnprocessableEntity, "missing destination");
+        if (destinationNode == null || collisionPolicyNode == null)
+            return status(StatusCode.UnprocessableEntity, "Missing attribute(s) in JSON object");
 
-        if (collisionPolicy == null)
-            collisionPolicy = Json.newObject().textNode(CollisionPolicy.KeepBoth);
-
-        // TODO : Temporary fix
-        String des = destination.asText();
-        des = des.startsWith("/") ? des.substring(1) : des;
-        des = des.replaceFirst(account + File.separator, "");
+        String destination = request.get("destination").toString();
+        String collisionPolicy = request.get("collisionPolicy").toString();
 
         IVFS vfs = new CommonsVFS(account, path);
-        String result = vfs.move(des, collisionPolicy.asText());
+        String result = vfs.move(destination, collisionPolicy);
 
         if (result == null)
             return status(StatusCode.UnprocessableEntity, "File operation failed");

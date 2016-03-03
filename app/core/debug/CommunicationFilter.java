@@ -7,7 +7,7 @@ import org.codehaus.plexus.util.StringUtils;
 import java.io.File;
 
 public class CommunicationFilter {
-    public static String ConvertPathToAbsolute(String message) {
+    public synchronized static String ConvertPathToAbsolute(String message) {
         String[] stringArray = message.split("\\s");
 
         for (int i = 0; i < stringArray.length; i++) {
@@ -21,7 +21,7 @@ public class CommunicationFilter {
         return StringUtils.join(stringArray, " ");
     }
 
-    public static String ConvertPathsToRelative(String message) {
+    public synchronized static String ConvertPathsToRelative(String message) {
         int index = message.indexOf("<");
         message = message.substring(index);
 
@@ -47,7 +47,7 @@ public class CommunicationFilter {
                 File file = new File(absolutePath);
 
                 if (file.isAbsolute()) {
-                    String relativePath = PathHelper.RemoveBase(file.getPath()).substring(1); // TODO : Tmp fix
+                    String relativePath = PathHelper.RemoveBase(file.getPath());
                     message = message.replaceFirst(file.toURI().toString(), relativePath);
                     scanStartIndex = (startIndex + relativePath.length()) - 4;
                 } else {

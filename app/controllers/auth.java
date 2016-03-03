@@ -53,8 +53,10 @@ public class auth extends Controller {
 
         if (idToken != null) {
             JsonNode credential = getTokenInfo(accessToken);
-            if (credential == null)
+            if (credential == null) {
+                SessionStore.getInstance().remove(accessToken);
                 return status(StatusCode.UnprocessableEntity, "Token info not obtained");
+            }
 
             GoogleIdToken.Payload payload = idToken.getPayload();
 
