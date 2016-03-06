@@ -113,8 +113,7 @@ public class importProject extends Application {
         File[] repository = new File(Paths.get(ServerConfigurations.basePath, ServerConfigurations.projectSamples, "VDMSL").toString())
                 .listFiles((dir, name) -> !name.startsWith("."));
 
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode arrayNode = mapper.createArrayNode();
+        ArrayNode arrayNode = new ObjectMapper().createArrayNode();
 
         for (File file : repository) {
             FileOperations.filterDirectoryContent(file, new String[]{"vdmsl", "txt"});
