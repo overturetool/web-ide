@@ -15,6 +15,7 @@ import play.Logger;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
@@ -29,7 +30,6 @@ public class ModelWrapper {
 
         if (ResourceCache.getInstance().existsAndNotModified(file)) {
             this.interpreter = ResourceCache.getInstance().get(file).getInterpreter();
-            //this.interpreter.init(null);
         } else {
             List<File> files = Collections.synchronizedList(new ArrayList<>());
             files.add(file.getIOFile()); // TODO : should not be done if file is a directory, but overture core takes care of it.
@@ -117,7 +117,13 @@ public class ModelWrapper {
                 e.printStackTrace();
             }
 
-            ExitStatus typeCheckStatus = vdmsl.typeCheck();
+            ExitStatus typeCheckStatus;
+            try {
+                typeCheckStatus = vdmsl.typeCheck();
+            } catch (ConcurrentModificationException e) {
+                typeCheckStatus = ExitStatus.EXIT_ERRORS;
+                Logger.error(e.getMessage());
+            }
 
             if (typeCheckStatus == ExitStatus.EXIT_OK) {
                 try {
@@ -127,7 +133,6 @@ public class ModelWrapper {
                     success = true;
                 } catch (Exception e) {
                     Logger.error(e.getMessage(), e);
-                    e.printStackTrace();
                 }
             }
         }

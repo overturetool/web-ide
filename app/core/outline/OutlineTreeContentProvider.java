@@ -126,7 +126,8 @@ public class OutlineTreeContentProvider {
                 json.putPOJO("location", locationNode);
             }
 
-            jsonList.add(json);
+            if (json.hasNonNull("name"))
+                jsonList.add(json);
         }
 
         return jsonList;

@@ -1,6 +1,7 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.api.client.auth.oauth2.BearerToken;
 import com.google.api.client.auth.oauth2.Credential;
@@ -15,7 +16,7 @@ import core.auth.SessionStore;
 import core.utilities.ServerUtils;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
-import play.libs.Json;
+import play.Logger;
 import play.mvc.Controller;
 import play.mvc.Result;
 
@@ -31,7 +32,7 @@ public class auth extends Controller {
         String accessToken = ServerUtils.extractAccessToken(request());
 
         if (accessToken == null)
-            return status(StatusCode.UnprocessableEntity, "Missing access token");
+            return unauthorized("Missing access token");
 
         JsonFactory jsonFactory = new JacksonFactory();
         HttpTransport transport = new NetHttpTransport();
@@ -46,8 +47,10 @@ public class auth extends Controller {
         try {
             idToken = verifier.verify(tokenId);
         } catch (GeneralSecurityException | IOException e) {
+            Logger.debug(e.getMessage());
             return status(StatusCode.UnprocessableEntity, e.toString());
         } catch (IllegalArgumentException e) {
+            Logger.debug(e.getMessage());
             return status(StatusCode.UnprocessableEntity, e.toString());
         }
 
@@ -55,14 +58,14 @@ public class auth extends Controller {
             JsonNode credential = getTokenInfo(accessToken);
             if (credential == null) {
                 SessionStore.getInstance().remove(accessToken);
-                return status(StatusCode.UnprocessableEntity, "Token info not obtained");
+                return unauthorized("Token info not obtained");
             }
 
             GoogleIdToken.Payload payload = idToken.getPayload();
 
             String userId = payload.getSubject();
             if (!credential.get("sub").asText().equals(userId))
-                return status(StatusCode.UnprocessableEntity, "Id mismatch");
+                return unauthorized("Id mismatch");
 
             IVFS vfs = new CommonsVFS(userId, "");
             if (!vfs.exists())
@@ -76,7 +79,7 @@ public class auth extends Controller {
             String familyName = (String) payload.get("family_name");
             String givenName = (String) payload.get("given_name");
 
-            ObjectNode node = Json.newObject();
+            ObjectNode node = new ObjectMapper().createObjectNode();
             node.put("userId", userId);
             node.put("givenName", givenName);
             node.put("familyName", familyName);
@@ -86,12 +89,11 @@ public class auth extends Controller {
             node.put("locale", locale);
             node.put("pictureUrl", pictureUrl);
 
-            //session(accessToken, userId);
             SessionStore.getInstance().set(accessToken, userId);
 
             return ok(node);
         } else {
-            return status(StatusCode.UnprocessableEntity, "Invalid ID token.");
+            return unauthorized("Invalid ID token.");
         }
     }
 
@@ -117,9 +119,9 @@ public class auth extends Controller {
         HttpRequestFactory requestFactory = httpTransport.createRequestFactory(credential::initialize);
 
         try {
-            HttpRequest request = requestFactory.buildGetRequest(url);
+            HttpRequest request = requestFactory.buildGetRequest(url).setConnectTimeout(5000);
             HttpResponse response = request.execute();
-            return Json.parse(response.parseAsString());
+            return new ObjectMapper().readTree(response.parseAsString());
         } catch (IOException e) {
             return null;
         }

@@ -25,9 +25,6 @@ public class importProject extends Application {
         String accessToken = ServerUtils.extractAccessToken(request());
         String userId = SessionStore.getInstance().get(accessToken);
 
-        // TODO : Remember to remove!
-        userId = userId == null ? "111425625270532893915" : userId;
-
         Path destinationAccount = Paths.get(ServerConfigurations.basePath, userId);
 
         Path zipFilePath = FileOperations.downloadFile(projectUrl, destinationAccount.toString());
@@ -123,7 +120,7 @@ public class importProject extends Application {
                 description += line + "\n";
         }
 
-        project.put("entryPoints", entryPoints);
+        project.putPOJO("entryPoints", entryPoints);
         project.put("description", description.trim());
 
         return project;
@@ -133,14 +130,14 @@ public class importProject extends Application {
         String accessToken = ServerUtils.extractAccessToken(request());
         String userId = SessionStore.getInstance().get(accessToken);
 
-        IVFS vfs = new CommonsVFSUnsafe(Paths.get("OvertureExamples", "VDMSL", projectName).toString());
+        IVFS vfs = new CommonsVFSUnsafe(Paths.get(ServerConfigurations.projectSamples, "VDMSL", projectName).toString());
         vfs.copy(Paths.get(userId, projectName).toString());
 
         return ok();
     }
 
     public Result listFromLocalRepository() {
-        File[] repository = new File(Paths.get(ServerConfigurations.basePath, "OvertureExamples", "VDMSL").toString())
+        File[] repository = new File(Paths.get(ServerConfigurations.basePath, ServerConfigurations.projectSamples, "VDMSL").toString())
                 .listFiles((dir, name) -> !name.startsWith("."));
 
         ObjectMapper mapper = new ObjectMapper();

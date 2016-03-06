@@ -489,6 +489,7 @@ public class CommonsVFS implements IVFS<FileObject> {
         return -1;
     }
 
+    @Override
     public String pseudoIdentity() {
         return this.relativePath + "@" + this.account;
     }

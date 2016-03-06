@@ -3,9 +3,11 @@ package core.lint;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.utilities.PathHelper;
 import org.overture.parser.messages.VDMMessage;
+import play.Logger;
 import play.libs.Json;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.List;
 
 public class LintMapper {
@@ -16,11 +18,15 @@ public class LintMapper {
     public <T extends VDMMessage> List<ObjectNode> messagesToJson(List<T> messages, String targetModuleName) {
         List<ObjectNode> jsonList = new ArrayList<>();
 
-        for (VDMMessage message : messages) {
-            if (targetModuleName != null && message.location.getModule().equals(targetModuleName))
-                jsonList.add(mapObject(message));
-            else if (targetModuleName == null)
-                jsonList.add(mapObject(message));
+        try {
+            for (VDMMessage message : messages) {
+                if (targetModuleName != null && message.location.getModule().equals(targetModuleName))
+                    jsonList.add(mapObject(message));
+                else if (targetModuleName == null)
+                    jsonList.add(mapObject(message));
+            }
+        } catch (ConcurrentModificationException e) {
+            Logger.error(e.getMessage());
         }
 
         return jsonList;
