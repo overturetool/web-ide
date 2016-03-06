@@ -90,8 +90,6 @@ public class ModelWrapper {
     }
 
     private synchronized boolean init(List<File> files) {
-        boolean success = false;
-
         // Look into using the VDMJ class instead
         VDMSL vdmsl = new VDMSL();
         vdmsl.setWarnings(false);
@@ -119,7 +117,7 @@ public class ModelWrapper {
                     this.interpreter = vdmsl.getInterpreter();
                     this.interpreter.defaultModule.setTypeChecked(true);
                     this.interpreter.init(null);
-                    success = true;
+                    return true;
                 } catch (Exception e) {
                     Logger.error(e.getMessage(), e);
                 }
@@ -129,7 +127,7 @@ public class ModelWrapper {
         // Safety-net to avoid NullPointerExceptions
         init();
 
-        return success;
+        return false;
     }
 
     private synchronized boolean init() {
