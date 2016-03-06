@@ -10,9 +10,9 @@ import core.auth.SessionStore;
 import core.utilities.FileOperations;
 import core.utilities.HttpUtils;
 import core.utilities.ServerUtils;
+import core.utilities.StringContentParser;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFSUnsafe;
-import org.apache.commons.lang3.StringUtils;
 import play.mvc.Result;
 
 import java.io.File;
@@ -99,34 +99,6 @@ public class importProject extends Application {
         return ok(jsonArray);
     }
 
-    private ObjectNode parseReadme(String content) {
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode entryPoints = mapper.createArrayNode();
-        ObjectNode project = mapper.createObjectNode();
-
-        String description = "";
-
-        for (String line : content.split("\n")) {
-            boolean containsColon = StringUtils.countMatches(line, ":") == 1;
-
-            if (line.indexOf("Author") == 0 && containsColon)
-                project.put("author", line.split(":")[1].trim());
-
-            else if (line.indexOf("Language Version") == 0 && containsColon)
-                project.put("languageVersion", line.split(":")[1].trim());
-
-            else if (line.indexOf("Entry point") == 0 && containsColon)
-                entryPoints.add(line.split(":")[1].trim());
-            else
-                description += line + "\n";
-        }
-
-        project.putPOJO("entryPoints", entryPoints);
-        project.put("description", description.trim());
-
-        return project;
-    }
-
     public Result getFromLocalRepository(String projectName) {
         String accessToken = ServerUtils.extractAccessToken(request());
         String userId = SessionStore.getInstance().get(accessToken);
@@ -149,7 +121,7 @@ public class importProject extends Application {
             File readme = file.listFiles((dir, name) -> name.equals("README.txt"))[0];
             String content = FileOperations.readFileContent(readme);
 
-            ObjectNode project = parseReadme(content);
+            ObjectNode project = new StringContentParser().parseReadme(content);
             project.put("name", file.getName());
 
             arrayNode.add(project);
