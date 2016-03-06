@@ -17,61 +17,50 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.List;
-import java.util.concurrent.Semaphore;
 
 public class ModelWrapper {
     private ModuleInterpreter interpreter;
-
-    private static final int MAX_AVAILABLE = 1;
-    private static final Semaphore available = new Semaphore(MAX_AVAILABLE, true);
+    private static final Object lock = new Object();
 
     public ModelWrapper(IVFS<FileObject> file) {
-        available.acquireUninterruptibly();
+        synchronized (lock) {
+            if (ResourceCache.getInstance().existsAndNotModified(file)) {
+                this.interpreter = ResourceCache.getInstance().get(file).getInterpreter();
+            } else {
+                List<File> files = Collections.synchronizedList(new ArrayList<>());
+                files.add(file.getIOFile()); // TODO : should not be done if file is a directory, but overture core takes care of it.
 
-        if (ResourceCache.getInstance().existsAndNotModified(file)) {
-            this.interpreter = ResourceCache.getInstance().get(file).getInterpreter();
-        } else {
-            List<File> files = Collections.synchronizedList(new ArrayList<>());
-            files.add(file.getIOFile()); // TODO : should not be done if file is a directory, but overture core takes care of it.
+                List<File> siblings = file.getSiblings();
+                if (siblings != null && !siblings.isEmpty())
+                    files.addAll(siblings);
+                else if (file.isDirectory())
+                    files.addAll(file.readdirAsIOFile(-1));
 
-            List<File> siblings = file.getSiblings();
-            if (siblings != null && !siblings.isEmpty())
-                files.addAll(siblings);
-            else if (file.isDirectory())
-                files.addAll(file.readdirAsIOFile(-1));
+                List<File> filteredFiles = Collections.synchronizedList(new ArrayList<>());
+                for (File f : files) {
+                    boolean keep = f.getName().endsWith(".vdmsl");
+                    if (keep)
+                        filteredFiles.add(f);
+                }
 
-            List<File> filteredFiles = Collections.synchronizedList(new ArrayList<>());
-            for (File f : files) {
-                boolean keep = f.getName().endsWith(".vdmsl");
-                if (keep)
-                    filteredFiles.add(f);
+                boolean success = init(filteredFiles);
+
+                if (success)
+                    ResourceCache.getInstance().add(file, this.interpreter);
             }
-
-            boolean success = init(filteredFiles);
-
-            if (success)
-                ResourceCache.getInstance().add(file, this.interpreter);
         }
-
-        available.release();
     }
 
+    @Deprecated
     public ModelWrapper(List<File> files) {
         Logger.debug("Here");
-        available.acquireUninterruptibly();
-        init(files);
-        available.release();
+        synchronized (lock) {
+            init(files);
+        }
     }
 
     public ModelWrapper() {
-        try {
-            if (this.interpreter == null) {
-                this.interpreter = new ModuleInterpreter(new ModuleList());
-                this.interpreter.init(null);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        init();
     }
 
     public synchronized String evaluate(String input) {
@@ -138,15 +127,21 @@ public class ModelWrapper {
         }
 
         // Safety-net to avoid NullPointerExceptions
+        init();
+
+        return success;
+    }
+
+    private synchronized boolean init() {
         try {
             if (this.interpreter == null) {
                 this.interpreter = new ModuleInterpreter(new ModuleList());
                 this.interpreter.init(null);
             }
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
-
-        return success;
     }
 }
