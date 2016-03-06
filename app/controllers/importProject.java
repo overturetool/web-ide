@@ -8,6 +8,7 @@ import core.ServerConfigurations;
 import core.StatusCode;
 import core.auth.SessionStore;
 import core.utilities.FileOperations;
+import core.utilities.HttpUtils;
 import core.utilities.ServerUtils;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFSUnsafe;
@@ -27,7 +28,7 @@ public class importProject extends Application {
 
         Path destinationAccount = Paths.get(ServerConfigurations.basePath, userId);
 
-        Path zipFilePath = FileOperations.downloadFile(projectUrl, destinationAccount.toString());
+        Path zipFilePath = HttpUtils.downloadFile(projectUrl, destinationAccount.toString());
         if (zipFilePath == null)
             return status(StatusCode.UnprocessableEntity, "Exception occurred while downloading file");
 
@@ -47,7 +48,7 @@ public class importProject extends Application {
 
     public Result listFromGithubApi() {
         String url = "https://api.github.com/repos/overturetool/documentation/contents/examples/VDMSL?ref=editing";
-        JsonNode jsonNodes = FileOperations.getContentAsJson(url);
+        JsonNode jsonNodes = HttpUtils.getContentAsJson(url);
 
         if (jsonNodes == null)
             return status(StatusCode.UnprocessableEntity, "Could not get content from url");
@@ -57,14 +58,14 @@ public class importProject extends Application {
 
         for (JsonNode node : jsonNodes) {
             String exampleUrl = node.get("url").asText();
-            JsonNode exampleNode = FileOperations.getContentAsJson(exampleUrl);
+            JsonNode exampleNode = HttpUtils.getContentAsJson(exampleUrl);
 
             if (exampleNode == null)
                 continue;
 
             JsonNode exampleReadMeNode = exampleNode.get(0);
             //JsonNode exampleReadMeNode = mapper.createObjectNode();
-            JsonNode readMeNode = FileOperations.getContentAsJson(exampleReadMeNode.get("url").asText());
+            JsonNode readMeNode = HttpUtils.getContentAsJson(exampleReadMeNode.get("url").asText());
 
             if (readMeNode == null)
                 continue;

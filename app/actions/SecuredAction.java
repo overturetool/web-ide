@@ -11,12 +11,6 @@ public class SecuredAction extends Action.Simple {
     @Override
     public F.Promise<Result> call(Http.Context ctx) throws Throwable {
         String receivedToken = getTokenFromHeader(ctx);
-
-        // TODO : For development - Remember to remove!
-//        if (ctx._requestHeader().uri().contains("/import") ||
-//            ctx._requestHeader().uri().equals("/list"))
-//            return delegate.call(ctx);
-
         if (receivedToken != null) {
             String userId = SessionStore.getInstance().get(receivedToken);
             if (userId != null) {
