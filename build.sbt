@@ -7,13 +7,13 @@ lazy val root = (project in file(".")).enablePlugins(PlayJava)
 scalaVersion := "2.11.6"
 
 libraryDependencies ++= Seq(
-  javaJdbc,
+  //javaJdbc,
   cache,
   javaWs,
   filters,
   "org.apache.commons" % "commons-vfs2" % "2.0",
   "commons-io" % "commons-io" % "2.4",
-  "org.overturetool.core" % "interpreter" % "2.3.0",
+  "org.overturetool.core" % "interpreter" % "2.3.2",
 
   "com.google.oauth-client" % "google-oauth-client" % "1.21.0",
   "com.google.api-client" % "google-api-client" % "1.21.0",

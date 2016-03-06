@@ -12,7 +12,7 @@ public class DBGPReaderInitializer {
 
         args.add("java");
         args.add("-cp");
-        args.add("Overture-2.3.0.jar");
+        args.add("Overture-2.3.2.jar");
         args.add("org.overture.interpreter.debug.DBGPReaderV2");
 
         if (type != null) {

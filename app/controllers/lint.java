@@ -1,5 +1,6 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.StatusCode;
 import core.lint.LintMapper;
@@ -12,7 +13,6 @@ import org.overture.ast.modules.AModuleModules;
 import org.overture.config.Settings;
 import org.overture.parser.util.ParserUtil;
 import org.overture.typechecker.util.TypeCheckerUtil;
-import play.libs.Json;
 import play.mvc.Result;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class lint extends Application {
 
         LintMapper mapper = new LintMapper();
 
-        ObjectNode messages = Json.newObject();
+        ObjectNode messages = new ObjectMapper().createObjectNode();
         messages.putPOJO("parserWarnings", mapper.messagesToJson(parserResults.warnings, targetModuleName));
         messages.putPOJO("parserErrors", mapper.messagesToJson(parserResults.errors, targetModuleName));
         messages.putPOJO("typeCheckerWarnings", mapper.messagesToJson(typeCheckerResults.warnings, targetModuleName));

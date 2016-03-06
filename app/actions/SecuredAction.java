@@ -23,7 +23,7 @@ public class SecuredAction extends Action.Simple {
                 return delegate.call(ctx);
             }
         }
-        Result unauthorized = Results.unauthorized("unauthorized");
+        Result unauthorized = Results.unauthorized("unauthorized: token may have expired");
         return F.Promise.pure(unauthorized);
     }
 
