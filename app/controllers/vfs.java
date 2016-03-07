@@ -69,8 +69,8 @@ public class vfs extends Application {
         if (destinationNode == null || collisionPolicyNode == null)
             return status(StatusCode.UnprocessableEntity, "Missing attribute(s) in JSON object");
 
-        String destination = request.get("destination").toString();
-        String collisionPolicy = request.get("collisionPolicy").toString();
+        String destination = request.get("destination").textValue();
+        String collisionPolicy = request.get("collisionPolicy").textValue();
 
         IVFS vfs = new CommonsVFS(account, path);
         String result = vfs.move(destination, collisionPolicy);

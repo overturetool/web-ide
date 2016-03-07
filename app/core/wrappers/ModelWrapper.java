@@ -151,11 +151,15 @@ public class ModelWrapper {
         try {
             String attribute = "release";
             FileObject projectFile = file.getProjectRoot().getChild(".project");
+            if (projectFile == null)
+                return Release.DEFAULT;
+
             InputStream content = projectFile.getContent().getInputStream();
             JsonNode node = new ObjectMapper().readTree(content);
             Release release = null;
             if (node != null && node.hasNonNull(attribute))
-                release = Release.lookup(node.get(attribute).asText());
+                release = Release.lookup(node.get(attribute).textValue());
+
             return release != null ? release : Release.DEFAULT;
         } catch (IOException e) {
             //e.printStackTrace();
