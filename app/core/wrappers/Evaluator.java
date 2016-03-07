@@ -23,6 +23,7 @@ public class Evaluator {
     private final String assignmentOperator = ":=";
     private final String setDefault = methodPrefix + "default";
     private final String getDefault = methodPrefix + "default";
+    private final String modules = methodPrefix + "modules";
     private final String help = methodPrefix + "help";
     private final String space = "\\s";
 
@@ -42,6 +43,8 @@ public class Evaluator {
                 return processSetDefault(input);
             } else if (input.startsWith(getDefault, 0)) {
                 return this.interpreter.getDefaultName();
+            } else if (input.startsWith(modules)) {
+                return processModules();
             } else if (input.equals(help)) {
                 return processHelp();
             } else {
@@ -77,10 +80,17 @@ public class Evaluator {
         return "Default changed from " + oldDefaultName + " to " + defaultName;
     }
 
+    private String processModules() {
+        final String[] result = {""};
+        this.interpreter.getModules().forEach(aModuleModules -> result[0] += aModuleModules.getName().getName().concat(System.lineSeparator()));
+        return result[0];
+    }
+
     private String processHelp() {
         return "These are the Overture cloudIDE REPL commands:" + System.lineSeparator() +
                "   Get default module name:        " + getDefault + System.lineSeparator() +
                "   Set default module name:        " + setDefault + " " + assignmentOperator + " <module_name>" + System.lineSeparator() +
+               "   Get a list of modules:          " + modules + System.lineSeparator() +
                "   Define variable:                <var_name> " + assignmentOperator + " <value>";
     }
 
