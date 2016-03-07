@@ -10,6 +10,7 @@ import org.apache.commons.vfs2.*;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import play.Logger;
 
+import javax.validation.constraints.NotNull;
 import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -20,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class CommonsVFS implements IVFS<FileObject> {
     private FileObject vfs;
@@ -40,40 +42,57 @@ public class CommonsVFS implements IVFS<FileObject> {
             this.vfs = fsManager.createVirtualFileSystem(this.baseFileObject);
         } catch (FileSystemException e) {
             Logger.error(e.getMessage(), e);
-            e.printStackTrace();
         }
     }
 
-    public CommonsVFS(String account, String path) {
+    public CommonsVFS(@NotNull String account, String path) {
         StandardFileSystemManager fsManager = new StandardFileSystemManager();
 
         this.account = account;
         this.relativePath = path;
-        String basePath = ServerConfigurations.basePath;
-
-        if (account != null)
-            basePath += File.separator + account;
+        Path basePath = Paths.get(ServerConfigurations.basePath, account);
 
         try {
             fsManager.init();
-            fsManager.setBaseFile(new File(basePath));
+            fsManager.setBaseFile(new File(basePath.toString()));
             this.baseFileObject = fsManager.getBaseFile();
             this.vfs = fsManager.createVirtualFileSystem(this.baseFileObject);
         } catch (FileSystemException e) {
             Logger.error(e.getMessage(), e);
-            e.printStackTrace();
         }
     }
 
     @Override
     public FileObject getProjectRoot() {
-        Path projectRoot = Paths.get(this.relativePath).getName(0);
+        Path projectRootPath = Paths.get(this.relativePath).getName(0);
         try {
-            return getFileObject(projectRoot.toString());
+            FileObject projectRootFileObject = getFileObject(projectRootPath.toString());
+            if (projectRootFileObject == null || !projectRootFileObject.exists())
+                return null;
+
+            FileObject isProjectRoot = this.baseFileObject.getChild(projectRootPath.toString());
+            if (isProjectRoot != null)
+                return projectRootFileObject;
         } catch (FileSystemException e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public List<File> getProjectAsIOFile() {
+        FileObject projectRoot = getProjectRoot();
+        List<File> files = Collections.synchronizedList(new ArrayList<>());
+        if (projectRoot == null)
+            return files;
+
+        List<FileObject> fileObjects = readdir(projectRoot.getName().getPath(), -1);
+        files.addAll(fileObjects
+                .stream()
+                .map(fileObject -> new File(toAbsolutePath(fileObject.getName().getPath())))
+                .collect(Collectors.toList()));
+
+        return files;
     }
 
     @Override
@@ -501,8 +520,15 @@ public class CommonsVFS implements IVFS<FileObject> {
     }
 
     @Override
-    public String pseudoIdentity() {
+    public String Id() {
         return this.relativePath + "@" + this.account;
+    }
+
+    @Override
+    public String projectId() {
+        FileObject projectRoot = getProjectRoot();
+        String project = projectRoot != null ? projectRoot.getName().getBaseName() : "root";
+        return project + "@" + this.account;
     }
 
     @Override

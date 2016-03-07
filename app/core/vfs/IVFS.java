@@ -9,6 +9,8 @@ import java.util.List;
 public interface IVFS<T> {
     FileObject getProjectRoot();
 
+    List<File> getProjectAsIOFile();
+
     boolean appendFile(String content);
 
     String readFile();
@@ -65,7 +67,9 @@ public interface IVFS<T> {
 
     long lastModifiedTime();
 
-    String pseudoIdentity();
+    String Id();
+
+    String projectId();
 
     List<File> findFile(String filename);
 }

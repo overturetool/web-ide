@@ -79,18 +79,9 @@ public class ModelWrapper {
     }
 
     private synchronized List<File> preprocessFiles(IVFS<FileObject> file) {
-        List<File> files = Collections.synchronizedList(new ArrayList<>());
-        files.add(file.getIOFile()); // TODO : should not be done if file is a directory, but overture core takes care of it.
-
-        List<File> siblings = file.getSiblings();
-        if (siblings != null && !siblings.isEmpty())
-            files.addAll(siblings);
-        else if (file.isDirectory())
-            files.addAll(file.readdirAsIOFile(-1));
-
+        List<File> files = file.getProjectAsIOFile();
         List<File> filteredFiles = Collections.synchronizedList(new ArrayList<>());
         filteredFiles.addAll(files.stream().filter(f -> f.getName().endsWith(".vdmsl")).collect(Collectors.toList()));
-
         return filteredFiles;
     }
 
@@ -107,7 +98,7 @@ public class ModelWrapper {
             try {
                 this.interpreter = vdmsl.getInterpreter();
             } catch (Exception e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
 
             ExitStatus typeCheckStatus;
@@ -115,7 +106,6 @@ public class ModelWrapper {
                 typeCheckStatus = vdmsl.typeCheck();
             } catch (ConcurrentModificationException e) {
                 typeCheckStatus = ExitStatus.EXIT_ERRORS;
-                Logger.error(e.getMessage());
             }
 
             if (typeCheckStatus == ExitStatus.EXIT_OK) {
@@ -147,10 +137,14 @@ public class ModelWrapper {
         }
     }
 
-    private Release getRelease(IVFS<FileObject> file) {
+    private synchronized Release getRelease(IVFS<FileObject> file) {
         try {
             String attribute = "release";
-            FileObject projectFile = file.getProjectRoot().getChild(".project");
+            FileObject projectRoot = file.getProjectRoot();
+            if (projectRoot == null)
+                return Release.DEFAULT;
+
+            FileObject projectFile = projectRoot.getChild(".project");
             if (projectFile == null)
                 return Release.DEFAULT;
 

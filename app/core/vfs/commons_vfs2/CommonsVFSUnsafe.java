@@ -2,6 +2,7 @@ package core.vfs.commons_vfs2;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.vfs.IVFS;
+import org.apache.commons.vfs2.FileObject;
 
 import java.io.File;
 import java.util.List;
@@ -10,6 +11,16 @@ public class CommonsVFSUnsafe extends CommonsVFS {
 
     public CommonsVFSUnsafe(String path) {
         super(path);
+    }
+
+    @Override
+    public FileObject getProjectRoot() {
+        return null;
+    }
+
+    @Override
+    public List<File> getProjectAsIOFile() {
+        return null;
     }
 
     @Override
@@ -93,6 +104,11 @@ public class CommonsVFSUnsafe extends CommonsVFS {
     }
 
     @Override
+    public String copy(String destination, String collisionPolicy) {
+        return null;
+    }
+
+    @Override
     public String getAbsolutePath() {
         return null;
     }
@@ -143,7 +159,17 @@ public class CommonsVFSUnsafe extends CommonsVFS {
     }
 
     @Override
-    public String pseudoIdentity() {
+    public String Id() {
+        return null;
+    }
+
+    @Override
+    public String projectId() {
+        return null;
+    }
+
+    @Override
+    public List<File> findFile(String filename) {
         return null;
     }
 }
