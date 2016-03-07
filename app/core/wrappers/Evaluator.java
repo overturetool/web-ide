@@ -21,10 +21,10 @@ import java.util.LinkedList;
 public class Evaluator {
     private final String methodPrefix = "&";
     private final String assignmentOperator = ":=";
-    private final String setDefault = methodPrefix + "setDefault";
-    private final String getDefault = methodPrefix + "getDefault";
+    private final String setDefault = methodPrefix + "default";
+    private final String getDefault = methodPrefix + "default";
     private final String help = methodPrefix + "help";
-    private final String space = " ";
+    private final String space = "\\s";
 
     private ModuleInterpreter interpreter;
 
@@ -48,7 +48,7 @@ public class Evaluator {
                 return this.interpreter.evaluate(input, this.interpreter.initialContext).toString();
             }
         } catch (Exception e) {
-            return e.toString();
+            return e.getMessage();
         }
     }
 
@@ -65,31 +65,23 @@ public class Evaluator {
         return this.interpreter.evaluate(input, this.interpreter.initialContext).toString();
     }
 
-    private String processSetDefault(String input) {
+    private String processSetDefault(String input) throws Exception {
         String[] strings = input.replaceAll(space, "").split(assignmentOperator);
         String defaultName = strings[1];
         String oldDefaultName = this.interpreter.getDefaultName();
-
         try {
             this.interpreter.setDefaultName(defaultName);
         } catch (Exception e) {
-            return "Error: " + e.toString();
+            throw new Exception("Error: " + e.getMessage());
         }
-
         return "Default changed from " + oldDefaultName + " to " + defaultName;
     }
 
     private String processHelp() {
-        StringBuilder helpString = new StringBuilder();
-        helpString.append("These are the Overture webIDE REPL commands:")
-                .append(System.lineSeparator());
-        helpString.append("   Get default module name:        ").append(getDefault)
-                .append(System.lineSeparator());
-        helpString.append("   Set default module name:        ").append(setDefault).append(" ").append(assignmentOperator).append(" <module_name>")
-                .append(System.lineSeparator());
-        helpString.append("   Define variable:                <var_name> ")
-                .append(assignmentOperator).append(" <value>");
-        return helpString.toString();
+        return "These are the Overture cloudIDE REPL commands:" + System.lineSeparator() +
+               "   Get default module name:        " + getDefault + System.lineSeparator() +
+               "   Set default module name:        " + setDefault + " " + assignmentOperator + " <module_name>" + System.lineSeparator() +
+               "   Define variable:                <var_name> " + assignmentOperator + " <value>";
     }
 
     private void create(String var, String exp) throws Exception {
