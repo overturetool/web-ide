@@ -66,6 +66,17 @@ public class CommonsVFS implements IVFS<FileObject> {
     }
 
     @Override
+    public FileObject getProjectRoot() {
+        Path projectRoot = Paths.get(this.relativePath).getName(0);
+        try {
+            return getFileObject(projectRoot.toString());
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
     public boolean appendFile(String content) {
         boolean success = false;
         PrintWriter pw = null;
@@ -539,6 +550,33 @@ public class CommonsVFS implements IVFS<FileObject> {
         }
 
         return filename;
+    }
+
+    // TODO : Not tested
+    @Override
+    public List<File> findFile(String filename) {
+        List<File> list = new ArrayList<>();
+        try {
+            FileObject[] files = getFileObject().findFiles(new FileSelector() {
+                @Override
+                public boolean includeFile(FileSelectInfo fileInfo) throws Exception {
+                    Logger.debug(fileInfo.getFile().getName().getBaseName());
+                    return fileInfo.getFile().getName().getBaseName().equals(filename);
+                }
+
+                @Override
+                public boolean traverseDescendents(FileSelectInfo fileInfo) throws Exception {
+                    return false;
+                }
+            });
+
+            for (FileObject file : files)
+                list.add(new File(file.getName().getPath()));
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+        }
+
+        return list;
     }
 
     private FileObject getFileObject() throws FileSystemException {

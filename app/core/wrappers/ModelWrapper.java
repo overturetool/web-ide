@@ -1,10 +1,15 @@
 package core.wrappers;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import core.utilities.ResourceCache;
 import core.vfs.IVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
+import org.overture.ast.lex.Dialect;
 import org.overture.ast.util.modules.ModuleList;
+import org.overture.config.Release;
+import org.overture.config.Settings;
 import org.overture.interpreter.VDMSL;
 import org.overture.interpreter.runtime.ModuleInterpreter;
 import org.overture.interpreter.util.ExitStatus;
@@ -13,10 +18,13 @@ import org.overture.pog.pub.IProofObligationList;
 import play.Logger;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ModelWrapper {
     private ModuleInterpreter interpreter;
@@ -27,25 +35,9 @@ public class ModelWrapper {
             if (ResourceCache.getInstance().existsAndNotModified(file)) {
                 this.interpreter = ResourceCache.getInstance().get(file).getInterpreter();
             } else {
-                List<File> files = Collections.synchronizedList(new ArrayList<>());
-                files.add(file.getIOFile()); // TODO : should not be done if file is a directory, but overture core takes care of it.
-
-                List<File> siblings = file.getSiblings();
-                if (siblings != null && !siblings.isEmpty())
-                    files.addAll(siblings);
-                else if (file.isDirectory())
-                    files.addAll(file.readdirAsIOFile(-1));
-
-                List<File> filteredFiles = Collections.synchronizedList(new ArrayList<>());
-                for (File f : files) {
-                    boolean keep = f.getName().endsWith(".vdmsl");
-                    if (keep)
-                        filteredFiles.add(f);
-                }
-
-                boolean success = init(filteredFiles);
-
-                if (success)
+                List<File> filteredFiles = preprocessFiles(file);
+                Release release = getRelease(file);
+                if (init(filteredFiles, release))
                     ResourceCache.getInstance().add(file, this.interpreter);
             }
         }
@@ -53,10 +45,7 @@ public class ModelWrapper {
 
     @Deprecated
     public ModelWrapper(List<File> files) {
-        Logger.debug("Here");
-        synchronized (lock) {
-            init(files);
-        }
+        init(files, Release.DEFAULT);
     }
 
     public ModelWrapper() {
@@ -89,14 +78,31 @@ public class ModelWrapper {
         return new ProofObligationList();
     }
 
-    private synchronized boolean init(List<File> files) {
-        // Look into using the VDMJ class instead
+    private synchronized List<File> preprocessFiles(IVFS<FileObject> file) {
+        List<File> files = Collections.synchronizedList(new ArrayList<>());
+        files.add(file.getIOFile()); // TODO : should not be done if file is a directory, but overture core takes care of it.
+
+        List<File> siblings = file.getSiblings();
+        if (siblings != null && !siblings.isEmpty())
+            files.addAll(siblings);
+        else if (file.isDirectory())
+            files.addAll(file.readdirAsIOFile(-1));
+
+        List<File> filteredFiles = Collections.synchronizedList(new ArrayList<>());
+        filteredFiles.addAll(files.stream().filter(f -> f.getName().endsWith(".vdmsl")).collect(Collectors.toList()));
+
+        return filteredFiles;
+    }
+
+    private synchronized boolean init(List<File> files, Release release) {
+        Settings.dialect = Dialect.VDM_SL;
+        Settings.release = release;
+
         VDMSL vdmsl = new VDMSL();
         vdmsl.setWarnings(false);
         vdmsl.setQuiet(true);
 
         ExitStatus parseStatus = vdmsl.parse(files);
-
         if (parseStatus == ExitStatus.EXIT_OK) {
             try {
                 this.interpreter = vdmsl.getInterpreter();
@@ -124,9 +130,7 @@ public class ModelWrapper {
             }
         }
 
-        // Safety-net to avoid NullPointerExceptions
         init();
-
         return false;
     }
 
@@ -141,5 +145,21 @@ public class ModelWrapper {
             e.printStackTrace();
             return false;
         }
+    }
+
+    private Release getRelease(IVFS<FileObject> file) {
+        try {
+            String attribute = "release";
+            FileObject projectFile = file.getProjectRoot().getChild(".project");
+            InputStream content = projectFile.getContent().getInputStream();
+            JsonNode node = new ObjectMapper().readTree(content);
+            Release release = null;
+            if (node != null && node.hasNonNull(attribute))
+                release = Release.lookup(node.get(attribute).asText());
+            return release != null ? release : Release.DEFAULT;
+        } catch (IOException e) {
+            //e.printStackTrace();
+        }
+        return Release.DEFAULT;
     }
 }

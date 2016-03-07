@@ -1,11 +1,14 @@
 package core.vfs;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.apache.commons.vfs2.FileObject;
 
 import java.io.File;
 import java.util.List;
 
 public interface IVFS<T> {
+    FileObject getProjectRoot();
+
     boolean appendFile(String content);
 
     String readFile();
@@ -63,4 +66,6 @@ public interface IVFS<T> {
     long lastModifiedTime();
 
     String pseudoIdentity();
+
+    List<File> findFile(String filename);
 }
