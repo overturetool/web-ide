@@ -20,13 +20,14 @@ public class LintMapper {
 
         try {
             for (VDMMessage message : messages) {
+                // TODO : wat?
                 if (targetModuleName != null && message.location.getModule().equals(targetModuleName))
                     jsonList.add(mapObject(message));
                 else if (targetModuleName == null)
                     jsonList.add(mapObject(message));
             }
         } catch (ConcurrentModificationException e) {
-            Logger.error(e.getMessage());
+            Logger.error(e.getMessage(), e);
         }
 
         return jsonList;

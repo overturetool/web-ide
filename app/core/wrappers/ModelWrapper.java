@@ -105,6 +105,7 @@ public class ModelWrapper {
             try {
                 typeCheckStatus = vdmsl.typeCheck();
             } catch (ConcurrentModificationException e) {
+                Logger.error(e.getMessage(), e);
                 typeCheckStatus = ExitStatus.EXIT_ERRORS;
             }
 

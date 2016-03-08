@@ -15,6 +15,7 @@ import org.overture.parser.util.ParserUtil;
 import org.overture.typechecker.util.TypeCheckerUtil;
 import play.mvc.Result;
 
+import java.io.File;
 import java.util.List;
 
 public class lint extends Application {
@@ -34,11 +35,14 @@ public class lint extends Application {
         String targetModuleName = modelWrapper.getTargetModuleName();
 
         Settings.dialect = Dialect.VDM_SL; // Necessary for the parser and typechecker
-        ParserUtil.ParserResult<List<AModuleModules>> parserResults = ParserUtil.parseSl(file.readdirAsIOFile());
-        TypeCheckerUtil.TypeCheckResult<List<AModuleModules>> typeCheckerResults = TypeCheckerUtil.typeCheckSl(file.readdirAsIOFile());
+        //Settings.release = Release.CLASSIC;
+        List<File> files = file.readdirAsIOFile();
+        String charset = "UTF-8";
+
+        ParserUtil.ParserResult<List<AModuleModules>> parserResults = ParserUtil.parseSl(files, charset);
+        TypeCheckerUtil.TypeCheckResult<List<AModuleModules>> typeCheckerResults = TypeCheckerUtil.typeCheckSl(files, charset);
 
         LintMapper mapper = new LintMapper();
-
         ObjectNode messages = new ObjectMapper().createObjectNode();
         messages.putPOJO("parserWarnings", mapper.messagesToJson(parserResults.warnings, targetModuleName));
         messages.putPOJO("parserErrors", mapper.messagesToJson(parserResults.errors, targetModuleName));

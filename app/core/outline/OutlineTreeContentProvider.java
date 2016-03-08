@@ -16,7 +16,6 @@ import org.overture.ast.types.PType;
 import org.overture.ast.types.SInvariantType;
 import org.overture.ast.util.modules.ModuleList;
 import org.overture.typechecker.assistant.TypeCheckerAssistantFactory;
-import play.libs.Json;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,25 +38,26 @@ public class OutlineTreeContentProvider {
             ILexLocation location = null;
 
             if (node instanceof ATypeDefinition) {
-                String name = ((ATypeDefinition) node).getName().getName();
-                String module = ((ATypeDefinition) node).getName().getModule();
+                ATypeDefinition definition = (ATypeDefinition) node;
+
+                String name = definition.getName().getName();
+                String module = definition.getName().getModule();
 
                 String type;
                 try {
-                    ANamedInvariantType subType = (ANamedInvariantType) ((ATypeDefinition) node).getInvType();
-                    type = subType.getType().toString();
+                    ANamedInvariantType subType = (ANamedInvariantType) definition.getInvType();
+                    type = subType.toString();
                 } catch (ClassCastException e) {
-                    type = ((ATypeDefinition) node).getInvType().toString();
+                    type = definition.getInvType().toString();
                 }
 
                 json.put("name", name);
                 json.put("module", module);
                 json.put("type", type);
 
-                location = ((ATypeDefinition) node).getName().getLocation();
-
+                location = definition.getName().getLocation();
             } else if (node instanceof ALocalDefinition) {
-                ALocalDefinition definition = (ALocalDefinition)node;
+                ALocalDefinition definition = (ALocalDefinition) node;
 
                 String name = definition.getName().toString();
                 String type = definition.getType().toString();
@@ -73,10 +73,9 @@ public class OutlineTreeContentProvider {
                 json.put("type", type);
                 json.put("expression", expression);
 
-                location = ((ALocalDefinition) node).getName().getLocation();
-
+                location = definition.getName().getLocation();
             } else if (node instanceof AExplicitFunctionDefinition) {
-                AExplicitFunctionDefinition definition = (AExplicitFunctionDefinition)node;
+                AExplicitFunctionDefinition definition = (AExplicitFunctionDefinition) node;
 
                 String name = definition.getName().toString();
                 String type = definition.getType().toString();
@@ -97,8 +96,58 @@ public class OutlineTreeContentProvider {
                 json.put("expectedResult",  expectedResult != null ? expectedResult.toString() : "");
                 json.put("actualResult", actualResult != null ? actualResult.toString() : "");
 
-                location = ((AExplicitFunctionDefinition) node).getName().getLocation();
-            }
+                location = definition.getName().getLocation();
+            } else if (node instanceof AExplicitOperationDefinition) {
+                AExplicitOperationDefinition definition = (AExplicitOperationDefinition) node;
+
+                String name = definition.getName().toString();
+                String type = definition.getType().toString();
+
+                LinkedList<PDefinition> params = definition.getParamDefinitions();
+                ArrayNode resolvedParam = mapper.createArrayNode();
+
+                for (PDefinition param : params) {
+                    resolvedParam.add(param.toString());
+                }
+
+                PType actualResult = definition.getActualResult();
+
+                json.put("name", name);
+                json.put("type", type);
+                json.set("parameters", resolvedParam);
+                json.put("expectedResult", "");
+                json.put("actualResult", actualResult != null ? actualResult.toString() : "");
+
+                location = definition.getName().getLocation();
+            } /* else if (node instanceof ImportsContainer) {
+                ImportsContainer importsContainer = (ImportsContainer) node;
+                AModuleModules modules = (AModuleModules) importsContainer.getImports().parent();
+                ILexIdentifierToken identifierToken = modules.getName();
+                boolean isInModule = Objects.equals(identifierToken.getLocation().getFile().getName(), target);
+                if (!isInModule)
+                    continue;
+
+                List<PDefinition> importDefs = importsContainer.getImportDefs();
+//                List<Object> importDefsObjects = new ArrayList<>();
+                for (PDefinition pdef : importDefs) {
+                    Object def = ((AImportedDefinition) pdef).getDef();
+                    AImportedDefinition pdef1 = (AImportedDefinition) pdef;
+
+                    String name = pdef.getName().toString();
+                    String type = pdef.getType().toString();
+                    location = pdef1.getLocation();
+
+//                    Class<? extends PDefinition> classDefinition = pdef1.getDef().getClass();
+//                    Object cast = classDefinition.cast(pdef);
+//                    importDefsObjects.add(classDefinition.cast(pdef));
+                }
+
+//                List<ObjectNode> objectNodes = toJSON(importDefsObjects, target);
+//                if (!objectList.isEmpty()) {
+//                    json.put("name", "imports");
+//                    json.putPOJO("imports", objectNodes);
+//                }
+            }*/
 
             if (location != null) {
                 if (!location.getFile().getName().equals(target))
@@ -111,7 +160,7 @@ public class OutlineTreeContentProvider {
                 int startPos = location.getStartPos();
                 int endPos = location.getEndPos();
 
-                ObjectNode locationNode = Json.newObject();
+                ObjectNode locationNode = mapper.createObjectNode();
 
                 locationNode.put("executable", location.getExecutable());
                 locationNode.put("file", PathHelper.RemoveBase(location.getFile().getPath()));
@@ -152,32 +201,29 @@ public class OutlineTreeContentProvider {
             // get definitions from the current class without inherited definitions
             List<PDefinition> defs = factory.createPDefinitionListAssistant().singleDefinitions(((SClassDefinition) parentElement).getDefinitions());
             return filterDefinitionList(defs).toArray();
-
         } else if (parentElement instanceof AModuleModules) {
             List<Object> all = new ArrayList<Object>();
 
-//            AModuleModules module = (AModuleModules) parentElement;
+            AModuleModules module = (AModuleModules) parentElement;
 
-//            if (module.getImports() != null) {
-//                all.add(new ImportsContainer(module.getImports(), module.getImportdefs()));
-//            }
+            if (module.getImports() != null) {
+                all.add(new ImportsContainer(module.getImports(), module.getImportdefs()));
+            }
 
             all.addAll(filterDefinitionList(factory.createPDefinitionListAssistant().singleDefinitions(((AModuleModules) parentElement).getDefs())));
             filterSLModule(all);
             return all.toArray();
         } else if (parentElement instanceof AModuleImports) {
             return ((AModuleImports) parentElement).getImports().toArray();
-        }
-//        else if (parentElement instanceof ImportsContainer) {
-//            ImportsContainer container = (ImportsContainer) parentElement;
-//
-//            if (!container.getImportDefs().isEmpty()) {
-//                return container.getImportDefs().toArray();
-//            } else {
-//                return container.getImports().getImports().toArray();
-//            }
-//        }
-        else if (parentElement instanceof AFromModuleImports) {
+        } else if (parentElement instanceof ImportsContainer) {
+            ImportsContainer container = (ImportsContainer) parentElement;
+
+            if (!container.getImportDefs().isEmpty()) {
+                return container.getImportDefs().toArray();
+            } else {
+                return container.getImports().getImports().toArray();
+            }
+        } else if (parentElement instanceof AFromModuleImports) {
             List<Object> all = new ArrayList<Object>();
 
             for (List<PImport> iterable_element : ((AFromModuleImports) parentElement).getSignatures()) {
@@ -218,23 +264,12 @@ public class OutlineTreeContentProvider {
                 try {
                     def.hashCode();
 
-//                    if (def instanceof AClassInvariantDefinition)
-//                    {
-//
-//                    }
-
                     if (def instanceof AExplicitFunctionDefinition) {
                         if (def.getName().getName().startsWith("pre_") || def.getName().getName().startsWith("post_")) {
                             fInput.remove(i);
                             i--;
                         }
                     }
-
-                    // if (def instanceof InheritedDefinition)
-                    // {
-                    // fInput.remove(i);
-                    // i--;
-                    // }
 
                 } catch (NullPointerException e) {
                     fInput.remove(i);
@@ -247,5 +282,27 @@ public class OutlineTreeContentProvider {
         }
 
         return fInput;
+    }
+
+    public boolean hasChildren(Object element) {
+        if (element instanceof SClassDefinition) {
+            return ((SClassDefinition) element).getDefinitions().size() > 0;
+        } else if (element instanceof AModuleModules) {
+            return ((AModuleModules) element).getDefs().size() > 0;
+        } else if (element instanceof AModuleImports) {
+            return ((AModuleImports) element).getImports().size() > 0;
+        } else if (element instanceof AFromModuleImports) {
+            return ((AFromModuleImports) element).getSignatures().size() > 0;
+        } else if (element instanceof ImportsContainer) {
+            return ((ImportsContainer) element).getImports().getImports().size() > 0;
+        } else if (element instanceof ATypeDefinition) {
+            ATypeDefinition typeDef = (ATypeDefinition) element;
+            SInvariantType type = typeDef.getInvType();
+            if (type instanceof ARecordInvariantType) {
+                return ((ARecordInvariantType) type).getFields().size() > 0;
+            }
+        }
+
+        return false;
     }
 }
