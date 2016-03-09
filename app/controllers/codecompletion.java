@@ -1,5 +1,6 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.StatusCode;
 import core.codecompletion.assistant.ContentAssistProcessor;
@@ -11,7 +12,6 @@ import core.vfs.commons_vfs2.CommonsVFS;
 import org.overture.interpreter.util.ExitStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import play.libs.Json;
 import play.mvc.Result;
 
 import java.util.List;
@@ -55,6 +55,6 @@ public class codecompletion extends Application {
         ProposalToJsonMapper mapper = new ProposalToJsonMapper();
         List<ObjectNode> proposalsAsJson = mapper.toJson(proposals, document);
 
-        return ok(Json.newArray().addAll(proposalsAsJson));
+        return ok(new ObjectMapper().createArrayNode().addAll(proposalsAsJson));
     }
 }

@@ -1,5 +1,6 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.StatusCode;
 import core.outline.OutlineTreeContentProvider;
@@ -8,7 +9,6 @@ import core.vfs.commons_vfs2.CommonsVFS;
 import core.wrappers.ModelWrapper;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.util.modules.ModuleList;
-import play.libs.Json;
 import play.mvc.Result;
 
 import java.util.List;
@@ -27,6 +27,6 @@ public class outline extends Application {
         List<Object> list = outlineProvider.getContent();
         List<ObjectNode> jsonList = outlineProvider.toJSON(list, file.getName());
 
-        return ok(Json.newArray().addAll(jsonList));
+        return ok(new ObjectMapper().createArrayNode().addAll(jsonList));
     }
 }

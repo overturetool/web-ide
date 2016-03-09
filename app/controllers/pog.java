@@ -1,5 +1,6 @@
 package controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.StatusCode;
 import core.mappers.PogMapper;
@@ -8,7 +9,6 @@ import core.vfs.commons_vfs2.CommonsVFS;
 import core.wrappers.ModelWrapper;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.pog.pub.IProofObligationList;
-import play.libs.Json;
 import play.mvc.Result;
 
 import java.util.List;
@@ -31,6 +31,6 @@ public class pog extends Application {
         PogMapper pogMapper = new PogMapper(pog);
         List<ObjectNode> jsonList = pogMapper.toJson();
 
-        return ok(Json.newArray().addAll(jsonList));
+        return ok(new ObjectMapper().createArrayNode().addAll(jsonList));
     }
 }

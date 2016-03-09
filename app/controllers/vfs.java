@@ -1,12 +1,12 @@
 package controllers;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.StatusCode;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import org.apache.commons.vfs2.FileObject;
-import play.libs.Json;
 import play.mvc.Http;
 import play.mvc.Result;
 
@@ -42,7 +42,7 @@ public class vfs extends Application {
         IVFS<FileObject> vfs = new CommonsVFS(account, path);
         List<ObjectNode> fileObjects = vfs.readdirAsJSONTree(depthInt);
 
-        return ok(Json.newArray().addAll(fileObjects));
+        return ok(new ObjectMapper().createArrayNode().addAll(fileObjects));
     }
 
     public Result writeFile(String account, String path) {

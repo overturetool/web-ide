@@ -1,11 +1,11 @@
 package core.lint;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.utilities.PathHelper;
 import org.overture.parser.messages.VDMMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import play.libs.Json;
 
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
@@ -37,7 +37,8 @@ public class LintMapper {
     }
 
     private <T extends VDMMessage> ObjectNode mapObject(T object) {
-        ObjectNode node = Json.newObject();
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode node = mapper.createObjectNode();
 
         node.put("number", object.number);
         node.put("message", object.message);
@@ -50,7 +51,7 @@ public class LintMapper {
         int endPos = object.location.getEndPos();
         long hits = object.location.getHits();
 
-        ObjectNode locationNode = Json.newObject();
+        ObjectNode locationNode = mapper.createObjectNode();
         locationNode.put("executable", object.location.getExecutable());
         locationNode.put("file", PathHelper.RemoveBase(object.location.getFile().getPath()));
         locationNode.put("module", object.location.getModule());
