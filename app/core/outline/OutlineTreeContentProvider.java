@@ -40,8 +40,8 @@ public class OutlineTreeContentProvider {
                     continue;
             }
 
-            /*
             // TODO : could replace the if-statements below
+            /*
             if (node instanceof PDefinition) {
                 PDefinition pdef = (PDefinition) node;
 
@@ -52,6 +52,29 @@ public class OutlineTreeContentProvider {
                 json.put("type", type);
                 json.putPOJO("location", mapLocation(location));
                 jsonList.add(json);
+            } else if (node instanceof ImportsContainer) {
+                ImportsContainer importsContainer = (ImportsContainer) node;
+                AModuleModules modules = (AModuleModules) importsContainer.getImports().parent();
+                ILexIdentifierToken identifierToken = modules.getName();
+
+                boolean isInModule = Objects.equals(identifierToken.getLocation().getFile().getName(), target);
+                if (!isInModule)
+                    continue;
+
+                List<PDefinition> importDefs = importsContainer.getImportDefs();
+                for (PDefinition pdef : importDefs) {
+                    PDefinition def = ((AImportedDefinition) pdef).getDef();
+
+                    ObjectNode importNode = mapper.createObjectNode();
+                    String name = pdef.getName().toString();
+                    String type = def.getType().toString();
+                    location = pdef.getLocation();
+
+                    importNode.put("name", name);
+                    importNode.put("type", type);
+                    importNode.putPOJO("location", mapLocation(location));
+                    jsonList.add(importNode);
+                }
             }
             */
 
