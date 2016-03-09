@@ -12,7 +12,9 @@ import core.utilities.HttpUtils;
 import core.utilities.ServerUtils;
 import core.utilities.StringContentParser;
 import core.vfs.IVFS;
+import core.vfs.commons_vfs2.CommonsVFS;
 import core.vfs.commons_vfs2.CommonsVFSUnsafe;
+import org.apache.commons.vfs2.FileObject;
 import play.mvc.Result;
 
 import java.io.File;
@@ -110,8 +112,8 @@ public class importProject extends Application {
     }
 
     public Result listFromLocalRepository() {
-        File[] repository = new File(Paths.get(ServerConfigurations.basePath, ServerConfigurations.projectSamples, "VDMSL").toString())
-                .listFiles((dir, name) -> !name.startsWith("."));
+        IVFS<FileObject> vfs = new CommonsVFS(ServerConfigurations.projectSamples, "VDMSL");
+        File[] repository = vfs.getIOFile().listFiles((dir, name) -> !name.startsWith("."));
 
         ArrayNode arrayNode = new ObjectMapper().createArrayNode();
 
