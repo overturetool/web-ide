@@ -7,6 +7,7 @@ import core.utilities.PathHelper;
 import org.overture.ast.definitions.*;
 import org.overture.ast.intf.lex.ILexIdentifierToken;
 import org.overture.ast.intf.lex.ILexLocation;
+import org.overture.ast.intf.lex.ILexNameToken;
 import org.overture.ast.modules.AFromModuleImports;
 import org.overture.ast.modules.AModuleImports;
 import org.overture.ast.modules.AModuleModules;
@@ -188,7 +189,8 @@ public class OutlineTreeContentProvider {
                     PDefinition def = ((AImportedDefinition) pdef).getDef();
 
                     ObjectNode importNode = mapper.createObjectNode();
-                    String name = pdef.getName().toString();
+                    ILexNameToken pdefName = pdef.getName();
+                    String name = pdefName != null ? pdefName.toString() : "";
                     String type = def.getType().toString();
                     location = pdef.getLocation();
 
