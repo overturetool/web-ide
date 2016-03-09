@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.utilities.PathHelper;
 import org.overture.ast.definitions.*;
+import org.overture.ast.intf.lex.ILexIdentifierToken;
 import org.overture.ast.intf.lex.ILexLocation;
 import org.overture.ast.modules.AFromModuleImports;
 import org.overture.ast.modules.AModuleImports;
@@ -17,10 +18,7 @@ import org.overture.ast.types.SInvariantType;
 import org.overture.ast.util.modules.ModuleList;
 import org.overture.typechecker.assistant.TypeCheckerAssistantFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class OutlineTreeContentProvider {
     private ModuleList ast;
@@ -35,10 +33,34 @@ public class OutlineTreeContentProvider {
         for (Object node : objectList) {
             ObjectMapper mapper = new ObjectMapper();
             ObjectNode json = mapper.createObjectNode();
-            ILexLocation location = null;
+            ILexLocation location;
+
+            if (node instanceof PDefinition) {
+                if (!((PDefinition)node).getLocation().getFile().getName().equals(target))
+                    continue;
+            }
+
+            /*
+            // TODO : could replace the if-statements below
+            if (node instanceof PDefinition) {
+                PDefinition pdef = (PDefinition) node;
+
+                String name = pdef.getName().toString();
+                String type = pdef.getType().toString();
+                location = pdef.getLocation();
+                json.put("name", name);
+                json.put("type", type);
+                json.putPOJO("location", mapLocation(location));
+                jsonList.add(json);
+            }
+            */
 
             if (node instanceof ATypeDefinition) {
                 ATypeDefinition definition = (ATypeDefinition) node;
+                location = definition.getName().getLocation();
+
+                if (!location.getFile().getName().equals(target))
+                    continue;
 
                 String name = definition.getName().getName();
                 String module = definition.getName().getModule();
@@ -54,10 +76,14 @@ public class OutlineTreeContentProvider {
                 json.put("name", name);
                 json.put("module", module);
                 json.put("type", type);
-
-                location = definition.getName().getLocation();
+                json.putPOJO("location", mapLocation(location));
+                jsonList.add(json);
             } else if (node instanceof ALocalDefinition) {
                 ALocalDefinition definition = (ALocalDefinition) node;
+                location = definition.getName().getLocation();
+
+                if (!location.getFile().getName().equals(target))
+                    continue;
 
                 String name = definition.getName().toString();
                 String type = definition.getType().toString();
@@ -72,10 +98,14 @@ public class OutlineTreeContentProvider {
                 json.put("name", name);
                 json.put("type", type);
                 json.put("expression", expression);
-
-                location = definition.getName().getLocation();
+                json.putPOJO("location", mapLocation(location));
+                jsonList.add(json);
             } else if (node instanceof AExplicitFunctionDefinition) {
                 AExplicitFunctionDefinition definition = (AExplicitFunctionDefinition) node;
+                location = definition.getName().getLocation();
+
+                if (!location.getFile().getName().equals(target))
+                    continue;
 
                 String name = definition.getName().toString();
                 String type = definition.getType().toString();
@@ -83,9 +113,8 @@ public class OutlineTreeContentProvider {
                 LinkedList<PType> params = definition.getType().getParameters();
                 ArrayNode resolvedParam = mapper.createArrayNode();
 
-                for (PType param : params) {
+                for (PType param : params)
                     resolvedParam.add(param.toString());
-                }
 
                 PType expectedResult = definition.getExpectedResult();
                 PType actualResult = definition.getActualResult();
@@ -95,10 +124,14 @@ public class OutlineTreeContentProvider {
                 json.set("parameters", resolvedParam);
                 json.put("expectedResult",  expectedResult != null ? expectedResult.toString() : "");
                 json.put("actualResult", actualResult != null ? actualResult.toString() : "");
-
-                location = definition.getName().getLocation();
+                json.putPOJO("location", mapLocation(location));
+                jsonList.add(json);
             } else if (node instanceof AExplicitOperationDefinition) {
                 AExplicitOperationDefinition definition = (AExplicitOperationDefinition) node;
+                location = definition.getName().getLocation();
+
+                if (!location.getFile().getName().equals(target))
+                    continue;
 
                 String name = definition.getName().toString();
                 String type = definition.getType().toString();
@@ -106,9 +139,8 @@ public class OutlineTreeContentProvider {
                 LinkedList<PDefinition> params = definition.getParamDefinitions();
                 ArrayNode resolvedParam = mapper.createArrayNode();
 
-                for (PDefinition param : params) {
+                for (PDefinition param : params)
                     resolvedParam.add(param.toString());
-                }
 
                 PType actualResult = definition.getActualResult();
 
@@ -117,66 +149,32 @@ public class OutlineTreeContentProvider {
                 json.set("parameters", resolvedParam);
                 json.put("expectedResult", "");
                 json.put("actualResult", actualResult != null ? actualResult.toString() : "");
-
-                location = definition.getName().getLocation();
-            } /* else if (node instanceof ImportsContainer) {
+                json.putPOJO("location", mapLocation(location));
+                jsonList.add(json);
+            } else if (node instanceof ImportsContainer) {
                 ImportsContainer importsContainer = (ImportsContainer) node;
                 AModuleModules modules = (AModuleModules) importsContainer.getImports().parent();
                 ILexIdentifierToken identifierToken = modules.getName();
+
                 boolean isInModule = Objects.equals(identifierToken.getLocation().getFile().getName(), target);
                 if (!isInModule)
                     continue;
 
                 List<PDefinition> importDefs = importsContainer.getImportDefs();
-//                List<Object> importDefsObjects = new ArrayList<>();
                 for (PDefinition pdef : importDefs) {
-                    Object def = ((AImportedDefinition) pdef).getDef();
-                    AImportedDefinition pdef1 = (AImportedDefinition) pdef;
+                    PDefinition def = ((AImportedDefinition) pdef).getDef();
 
+                    ObjectNode importNode = mapper.createObjectNode();
                     String name = pdef.getName().toString();
-                    String type = pdef.getType().toString();
-                    location = pdef1.getLocation();
+                    String type = def.getType().toString();
+                    location = pdef.getLocation();
 
-//                    Class<? extends PDefinition> classDefinition = pdef1.getDef().getClass();
-//                    Object cast = classDefinition.cast(pdef);
-//                    importDefsObjects.add(classDefinition.cast(pdef));
+                    importNode.put("name", name);
+                    importNode.put("type", type);
+                    importNode.putPOJO("location", mapLocation(location));
+                    jsonList.add(importNode);
                 }
-
-//                List<ObjectNode> objectNodes = toJSON(importDefsObjects, target);
-//                if (!objectList.isEmpty()) {
-//                    json.put("name", "imports");
-//                    json.putPOJO("imports", objectNodes);
-//                }
-            }*/
-
-            if (location != null) {
-                if (!location.getFile().getName().equals(target))
-                    continue;
-
-                int startLine = location.getStartLine();
-                int endLine = location.getEndLine();
-                int startOffset = location.getStartOffset();
-                int endOffset = location.getEndOffset();
-                int startPos = location.getStartPos();
-                int endPos = location.getEndPos();
-
-                ObjectNode locationNode = mapper.createObjectNode();
-
-                locationNode.put("executable", location.getExecutable());
-                locationNode.put("file", PathHelper.RemoveBase(location.getFile().getPath()));
-                locationNode.put("module", location.getModule());
-                locationNode.put("startLine", startLine);
-                locationNode.put("endLine", endLine);
-                locationNode.put("startOffset", startOffset);
-                locationNode.put("endOffset", endOffset);
-                locationNode.put("startPos", startPos);
-                locationNode.put("endPos", endPos);
-
-                json.putPOJO("location", locationNode);
             }
-
-            if (json.hasNonNull("name"))
-                jsonList.add(json);
         }
 
         return jsonList;
@@ -244,6 +242,51 @@ public class OutlineTreeContentProvider {
         return null;
     }
 
+    public boolean hasChildren(Object element) {
+        if (element instanceof SClassDefinition) {
+            return ((SClassDefinition) element).getDefinitions().size() > 0;
+        } else if (element instanceof AModuleModules) {
+            return ((AModuleModules) element).getDefs().size() > 0;
+        } else if (element instanceof AModuleImports) {
+            return ((AModuleImports) element).getImports().size() > 0;
+        } else if (element instanceof AFromModuleImports) {
+            return ((AFromModuleImports) element).getSignatures().size() > 0;
+        } else if (element instanceof ImportsContainer) {
+            return ((ImportsContainer) element).getImports().getImports().size() > 0;
+        } else if (element instanceof ATypeDefinition) {
+            ATypeDefinition typeDef = (ATypeDefinition) element;
+            SInvariantType type = typeDef.getInvType();
+            if (type instanceof ARecordInvariantType) {
+                return ((ARecordInvariantType) type).getFields().size() > 0;
+            }
+        }
+
+        return false;
+    }
+
+    private ObjectNode mapLocation(ILexLocation location) {
+        int startLine = location.getStartLine();
+        int endLine = location.getEndLine();
+        int startOffset = location.getStartOffset();
+        int endOffset = location.getEndOffset();
+        int startPos = location.getStartPos();
+        int endPos = location.getEndPos();
+
+        ObjectNode locationNode = new ObjectMapper().createObjectNode();
+
+        locationNode.put("executable", location.getExecutable());
+        locationNode.put("file", PathHelper.RemoveBase(location.getFile().getPath()));
+        locationNode.put("module", location.getModule());
+        locationNode.put("startLine", startLine);
+        locationNode.put("endLine", endLine);
+        locationNode.put("startOffset", startOffset);
+        locationNode.put("endOffset", endOffset);
+        locationNode.put("startPos", startPos);
+        locationNode.put("endPos", endPos);
+
+        return locationNode;
+    }
+
     private void filterSLModule(List<Object> all) {
         for (int i = 0; i < all.size(); i++) {
             if (all.get(i) instanceof ALocalDefinition) {
@@ -282,27 +325,5 @@ public class OutlineTreeContentProvider {
         }
 
         return fInput;
-    }
-
-    public boolean hasChildren(Object element) {
-        if (element instanceof SClassDefinition) {
-            return ((SClassDefinition) element).getDefinitions().size() > 0;
-        } else if (element instanceof AModuleModules) {
-            return ((AModuleModules) element).getDefs().size() > 0;
-        } else if (element instanceof AModuleImports) {
-            return ((AModuleImports) element).getImports().size() > 0;
-        } else if (element instanceof AFromModuleImports) {
-            return ((AFromModuleImports) element).getSignatures().size() > 0;
-        } else if (element instanceof ImportsContainer) {
-            return ((ImportsContainer) element).getImports().getImports().size() > 0;
-        } else if (element instanceof ATypeDefinition) {
-            ATypeDefinition typeDef = (ATypeDefinition) element;
-            SInvariantType type = typeDef.getInvType();
-            if (type instanceof ARecordInvariantType) {
-                return ((ARecordInvariantType) type).getFields().size() > 0;
-            }
-        }
-
-        return false;
     }
 }
