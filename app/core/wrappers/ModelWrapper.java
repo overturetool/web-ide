@@ -15,7 +15,8 @@ import org.overture.interpreter.runtime.ModuleInterpreter;
 import org.overture.interpreter.util.ExitStatus;
 import org.overture.pog.obligation.ProofObligationList;
 import org.overture.pog.pub.IProofObligationList;
-import play.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 public class ModelWrapper {
     private ModuleInterpreter interpreter;
     private static final Object lock = new Object();
+    private final Logger logger = LoggerFactory.getLogger(ModelWrapper.class);
 
     public ModelWrapper(IVFS<FileObject> file) {
         synchronized (lock) {
@@ -105,7 +107,7 @@ public class ModelWrapper {
             try {
                 typeCheckStatus = vdmsl.typeCheck();
             } catch (ConcurrentModificationException e) {
-                Logger.error(e.getMessage(), e);
+                logger.error(e.getMessage(), e);
                 typeCheckStatus = ExitStatus.EXIT_ERRORS;
             }
 
@@ -116,7 +118,7 @@ public class ModelWrapper {
                     this.interpreter.init(null);
                     return true;
                 } catch (Exception e) {
-                    Logger.error(e.getMessage(), e);
+                    logger.error(e.getMessage(), e);
                 }
             }
         }

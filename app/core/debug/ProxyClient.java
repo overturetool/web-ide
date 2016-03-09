@@ -1,6 +1,7 @@
 package core.debug;
 
-import play.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,6 +16,7 @@ public class ProxyClient extends Thread {
     private BufferedReader in;
     private PrintWriter out;
     private final Object lock = new Object();
+    private final Logger logger = LoggerFactory.getLogger(ProxyClient.class);
 
     public ProxyClient(final ServerSocket server) {
         this.server = server;
@@ -23,11 +25,11 @@ public class ProxyClient extends Thread {
     @Override
     public void run() {
         try {
-            Logger.debug("Ready to connect on port " + server.getLocalPort());
+            logger.debug("Ready to connect on port " + server.getLocalPort());
             client = server.accept();
-            Logger.debug("Connection accepted on port " + client.getLocalPort());
+            logger.debug("Connection accepted on port " + client.getLocalPort());
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.info(e.getMessage(), e);
             return;
         }
 
@@ -35,8 +37,7 @@ public class ProxyClient extends Thread {
             in = new BufferedReader(new InputStreamReader(client.getInputStream()));
             out = new PrintWriter(client.getOutputStream(), true);
         } catch (IOException e) {
-            Logger.info("Exception thrown while initiating input and output streams");
-            e.printStackTrace();
+            logger.info(e.getMessage(), e);
         }
 
         synchronized (lock) {
@@ -54,7 +55,7 @@ public class ProxyClient extends Thread {
                 return null;
             }
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            logger.info(e.getMessage(), e);
         }
 
         return "An error occurred while reading from DBGPReader";
@@ -71,8 +72,7 @@ public class ProxyClient extends Thread {
                 return in.readLine();
             }
         } catch (IOException | InterruptedException e) {
-            Logger.info("Exception thrown while sending");
-            e.printStackTrace();
+            logger.info(e.getMessage(), e);
         }
 
         return "An error occurred while communicating with DBGPReader";
@@ -89,8 +89,7 @@ public class ProxyClient extends Thread {
             if (server != null)
                 server.close();
         } catch (IOException e) {
-            Logger.info("Exception thrown while disconnecting");
-            e.printStackTrace();
+            logger.info(e.getMessage(), e);
         }
     }
 

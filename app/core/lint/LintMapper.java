@@ -3,7 +3,8 @@ package core.lint;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.utilities.PathHelper;
 import org.overture.parser.messages.VDMMessage;
-import play.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import play.libs.Json;
 
 import java.util.ArrayList;
@@ -11,6 +12,8 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 
 public class LintMapper {
+    private final Logger logger = LoggerFactory.getLogger(LintMapper.class);
+
     public <T extends VDMMessage> List<ObjectNode> messagesToJson(List<T> messages) {
         return messagesToJson(messages, null);
     }
@@ -27,7 +30,7 @@ public class LintMapper {
                     jsonList.add(mapObject(message));
             }
         } catch (ConcurrentModificationException e) {
-            Logger.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
         }
 
         return jsonList;

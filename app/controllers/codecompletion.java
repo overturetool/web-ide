@@ -9,12 +9,16 @@ import core.codecompletion.resources.ICompletionProposal;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import org.overture.interpreter.util.ExitStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import play.libs.Json;
 import play.mvc.Result;
 
 import java.util.List;
 
 public class codecompletion extends Application {
+    private final Logger logger = LoggerFactory.getLogger(codecompletion.class);
+
     public Result proposal(String account, String path) {
         String lineStr = request().getQueryString("line");
         String columnStr = request().getQueryString("column");
@@ -28,7 +32,7 @@ public class codecompletion extends Application {
             line = Integer.parseInt(lineStr);
             column = Integer.parseInt(columnStr);
         } catch (NumberFormatException e) {
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             return status(StatusCode.UnprocessableEntity, "Invalid query argument format");
         }
 

@@ -9,7 +9,8 @@ import core.auth.SessionStore;
 import core.utilities.ServerUtils;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
-import play.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import play.mvc.Controller;
 import play.mvc.Result;
 
@@ -17,6 +18,8 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 
 public class auth extends Controller {
+    private final Logger logger = LoggerFactory.getLogger(auth.class);
+
     public Result verify(String tokenId) {
         String accessToken = ServerUtils.extractAccessToken(request());
         GoogleAuthentication googleAuthentication = new GoogleAuthentication();
@@ -28,10 +31,10 @@ public class auth extends Controller {
         try {
             idToken = googleAuthentication.verify(tokenId);
         } catch (GeneralSecurityException | IOException e) {
-            Logger.debug(e.getMessage());
+            logger.error(e.getMessage(), e);
             return status(StatusCode.UnprocessableEntity, e.toString());
         } catch (IllegalArgumentException e) {
-            Logger.debug(e.getMessage());
+            logger.error(e.getMessage(), e);
             return status(StatusCode.UnprocessableEntity, e.toString());
         }
 

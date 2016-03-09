@@ -8,7 +8,8 @@ import core.vfs.IVFS;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.vfs2.*;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
-import play.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.validation.constraints.NotNull;
 import java.io.*;
@@ -28,6 +29,7 @@ public class CommonsVFS implements IVFS<FileObject> {
     private String account;
     private String relativePath;
     private FileObject baseFileObject;
+    private final Logger logger = LoggerFactory.getLogger(CommonsVFS.class);
 
     protected CommonsVFS(String path) {
         StandardFileSystemManager fsManager = new StandardFileSystemManager();
@@ -41,7 +43,7 @@ public class CommonsVFS implements IVFS<FileObject> {
             this.baseFileObject = fsManager.getBaseFile();
             this.vfs = fsManager.createVirtualFileSystem(this.baseFileObject);
         } catch (FileSystemException e) {
-            Logger.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -58,7 +60,7 @@ public class CommonsVFS implements IVFS<FileObject> {
             this.baseFileObject = fsManager.getBaseFile();
             this.vfs = fsManager.createVirtualFileSystem(this.baseFileObject);
         } catch (FileSystemException e) {
-            Logger.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
         }
     }
 
@@ -244,7 +246,7 @@ public class CommonsVFS implements IVFS<FileObject> {
                 nodes.add(node);
             }
         } catch (IOException e) {
-            Logger.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             e.printStackTrace();
         }
 
@@ -502,7 +504,7 @@ public class CommonsVFS implements IVFS<FileObject> {
         try {
             return new CommonsVFS(this.account, getFileObject().getParent().getName().getPath());
         } catch (FileSystemException e) {
-            Logger.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             e.printStackTrace();
         }
         return null;
@@ -513,7 +515,7 @@ public class CommonsVFS implements IVFS<FileObject> {
         try {
             return getFileObject().getContent().getLastModifiedTime();
         } catch (FileSystemException e) {
-            Logger.error(e.getMessage(), e);
+            logger.error(e.getMessage(), e);
             e.printStackTrace();
         }
         return -1;
@@ -586,7 +588,7 @@ public class CommonsVFS implements IVFS<FileObject> {
             FileObject[] files = getFileObject().findFiles(new FileSelector() {
                 @Override
                 public boolean includeFile(FileSelectInfo fileInfo) throws Exception {
-                    Logger.debug(fileInfo.getFile().getName().getBaseName());
+                    logger.debug(fileInfo.getFile().getName().getBaseName());
                     return fileInfo.getFile().getName().getBaseName().equals(filename);
                 }
 

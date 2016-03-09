@@ -1,7 +1,8 @@
 package core.debug;
 
 import core.vfs.IVFS;
-import play.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -18,6 +19,8 @@ public class ProxyServer {
     private String type;
     private String defaultName;
     private String absolutePath;
+
+    private final Logger logger = LoggerFactory.getLogger(ProxyServer.class);
 
     public ProxyServer(int port, String entry, String defaultName, IVFS file) {
         this(port, entry, file.getExtension(), defaultName, file.getAbsoluteUrl());
@@ -46,8 +49,7 @@ public class ProxyServer {
             server.setSoTimeout(timeout);
             //server.setReuseAddress(true);
         } catch (IOException e) {
-            Logger.info("Could not listen on port " + port);
-            e.printStackTrace();
+            logger.error(e.getMessage(), e);
             return null;
         }
 

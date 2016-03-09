@@ -1,11 +1,11 @@
 package core.mappers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.utilities.PathHelper;
 import org.overture.ast.intf.lex.ILexLocation;
 import org.overture.pog.pub.IProofObligation;
 import org.overture.pog.pub.IProofObligationList;
-import play.libs.Json;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +26,8 @@ public class PogMapper {
     }
 
     private ObjectNode mapObject(IProofObligation po) {
-        ObjectNode node = Json.newObject();
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode node = mapper.createObjectNode();
 
         node.put("rootNode", po.getNode().toString());
         node.put("name", po.getName());
@@ -38,7 +39,7 @@ public class PogMapper {
         node.put("number", po.getNumber());
         node.put("generator", po.getUniqueName());
 
-        ObjectNode locationNode = Json.newObject();
+        ObjectNode locationNode = mapper.createObjectNode();
         ILexLocation location = po.getLocation();
 
         locationNode.put("executable", location.getExecutable());
