@@ -28,7 +28,8 @@ public class evaluate extends Application {
             return status(StatusCode.UnprocessableEntity, "File not found");
 
         ModelWrapper modelWrapper = new ModelWrapper(file);
+        String result = modelWrapper.evaluate(inputDecoded);
 
-        return ok(modelWrapper.evaluate(inputDecoded));
+        return ok(result != null ? result : "?");
     }
 }

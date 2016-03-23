@@ -186,12 +186,14 @@ public class OutlineTreeContentProvider {
 
                 List<PDefinition> importDefs = importsContainer.getImportDefs();
                 for (PDefinition pdef : importDefs) {
-                    PDefinition def = ((AImportedDefinition) pdef).getDef();
+                    //PDefinition def = ((AImportedDefinition) pdef).getDef();
 
                     ObjectNode importNode = mapper.createObjectNode();
                     ILexNameToken pdefName = pdef.getName();
+                    PType ptype = pdef.getType();
+
                     String name = pdefName != null ? pdefName.toString() : "";
-                    String type = def.getType().toString();
+                    String type = ptype != null ? ptype.toString() : "";
                     location = pdef.getLocation();
 
                     importNode.put("name", name);

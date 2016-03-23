@@ -23,7 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
 
-public class importProject extends Application {
+public class samples extends Application {
     public Result getFromGithubApi(String projectUrl) {
         String accessToken = ServerUtils.extractAccessToken(request());
         String userId = SessionStore.getInstance().get(accessToken);

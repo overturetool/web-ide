@@ -9,16 +9,22 @@ import core.vfs.commons_vfs2.CommonsVFS;
 import core.wrappers.ModelWrapper;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.lex.Dialect;
+import org.overture.ast.messages.InternalException;
 import org.overture.ast.modules.AModuleModules;
 import org.overture.config.Settings;
+import org.overture.interpreter.VDMJ;
 import org.overture.parser.util.ParserUtil;
 import org.overture.typechecker.util.TypeCheckerUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import play.mvc.Result;
 
 import java.io.File;
 import java.util.List;
 
 public class lint extends Application {
+    private final Logger logger = LoggerFactory.getLogger(lint.class);
+
     public Result file(String account, String path) {
         IVFS<FileObject> file = new CommonsVFS(account, path);
 
@@ -37,10 +43,18 @@ public class lint extends Application {
         Settings.dialect = Dialect.VDM_SL; // Necessary for the parser and typechecker
         //Settings.release = Release.CLASSIC;
         List<File> files = file.readdirAsIOFile();
-        String charset = "UTF-8";
+        String charset = VDMJ.filecharset;
 
-        ParserUtil.ParserResult<List<AModuleModules>> parserResults = ParserUtil.parseSl(files, charset);
-        TypeCheckerUtil.TypeCheckResult<List<AModuleModules>> typeCheckerResults = TypeCheckerUtil.typeCheckSl(files, charset);
+        ParserUtil.ParserResult<List<AModuleModules>> parserResults;
+        TypeCheckerUtil.TypeCheckResult<List<AModuleModules>> typeCheckerResults;
+        try {
+            parserResults = ParserUtil.parseSl(files, charset);
+            typeCheckerResults = TypeCheckerUtil.typeCheckSl(files, charset);
+        } catch (InternalException e) {
+            logger.error(e.getMessage(), e);
+            parserResults = ParserUtil.parseSl("");
+            typeCheckerResults = TypeCheckerUtil.typeCheckSl("");
+        }
 
         LintMapper mapper = new LintMapper();
         ObjectNode messages = new ObjectMapper().createObjectNode();

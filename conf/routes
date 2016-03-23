@@ -39,8 +39,8 @@ GET     /verify                                                             cont
 GET     /signout                                                            controllers.auth.signout()
 
 # project examples
-GET     /import                                                             controllers.importProject.getFromLocalRepository(projectName)
-GET     /list                                                               controllers.importProject.listFromLocalRepository()
+GET     /import                                                             controllers.samples.getFromLocalRepository(projectName)
+GET     /list                                                               controllers.samples.listFromLocalRepository()
 
 # Web Socket management
 GET     /debug/:account/$path<[a-zA-Z0-9/_-]+.*>                            controllers.debug.ws(account, path)

@@ -10,6 +10,7 @@ import org.overture.ast.lex.Dialect;
 import org.overture.ast.util.modules.ModuleList;
 import org.overture.config.Release;
 import org.overture.config.Settings;
+import org.overture.interpreter.VDMJ;
 import org.overture.interpreter.VDMSL;
 import org.overture.interpreter.runtime.ModuleInterpreter;
 import org.overture.interpreter.util.ExitStatus;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.List;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class ModelWrapper {
@@ -94,6 +96,7 @@ public class ModelWrapper {
         VDMSL vdmsl = new VDMSL();
         vdmsl.setWarnings(false);
         vdmsl.setQuiet(true);
+        vdmsl.setCharset(VDMJ.filecharset);
 
         ExitStatus parseStatus = vdmsl.parse(files);
         if (parseStatus == ExitStatus.EXIT_OK) {
@@ -115,7 +118,7 @@ public class ModelWrapper {
                 try {
                     this.interpreter = vdmsl.getInterpreter();
                     this.interpreter.defaultModule.setTypeChecked(true);
-                    this.interpreter.init(null);
+                    this.interpreter.init(null); // Needed for the evaluation part of the REPL
                     return true;
                 } catch (Exception e) {
                     logger.error(e.getMessage(), e);
@@ -125,6 +128,25 @@ public class ModelWrapper {
 
         init();
         return false;
+    }
+
+    private void protectedCall() {
+        ExecutorService executor = Executors.newCachedThreadPool();
+        Callable<Object> task = new Callable<Object>() {
+            public Object call() {
+                interpreter.init(null);
+                return null;
+            }
+        };
+        Future<Object> future = executor.submit(task);
+        try {
+            Object result = future.get(5, TimeUnit.SECONDS);
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            logger.error(e.getMessage(), e);
+        } finally {
+            future.cancel(true);
+            executor.shutdownNow();
+        }
     }
 
     private synchronized boolean init() {
