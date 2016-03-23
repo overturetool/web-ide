@@ -25,9 +25,9 @@ public class ProxyClient extends Thread {
     @Override
     public void run() {
         try {
-            logger.info("Ready to connect on port " + server.getLocalPort());
+            //logger.info("Ready to connect on port " + server.getLocalPort());
             client = server.accept();
-            logger.info("Connection accepted on port " + client.getLocalPort());
+            //logger.info("Connection accepted on port " + client.getLocalPort());
         } catch (IOException e) {
             logger.info(e.getMessage(), e);
             return;

@@ -20,12 +20,7 @@ public class pog extends Application {
         if (!file.exists())
             return status(StatusCode.UnprocessableEntity, "File not found");
 
-        ModelWrapper modelWrapper;
-
-        if (file.isDirectory())
-            modelWrapper = new ModelWrapper(file.readdirAsIOFile());
-        else
-            modelWrapper = new ModelWrapper(file);
+        ModelWrapper modelWrapper = new ModelWrapper(file);
 
         IProofObligationList pog = modelWrapper.getPog();
         PogMapper pogMapper = new PogMapper(pog);

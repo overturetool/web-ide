@@ -31,13 +31,7 @@ public class lint extends Application {
         if (!file.exists())
             return status(StatusCode.UnprocessableEntity, "File not found");
 
-        ModelWrapper modelWrapper;
-
-        if (file.isDirectory())
-            modelWrapper = new ModelWrapper(file.readdirAsIOFile());
-        else
-            modelWrapper = new ModelWrapper(file);
-
+        ModelWrapper modelWrapper = new ModelWrapper(file);
         String targetModuleName = modelWrapper.getTargetModuleName();
 
         Settings.dialect = Dialect.VDM_SL; // Necessary for the parser and typechecker

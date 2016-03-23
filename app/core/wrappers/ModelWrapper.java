@@ -47,11 +47,6 @@ public class ModelWrapper {
         }
     }
 
-    @Deprecated
-    public ModelWrapper(List<File> files) {
-        init(files, Release.DEFAULT);
-    }
-
     public ModelWrapper() {
         init();
     }
