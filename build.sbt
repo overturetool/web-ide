@@ -14,6 +14,7 @@ libraryDependencies ++= Seq(
   "org.apache.commons" % "commons-vfs2" % "2.0",
   "commons-io" % "commons-io" % "2.4",
   "org.overturetool.core" % "interpreter" % "2.3.2",
+  "org.overturetool.core.codegen" % "javagen" % "2.3.4",
 
   "com.google.oauth-client" % "google-oauth-client" % "1.21.0",
   "com.google.api-client" % "google-api-client" % "1.21.0",

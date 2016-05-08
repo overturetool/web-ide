@@ -48,6 +48,9 @@ public class DBGPReaderInitializer {
             args.add(defaultName);
         }
 
+//        args.add("-coverage");
+//        args.add("file:/Users/kaspersaaby/Documents/projects/iha/playframework/overture_webide/workspace/111425625270532893915/BOMSL/generated");
+
         args.add("-w"); // turn off warnings
 
         args.add(file);
