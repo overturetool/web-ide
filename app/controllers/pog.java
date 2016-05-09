@@ -8,6 +8,8 @@ import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import core.wrappers.ModelWrapper;
 import org.apache.commons.vfs2.FileObject;
+import org.overture.ast.analysis.AnalysisException;
+import org.overture.pog.obligation.ProofObligationList;
 import org.overture.pog.pub.IProofObligationList;
 import play.mvc.Result;
 
@@ -22,7 +24,12 @@ public class pog extends Application {
 
         ModelWrapper modelWrapper = new ModelWrapper(file);
 
-        IProofObligationList pog = modelWrapper.getPog();
+        IProofObligationList pog = new ProofObligationList();
+        try {
+            pog = modelWrapper.getPog();
+        } catch (AnalysisException e) {
+            e.printStackTrace();
+        }
         PogMapper pogMapper = new PogMapper(pog);
         List<ObjectNode> jsonList = pogMapper.toJson();
 

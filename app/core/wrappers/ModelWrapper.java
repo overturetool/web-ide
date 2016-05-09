@@ -7,15 +7,16 @@ import core.vfs.IVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
 import org.overture.ast.lex.Dialect;
+import org.overture.ast.modules.AModuleModules;
 import org.overture.ast.util.modules.ModuleList;
 import org.overture.config.Release;
 import org.overture.config.Settings;
 import org.overture.interpreter.VDMJ;
-import org.overture.interpreter.VDMSL;
 import org.overture.interpreter.runtime.ModuleInterpreter;
-import org.overture.interpreter.util.ExitStatus;
+import org.overture.parser.util.ParserUtil.ParserResult;
 import org.overture.pog.obligation.ProofObligationList;
 import org.overture.pog.pub.IProofObligationList;
+import org.overture.typechecker.util.TypeCheckerUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +25,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -35,15 +35,13 @@ public class ModelWrapper {
     private final Logger logger = LoggerFactory.getLogger(ModelWrapper.class);
 
     public ModelWrapper(IVFS<FileObject> file) {
-        synchronized (lock) {
-            if (ResourceCache.getInstance().existsAndNotModified(file)) {
-                this.interpreter = ResourceCache.getInstance().get(file).getInterpreter();
-            } else {
-                List<File> filteredFiles = preprocessFiles(file);
-                Release release = getRelease(file);
-                if (init(filteredFiles, release))
-                    ResourceCache.getInstance().add(file, this.interpreter);
-            }
+        if (ResourceCache.getInstance().existsAndNotModified(file)) {
+            this.interpreter = ResourceCache.getInstance().get(file).getInterpreter();
+        } else {
+            List<File> filteredFiles = preprocessFiles(file);
+            Release release = getRelease(file);
+            if (init(filteredFiles, release))
+                ResourceCache.getInstance().add(file, this.interpreter);
         }
     }
 
@@ -67,13 +65,9 @@ public class ModelWrapper {
             return new ModuleList();
     }
 
-    public IProofObligationList getPog() {
-        try {
-            if (this.interpreter != null && this.interpreter.defaultModule.getTypeChecked())
-                return this.interpreter.getProofObligations();
-        } catch (AnalysisException e) {
-            e.printStackTrace();
-        }
+    public synchronized IProofObligationList getPog() throws AnalysisException {
+        if (this.interpreter != null && this.interpreter.defaultModule.getTypeChecked())
+            return this.interpreter.getProofObligations();
         return new ProofObligationList();
     }
 
@@ -84,45 +78,35 @@ public class ModelWrapper {
         return filteredFiles;
     }
 
-    private synchronized boolean init(List<File> files, Release release) {
+    private boolean init(List<File> files, Release release) {
         Settings.dialect = Dialect.VDM_SL;
-        Settings.release = release;
+        ParserResult<List<AModuleModules>> parserResult;
+        List<AModuleModules> result;
+        ModuleList ast;
 
-        VDMSL vdmsl = new VDMSL();
-        vdmsl.setWarnings(false);
-        vdmsl.setQuiet(true);
-        vdmsl.setCharset(VDMJ.filecharset);
-
-        ExitStatus parseStatus = vdmsl.parse(files);
-        if (parseStatus == ExitStatus.EXIT_OK) {
-            try {
-                this.interpreter = vdmsl.getInterpreter();
-            } catch (Exception e) {
-                //e.printStackTrace();
-            }
-
-            ExitStatus typeCheckStatus;
-            try {
-                typeCheckStatus = vdmsl.typeCheck();
-            } catch (ConcurrentModificationException e) {
-                logger.error(e.getMessage(), e);
-                typeCheckStatus = ExitStatus.EXIT_ERRORS;
-            }
-
-            if (typeCheckStatus == ExitStatus.EXIT_OK) {
-                try {
-                    this.interpreter = vdmsl.getInterpreter();
-                    this.interpreter.defaultModule.setTypeChecked(true);
-                    this.interpreter.init(null); // Needed for the evaluation part of the REPL
-                    return true;
-                } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
-                }
-            }
+        synchronized (lock) {
+            Settings.release = release;
+            parserResult = TypeCheckerUtil.typeCheckSl(files, VDMJ.filecharset).parserResult;
+            result = parserResult.result;
         }
 
-        init();
-        return false;
+        if (result == null) {
+            ast = new ModuleList();
+        } else {
+            ast = new ModuleList(result);
+            ast.combineDefaults();
+        }
+
+        try {
+            this.interpreter = new ModuleInterpreter(ast);
+            if (parserResult.errors.isEmpty()) {
+                this.interpreter.defaultModule.setTypeChecked(true);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            return false;
+        }
+        return true;
     }
 
     private void protectedCall() {
