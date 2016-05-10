@@ -30,9 +30,9 @@ public class OutlineTreeContentProvider {
 
     public List<ObjectNode> toJSON(List<Object> objectList, String target) {
         List<ObjectNode> jsonList = new ArrayList<>();
+        ObjectMapper mapper = new ObjectMapper();
 
         for (Object node : objectList) {
-            ObjectMapper mapper = new ObjectMapper();
             ObjectNode json = mapper.createObjectNode();
             ILexLocation location;
 

@@ -1,6 +1,7 @@
 package core.utilities;
 
 import core.vfs.IVFS;
+import org.apache.commons.vfs2.FileSystemException;
 import org.overture.interpreter.runtime.ModuleInterpreter;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,7 +24,11 @@ public class ResourceCache {
     }
 
     public void add(IVFS file, ModuleInterpreter interpreter) {
-        map.put(file.projectId(), new Resource(file.lastModifiedTime(), interpreter));
+        try {
+            map.put(file.projectId(), new Resource(file.getProjectRoot().getContent().getLastModifiedTime(), interpreter));
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+        }
     }
 
     public Resource get(IVFS file) {
@@ -36,10 +41,14 @@ public class ResourceCache {
         if (resource == null)
             return false;
 
-        if (resource.getLastModified() == file.lastModifiedTime())
-            return true;
-        else
-            map.remove(file.projectId());
+        try {
+            if (resource.getLastModified() == file.getProjectRoot().getContent().getLastModifiedTime())
+                return true;
+            else
+                map.remove(file.projectId());
+        } catch (FileSystemException e) {
+            e.printStackTrace();
+        }
 
         return false;
     }

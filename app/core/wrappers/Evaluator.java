@@ -1,6 +1,5 @@
 package core.wrappers;
 
-import org.overture.ast.definitions.AValueDefinition;
 import org.overture.ast.definitions.PDefinition;
 import org.overture.ast.expressions.PExp;
 import org.overture.ast.factory.AstFactory;
@@ -108,9 +107,11 @@ public class Evaluator {
 
         this.interpreter.initialContext.put(name, value);
 
-        AValueDefinition def = AstFactory.newAValueDefinition(
-                AstFactory.newAIdentifierPattern(name),
-                NameScope.GLOBAL, type, pExp);
+//        AValueDefinition def = AstFactory.newAValueDefinition(
+//                AstFactory.newAIdentifierPattern(name),
+//                NameScope.GLOBAL, type, pExp);
+
+        PDefinition def = AstFactory.newAUntypedDefinition(location, name, NameScope.GLOBAL);
 
         LinkedList<PDefinition> defs = this.interpreter.defaultModule.getDefs();
         defs.add(def);
