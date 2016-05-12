@@ -30,7 +30,7 @@ public class LintMapper {
                     jsonList.add(mapObject(message));
             }
         } catch (ConcurrentModificationException e) {
-            logger.error(e.getMessage(), e);
+            //logger.error(e.getMessage(), e);
         }
 
         return jsonList;
