@@ -99,11 +99,12 @@ public class ModelWrapper {
 
         try {
             this.interpreter = new ModuleInterpreter(ast);
+            this.interpreter.init(null);
             if (parserResult.errors.isEmpty()) {
                 this.interpreter.defaultModule.setTypeChecked(true);
             }
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            e.printStackTrace();
             return false;
         }
         return true;

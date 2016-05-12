@@ -18,7 +18,7 @@ public class LintMapper {
         return messagesToJson(messages, null);
     }
 
-    public synchronized  <T extends VDMMessage> List<ObjectNode> messagesToJson(List<T> messages, String targetModuleName) {
+    public synchronized <T extends VDMMessage> List<ObjectNode> messagesToJson(List<T> messages, String targetModuleName) {
         List<ObjectNode> jsonList = new ArrayList<>();
 
         try {
@@ -30,7 +30,7 @@ public class LintMapper {
                     jsonList.add(mapObject(message));
             }
         } catch (ConcurrentModificationException e) {
-            logger.error(e.getMessage(), e);
+            e.printStackTrace();
         }
 
         return jsonList;
