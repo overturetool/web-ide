@@ -115,7 +115,7 @@ public class ModelWrapper {
                     this.interpreter.init(null); // Needed for the evaluation part of the REPL
                     return true;
                 } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
+                    //e.printStackTrace();
                 }
             }
         }
@@ -151,7 +151,7 @@ public class ModelWrapper {
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             return false;
         }
     }
