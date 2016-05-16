@@ -17,4 +17,8 @@
 #    --ulimit nofile=1024 \
 #    --name overture_api_$1 kdsaaby/overture_api
 
+# upload local files to s3 - aws s3 sync <src> <des>
+# run: aws configure to setup authentication details.
+# aws s3 sync /app/target/universal/stage/workspace/ s3://overturebucket
+
 docker run -d -p 9000:9000 --name overture_api overture/api
