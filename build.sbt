@@ -17,7 +17,6 @@ libraryDependencies ++= Seq(
 
   "com.google.oauth-client" % "google-oauth-client" % "1.21.0",
   "com.google.api-client" % "google-api-client" % "1.21.0",
-//  "com.diffplug.durian" % "durian" % "3.4.0",
 
   "com.jayway.restassured" % "rest-assured" % "2.8.0" % "test",
   "com.jayway.restassured" % "scala-support" % "2.8.0" % "test",
