@@ -31,7 +31,7 @@ GET     /codecompletion/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>   cont
 GET     /pog/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>              controllers.pog.generatePog(account, path)
 
 # evaluate
-GET     /eval/:input                                                        controllers.evaluate.expression(input)
+# GET     /eval/:input                                                        controllers.evaluate.expression(input)
 GET     /eval/:input/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>      controllers.evaluate.project(input, account, path)
 
 # authorization

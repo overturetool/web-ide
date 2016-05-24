@@ -22,7 +22,7 @@ public class pog extends Application {
         if (!file.exists())
             return status(StatusCode.UnprocessableEntity, "File not found");
 
-        ModelWrapper modelWrapper = new ModelWrapper(file);
+        ModelWrapper modelWrapper = new ModelWrapper(file).init();
 
         IProofObligationList pog = new ProofObligationList();
         try {
@@ -30,6 +30,7 @@ public class pog extends Application {
         } catch (AnalysisException e) {
             e.printStackTrace();
         }
+
         PogMapper pogMapper = new PogMapper(pog);
         List<ObjectNode> jsonList = pogMapper.toJson();
 

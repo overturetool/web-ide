@@ -2,7 +2,6 @@ package core.wrappers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import core.utilities.ResourceCache;
 import core.vfs.IVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
@@ -13,10 +12,13 @@ import org.overture.config.Release;
 import org.overture.config.Settings;
 import org.overture.interpreter.VDMJ;
 import org.overture.interpreter.runtime.ModuleInterpreter;
+import org.overture.parser.messages.VDMError;
+import org.overture.parser.messages.VDMWarning;
 import org.overture.parser.util.ParserUtil.ParserResult;
 import org.overture.pog.obligation.ProofObligationList;
 import org.overture.pog.pub.IProofObligationList;
 import org.overture.typechecker.util.TypeCheckerUtil;
+import org.overture.typechecker.util.TypeCheckerUtil.TypeCheckResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,25 +33,24 @@ import java.util.stream.Collectors;
 
 public class ModelWrapper {
     private ModuleInterpreter interpreter;
+
+    private List<File> files;
+    private Release release;
+
     private static final Object lock = new Object();
     private final Logger logger = LoggerFactory.getLogger(ModelWrapper.class);
 
+    public List<VDMWarning> parserWarnings;
+    public List<VDMWarning> typeCheckerWarnings;
+    public List<VDMError> parserErrors;
+    public List<VDMError> typeCheckerErrors;
+
     public ModelWrapper(IVFS<FileObject> file) {
-        if (ResourceCache.getInstance().existsAndNotModified(file)) {
-            this.interpreter = ResourceCache.getInstance().get(file).getInterpreter();
-        } else {
-            List<File> filteredFiles = preprocessFiles(file);
-            Release release = getRelease(file);
-            if (init(filteredFiles, release))
-                ResourceCache.getInstance().add(file, this.interpreter);
-        }
+        this.files = preprocessFiles(file);
+        this.release = getRelease(file);
     }
 
-    public ModelWrapper() {
-        init();
-    }
-
-    public synchronized String evaluate(String input) {
+    public String evaluate(String input) {
         Evaluator evaluator = new Evaluator(this.interpreter);
         return evaluator.evaluate(input);
     }
@@ -65,29 +66,36 @@ public class ModelWrapper {
             return new ModuleList();
     }
 
-    public synchronized IProofObligationList getPog() throws AnalysisException {
+    public IProofObligationList getPog() throws AnalysisException {
         if (this.interpreter != null && this.interpreter.defaultModule.getTypeChecked())
             return this.interpreter.getProofObligations();
         return new ProofObligationList();
     }
 
-    private synchronized List<File> preprocessFiles(IVFS<FileObject> file) {
+    private List<File> preprocessFiles(IVFS<FileObject> file) {
         List<File> files = file.getProjectAsIOFile();
         List<File> filteredFiles = Collections.synchronizedList(new ArrayList<>());
         filteredFiles.addAll(files.stream().filter(f -> f.getName().endsWith(".vdmsl")).collect(Collectors.toList()));
         return filteredFiles;
     }
 
-    private boolean init(List<File> files, Release release) {
-        Settings.dialect = Dialect.VDM_SL;
-        ParserResult<List<AModuleModules>> parserResult;
+    public ModelWrapper init() {
         List<AModuleModules> result;
         ModuleList ast;
 
         synchronized (lock) {
-            Settings.release = release;
-            parserResult = TypeCheckerUtil.typeCheckSl(files, VDMJ.filecharset).parserResult;
-            result = parserResult.result;
+            Settings.dialect = Dialect.VDM_SL;
+            Settings.release = this.release;
+
+            TypeCheckResult<List<AModuleModules>> typeCheckerResult = TypeCheckerUtil.typeCheckSl(this.files, VDMJ.filecharset);
+            ParserResult<List<AModuleModules>> parserResult = typeCheckerResult.parserResult;
+
+            this.parserWarnings = parserResult.warnings;
+            this.parserErrors = parserResult.errors;
+            this.typeCheckerWarnings = typeCheckerResult.warnings;
+            this.typeCheckerErrors = typeCheckerResult.errors;
+
+            result = typeCheckerResult.result != null ? typeCheckerResult.result : parserResult.result;
         }
 
         if (result == null) {
@@ -99,15 +107,13 @@ public class ModelWrapper {
 
         try {
             this.interpreter = new ModuleInterpreter(ast);
-            this.interpreter.init(null);
-            if (parserResult.errors.isEmpty()) {
+            if (this.parserErrors.isEmpty() && this.typeCheckerErrors.isEmpty()) {
                 this.interpreter.defaultModule.setTypeChecked(true);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
         }
-        return true;
+        return this;
     }
 
     private void protectedCall() {
@@ -126,19 +132,6 @@ public class ModelWrapper {
         } finally {
             future.cancel(true);
             executor.shutdownNow();
-        }
-    }
-
-    private synchronized boolean init() {
-        try {
-            if (this.interpreter == null) {
-                this.interpreter = new ModuleInterpreter(new ModuleList());
-                this.interpreter.init(null);
-            }
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
         }
     }
 

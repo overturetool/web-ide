@@ -20,7 +20,7 @@ public class outline extends Application {
         if (!file.exists())
             return status(StatusCode.UnprocessableEntity, "File not found");
 
-        ModelWrapper modelWrapper = new ModelWrapper(file);
+        ModelWrapper modelWrapper = new ModelWrapper(file).init();
 
         ModuleList ast = modelWrapper.getAst();
         OutlineTreeContentProvider outlineProvider = new OutlineTreeContentProvider(ast);
