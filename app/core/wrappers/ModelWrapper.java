@@ -19,8 +19,6 @@ import org.overture.pog.obligation.ProofObligationList;
 import org.overture.pog.pub.IProofObligationList;
 import org.overture.typechecker.util.TypeCheckerUtil;
 import org.overture.typechecker.util.TypeCheckerUtil.TypeCheckResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +26,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class ModelWrapper {
@@ -38,7 +35,6 @@ public class ModelWrapper {
     private Release release;
 
     private static final Object lock = new Object();
-    private final Logger logger = LoggerFactory.getLogger(ModelWrapper.class);
 
     public List<VDMWarning> parserWarnings;
     public List<VDMWarning> typeCheckerWarnings;
@@ -116,26 +112,7 @@ public class ModelWrapper {
         return this;
     }
 
-    private void protectedCall() {
-        ExecutorService executor = Executors.newCachedThreadPool();
-        Callable<Object> task = new Callable<Object>() {
-            public Object call() {
-                interpreter.init(null);
-                return null;
-            }
-        };
-        Future<Object> future = executor.submit(task);
-        try {
-            Object result = future.get(5, TimeUnit.SECONDS);
-        } catch (TimeoutException | InterruptedException | ExecutionException e) {
-            logger.error(e.getMessage(), e);
-        } finally {
-            future.cancel(true);
-            executor.shutdownNow();
-        }
-    }
-
-    private synchronized Release getRelease(IVFS<FileObject> file) {
+    private Release getRelease(IVFS<FileObject> file) {
         try {
             String attribute = "release";
             FileObject projectRoot = file.getProjectRoot();
