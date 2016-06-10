@@ -18,7 +18,7 @@ public class LintMapper {
         return messagesToJson(messages, null);
     }
 
-    public synchronized <T extends VDMMessage> List<ObjectNode> messagesToJson(List<T> messages, String targetModuleName) {
+    public <T extends VDMMessage> List<ObjectNode> messagesToJson(List<T> messages, String targetModuleName) {
         List<ObjectNode> jsonList = new ArrayList<>();
 
         try {
