@@ -2,14 +2,12 @@ package core.wrappers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import core.utilities.ResourceCache;
+import com.google.gson.Gson;
 import core.vfs.IVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
-import org.overture.ast.lex.Dialect;
 import org.overture.ast.util.modules.ModuleList;
 import org.overture.config.Release;
-import org.overture.config.Settings;
 import org.overture.interpreter.VDMJ;
 import org.overture.interpreter.VDMSL;
 import org.overture.interpreter.runtime.ModuleInterpreter;
@@ -22,6 +20,9 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -35,7 +36,10 @@ public class ModelWrapper {
     private final Logger logger = LoggerFactory.getLogger(ModelWrapper.class);
 
     public ModelWrapper(IVFS<FileObject> file) {
-        synchronized (lock) {
+        List<File> filteredFiles = preprocessFiles(file);
+        Release release = getRelease(file);
+        init(filteredFiles, release);
+        /*synchronized (lock) {
             if (ResourceCache.getInstance().existsAndNotModified(file)) {
                 this.interpreter = ResourceCache.getInstance().get(file).getInterpreter();
             } else {
@@ -44,14 +48,14 @@ public class ModelWrapper {
                 if (init(filteredFiles, release))
                     ResourceCache.getInstance().add(file, this.interpreter);
             }
-        }
+        }*/
     }
 
     public ModelWrapper() {
         init();
     }
 
-    public synchronized String evaluate(String input) {
+    public String evaluate(String input) {
         Evaluator evaluator = new Evaluator(this.interpreter);
         return evaluator.evaluate(input);
     }
@@ -77,18 +81,38 @@ public class ModelWrapper {
         return new ProofObligationList();
     }
 
-    private synchronized List<File> preprocessFiles(IVFS<FileObject> file) {
+    private List<File> preprocessFiles(IVFS<FileObject> file) {
         List<File> files = file.getProjectAsIOFile();
         List<File> filteredFiles = Collections.synchronizedList(new ArrayList<>());
         filteredFiles.addAll(files.stream().filter(f -> f.getName().endsWith(".vdmsl")).collect(Collectors.toList()));
         return filteredFiles;
     }
 
-    private synchronized boolean init(List<File> files, Release release) {
-        Settings.dialect = Dialect.VDM_SL;
-        Settings.release = release;
+    private boolean init(List<File> files, Release release) {
+//        Settings.dialect = Dialect.VDM_SL;
+//        Settings.release = release;
 
-        VDMSL vdmsl = new VDMSL();
+        VDMSL vdmsl;
+
+        try {
+            Gson gson = new Gson();
+            URLClassLoader clsLoader = new URLClassLoader(new URL[] {new URL("file:/Users/kaspersaaby/Documents/projects/iha/playframework/overture_webide/lib/Overture-2.3.2.jar")});
+            //URLClassLoader clsLoader = URLClassLoader.newInstance(new URL[] {new URL("file:/Users/kaspersaaby/Documents/projects/iha/playframework/overture_webide/lib/Overture-2.3.6.jar")});
+
+            Class cls = clsLoader.loadClass("org.overture.interpreter.VDMSL");
+            Object newInstance = cls.newInstance();
+            vdmsl = gson.fromJson(gson.toJson(newInstance), VDMSL.class);
+
+            clsLoader.close();
+
+        } catch (MalformedURLException | ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+            e.printStackTrace();
+            return false;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+
         vdmsl.setWarnings(false);
         vdmsl.setQuiet(true);
         vdmsl.setCharset(VDMJ.filecharset);
@@ -112,7 +136,7 @@ public class ModelWrapper {
                 try {
                     this.interpreter = vdmsl.getInterpreter();
                     this.interpreter.defaultModule.setTypeChecked(true);
-                    this.interpreter.init(null); // Needed for the evaluation part of the REPL
+                    //this.interpreter.init(null); // Needed for the evaluation part of the REPL
                     return true;
                 } catch (Exception e) {
                     //e.printStackTrace();
@@ -147,7 +171,7 @@ public class ModelWrapper {
         try {
             if (this.interpreter == null) {
                 this.interpreter = new ModuleInterpreter(new ModuleList());
-                this.interpreter.init(null);
+                //this.interpreter.init(null);
             }
             return true;
         } catch (Exception e) {
