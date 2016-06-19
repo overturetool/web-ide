@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.overturetool.webide.processor</groupId>
+    <artifactId>OvertureProcessor</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.overturetool</groupId>
+            <artifactId>root</artifactId>
+            <version>2.3.6</version>
+            <!--<directory>${project.basedir}/lib/Overture-2.3.6.jar</directory>-->
+            <!--<systemPath>${basedir}/WebContent/WEB-INF/lib/YOUR_LIB.jar</systemPath>-->
+            <!--<scope>system</scope>-->
+            <!--<systemPath>${basedir}/lib/Overture-2.3.6.jar</systemPath>-->
+        </dependency>
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>project</id>
+            <name>project.local</name>
+            <url>file:${basedir}/lib/Overture-2.3.6.jar</url>
+        </repository>
+    </repositories>
+
+</project>

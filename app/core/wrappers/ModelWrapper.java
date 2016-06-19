@@ -2,6 +2,8 @@ package core.wrappers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import core.rmi.RmiProcessor;
+import core.rmi.RmiRuntimeClient;
 import core.vfs.IVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
@@ -78,6 +80,15 @@ public class ModelWrapper {
     public ModelWrapper init() {
         List<AModuleModules> result;
         ModuleList ast;
+
+        try {
+            RmiProcessor.getInstance().startRmiServer();
+            Thread.sleep(5000);
+            RmiRuntimeClient runtimeClient = new RmiRuntimeClient();
+//            runtimeClient.getMessage();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         synchronized (lock) {
             Settings.dialect = Dialect.VDM_SL;
