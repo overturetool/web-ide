@@ -1,65 +1,87 @@
 package org.overture.webide.processor;
 
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
+import org.overture.ast.lex.Dialect;
+import org.overture.ast.modules.AModuleModules;
+import org.overture.config.Settings;
+import org.overture.interpreter.VDMJ;
+import org.overture.parser.util.ParserUtil.ParserResult;
+import org.overture.typechecker.util.TypeCheckerUtil;
+import org.overture.typechecker.util.TypeCheckerUtil.TypeCheckResult;
 
-public class RmiRuntimeServer implements IRmiRuntimeServer {
+import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
-    public RmiRuntimeServer() throws RemoteException {
-        super();
-    }
+public class RmiRuntimeServer implements IRuntimeSocketServer {
 
-    public String getMessage(String content) throws RemoteException {
+    public String getMessage(String content) {
         return content + " 1";
     }
 
     public static void main(String args[]) {
-        //System.setProperty("java.rmi.server.hostname", "192.168.99.100");
-        //System.setProperty("java.security.policy", "java.security.AllPermission");
+        int port = Integer.parseInt(args[0]);
+        ServerSocket serverSocket = null;
 
-        if (System.getSecurityManager() == null) {
-            System.setSecurityManager(new SecurityManager());
-        }
+        try {
+            serverSocket = new ServerSocket(port);
+            //serverSocket.setSoTimeout(5000);
+            //System.out.println("ready");
+            Socket client = serverSocket.accept();
 
-        try{
-            String name = "RmiRuntimeServer";
-            RmiRuntimeServer runtimeServer = new RmiRuntimeServer();
-            RmiRuntimeServer stub = (RmiRuntimeServer) UnicastRemoteObject.exportObject(runtimeServer, 0);
+            ObjectOutputStream out = new ObjectOutputStream(client.getOutputStream());
+            ObjectInputStream in = new ObjectInputStream(client.getInputStream());
 
-            Registry registry = LocateRegistry.getRegistry();
-            registry.rebind(name, stub);
+            Object inputObject = null;
 
-            System.out.println("RmiRuntimeServer bound");
-        }
-        catch(Exception e){
-            System.out.println("RmiRuntimeServer exception:");
-            e.printStackTrace();
+            try {
+                inputObject = in.readObject();
+            } catch (EOFException e) {
+                // done
+            }
+
+            List<File> fileList = new ArrayList<File>();
+
+            if (inputObject != null) {
+                if (inputObject instanceof List<?>) {
+                    List<?> inputList = (List<?>) inputObject;
+                    if (!inputList.isEmpty() && inputList.get(0) instanceof File) {
+                        for (Object object : inputList) {
+                            fileList.add((File) object);
+                        }
+                    }
+                }
+            }
+
+            Settings.dialect = Dialect.VDM_SL;
+            //Settings.release = this.release;
+
+            TypeCheckResult<List<AModuleModules>> typeCheckerResult = TypeCheckerUtil.typeCheckSl(fileList, VDMJ.filecharset);
+            ParserResult<List<AModuleModules>> parserResult = typeCheckerResult.parserResult;
+
+            ProcessingResult result = new ProcessingResult();
+
+            result.setParserWarnings(parserResult.warnings);
+            result.setParserErrors(parserResult.errors);
+            result.setTypeCheckerWarnings(typeCheckerResult.warnings);
+            result.setTypeCheckerErrors(typeCheckerResult.errors);
+            result.modules = typeCheckerResult.result != null ? typeCheckerResult.result : parserResult.result;
+
+            out.writeObject(result);
+            out.flush();
+
+            out.close();
+            in.close();
+            client.close();
+            serverSocket.close();
+        } catch (Exception e) {
+            try {
+                if (serverSocket != null)
+                    serverSocket.close();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
         }
     }
-
-//    public static void main(String args[]) throws Exception {
-////        if (System.getSecurityManager() == null)
-////            System.setSecurityManager(new RMISecurityManager());
-//
-//        System.out.println("RMI server started");
-//
-//        try {
-//            //special exception handler for registry creation
-//            LocateRegistry.createRegistry(1099);
-//            System.out.println("java RMI registry created.");
-//        } catch (RemoteException e) {
-//            //do nothing, error means registry already exists
-//            System.out.println("java RMI registry already exists.");
-//        }
-//
-//        //Instantiate RmiServer
-//
-//        RmiRuntimeServer obj = new RmiRuntimeServer();
-//
-//        // Bind this object instance to the name "RmiServer"
-//        Naming.rebind("//localhost/RmiRuntimeServer", obj);
-//        System.out.println("PeerServer bound in registry");
-//    }
 }

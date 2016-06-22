@@ -29,11 +29,11 @@ public class ModelProcessor {
 
         ProcessingResult result = new ProcessingResult();
 
-        result.parserWarnings = parserResult.warnings;
-        result.parserErrors = parserResult.errors;
-        result.typeCheckerWarnings = typeCheckerResult.warnings;
-        result.typeCheckerErrors = typeCheckerResult.errors;
-        result.modules = typeCheckerResult.result != null ? typeCheckerResult.result : parserResult.result;
+//        result.parserWarnings = parserResult.warnings;
+//        result.parserErrors = parserResult.errors;
+//        result.typeCheckerWarnings = typeCheckerResult.warnings;
+//        result.typeCheckerErrors = typeCheckerResult.errors;
+//        result.modules = typeCheckerResult.result != null ? typeCheckerResult.result : parserResult.result;
 
         return result;
     }

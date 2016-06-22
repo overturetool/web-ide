@@ -2,29 +2,25 @@ package core.wrappers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import core.rmi.RmiProcessor;
-import core.rmi.RmiRuntimeClient;
+import core.rmi.RuntimeProcess;
+import core.rmi.RuntimeSocketClient;
 import core.vfs.IVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
-import org.overture.ast.lex.Dialect;
 import org.overture.ast.modules.AModuleModules;
 import org.overture.ast.util.modules.ModuleList;
 import org.overture.config.Release;
-import org.overture.config.Settings;
-import org.overture.interpreter.VDMJ;
 import org.overture.interpreter.runtime.ModuleInterpreter;
 import org.overture.parser.messages.VDMError;
 import org.overture.parser.messages.VDMWarning;
-import org.overture.parser.util.ParserUtil.ParserResult;
 import org.overture.pog.obligation.ProofObligationList;
 import org.overture.pog.pub.IProofObligationList;
-import org.overture.typechecker.util.TypeCheckerUtil;
-import org.overture.typechecker.util.TypeCheckerUtil.TypeCheckResult;
+import org.overture.webide.processor.ProcessingResult;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -79,30 +75,28 @@ public class ModelWrapper {
 
     public ModelWrapper init() {
         List<AModuleModules> result;
+        ProcessingResult res = new ProcessingResult();
         ModuleList ast;
 
-        try {
-            RmiProcessor.getInstance().startRmiServer();
-            Thread.sleep(5000);
-            RmiRuntimeClient runtimeClient = new RmiRuntimeClient();
-//            runtimeClient.getMessage();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         synchronized (lock) {
-            Settings.dialect = Dialect.VDM_SL;
-            Settings.release = this.release;
+            try {
+                int port = findAvailablePort(49152, 65535);
+                RuntimeProcess runtimeProcess = new RuntimeProcess();
+                runtimeProcess.init(port);
 
-            TypeCheckResult<List<AModuleModules>> typeCheckerResult = TypeCheckerUtil.typeCheckSl(this.files, VDMJ.filecharset);
-            ParserResult<List<AModuleModules>> parserResult = typeCheckerResult.parserResult;
+                Thread.sleep(1000);
 
-            this.parserWarnings = parserResult.warnings;
-            this.parserErrors = parserResult.errors;
-            this.typeCheckerWarnings = typeCheckerResult.warnings;
-            this.typeCheckerErrors = typeCheckerResult.errors;
+                RuntimeSocketClient runtimeClient = new RuntimeSocketClient(port);
+                res = runtimeClient.send(this.files);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
-            result = typeCheckerResult.result != null ? typeCheckerResult.result : parserResult.result;
+            this.parserWarnings = res.getParserWarnings();
+            this.parserErrors = res.getParserErrors();
+            this.typeCheckerWarnings = res.getTypeCheckerWarnings();
+            this.typeCheckerErrors = res.getTypeCheckerErrors();
+            result = res.modules;
         }
 
         if (result == null) {
@@ -145,5 +139,20 @@ public class ModelWrapper {
             //e.printStackTrace();
         }
         return Release.DEFAULT;
+    }
+
+    private int findAvailablePort(int minPort, int maxPort) throws IOException {
+        for (int i = minPort; i < maxPort; i++) {
+            try {
+                ServerSocket serverSocket = new ServerSocket(i);
+                serverSocket.close();
+                return i;
+            } catch (IOException ex) {
+                // try next port
+            }
+        }
+
+        // if the program gets here, no port in the range was found
+        throw new IOException("no available port found");
     }
 }
