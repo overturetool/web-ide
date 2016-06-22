@@ -14,11 +14,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RmiRuntimeServer implements IRuntimeSocketServer {
-
-    public String getMessage(String content) {
-        return content + " 1";
-    }
+public class RuntimeSocketServer {
 
     public static void main(String args[]) {
         int port = Integer.parseInt(args[0]);
@@ -26,8 +22,9 @@ public class RmiRuntimeServer implements IRuntimeSocketServer {
 
         try {
             serverSocket = new ServerSocket(port);
-            //serverSocket.setSoTimeout(5000);
-            //System.out.println("ready");
+            serverSocket.setSoTimeout(5000);
+
+            System.out.println("ready:" + port);
             Socket client = serverSocket.accept();
 
             ObjectOutputStream out = new ObjectOutputStream(client.getOutputStream());

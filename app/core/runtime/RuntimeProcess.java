@@ -1,4 +1,4 @@
-package core.rmi;
+package core.runtime;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,23 +13,26 @@ public class RuntimeProcess {
         args.add("java");
         args.add("-cp");
         args.add("OvertureProcessor/target/OvertureProcessor-1.0-SNAPSHOT.jar");
-        args.add("org.overture.webide.processor.RmiRuntimeServer");
+        args.add("org.overture.webide.processor.RuntimeSocketServer");
         args.add(port + "");
 
         try {
-            Process start = new ProcessBuilder(args).start();
+            ProcessBuilder builder = new ProcessBuilder(args);
+            builder.redirectErrorStream(true);
+            Process process = builder.start();
 
-            InputStream inputStream = start.getInputStream();
-            InputStream errorStream = start.getErrorStream();
+            InputStream inputStream = process.getInputStream();
+            //InputStream errorStream = process.getErrorStream();
 
-            new ProcessStream(inputStream).start();
-            new ProcessStream(errorStream).start();
+            //new ProcessStream(inputStream).start();
+            //new ProcessStream(errorStream).start();
 
-//            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-//            String status = bufferedReader.readLine();
-//
-//            if (status.equals("ready"))
-//                return true;
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+            String status = bufferedReader.readLine();
+
+            if (status.equals("ready:" + port))
+                return true;
+
         } catch (IOException e) {
             e.printStackTrace();
         }

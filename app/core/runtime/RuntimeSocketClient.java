@@ -1,4 +1,4 @@
-package core.rmi;
+package core.runtime;
 
 import org.overture.webide.processor.ProcessingResult;
 

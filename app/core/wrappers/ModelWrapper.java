@@ -2,8 +2,8 @@ package core.wrappers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import core.rmi.RuntimeProcess;
-import core.rmi.RuntimeSocketClient;
+import core.runtime.RuntimeProcess;
+import core.runtime.RuntimeSocketClient;
 import core.vfs.IVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
@@ -84,7 +84,7 @@ public class ModelWrapper {
                 RuntimeProcess runtimeProcess = new RuntimeProcess();
                 runtimeProcess.init(port);
 
-                Thread.sleep(1000);
+                //Thread.sleep(1000);
 
                 RuntimeSocketClient runtimeClient = new RuntimeSocketClient(port);
                 res = runtimeClient.send(this.files);
