@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import core.runtime.RuntimeProcess;
 import core.runtime.RuntimeSocketClient;
+import core.utilities.SocketUtils;
 import core.vfs.IVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
@@ -32,8 +33,6 @@ public class ModelWrapper {
     private List<File> files;
     private Release release;
 
-    private static final Object lock = new Object();
-
     public List<VDMWarning> parserWarnings;
     public List<VDMWarning> typeCheckerWarnings;
     public List<VDMError> parserErrors;
@@ -41,7 +40,7 @@ public class ModelWrapper {
 
     public ModelWrapper(IVFS<FileObject> file) {
         this.files = preprocessFiles(file);
-        this.release = getRelease(file);
+        //this.release = getRelease(file);
     }
 
     public String evaluate(String input) {
@@ -78,26 +77,26 @@ public class ModelWrapper {
         ProcessingResult res = new ProcessingResult();
         ModuleList ast;
 
-        synchronized (lock) {
-            try {
-                int port = findAvailablePort(49152, 65535);
-                RuntimeProcess runtimeProcess = new RuntimeProcess();
-                runtimeProcess.init(port);
+        try {
+            ServerSocket serverSocket = SocketUtils.findAvailablePort(49152, 65535);
+            int port = serverSocket.getLocalPort();
 
-                //Thread.sleep(1000);
+            RuntimeSocketClient runtimeClient = new RuntimeSocketClient(serverSocket);
+            runtimeClient.start();
 
-                RuntimeSocketClient runtimeClient = new RuntimeSocketClient(port);
-                res = runtimeClient.send(this.files);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            RuntimeProcess runtimeProcess = new RuntimeProcess();
+            runtimeProcess.init(port);
 
-            this.parserWarnings = res.getParserWarnings();
-            this.parserErrors = res.getParserErrors();
-            this.typeCheckerWarnings = res.getTypeCheckerWarnings();
-            this.typeCheckerErrors = res.getTypeCheckerErrors();
-            result = res.modules;
+            res = runtimeClient.process(this.files);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
+        this.parserWarnings = res.getParserWarnings();
+        this.parserErrors = res.getParserErrors();
+        this.typeCheckerWarnings = res.getTypeCheckerWarnings();
+        this.typeCheckerErrors = res.getTypeCheckerErrors();
+        result = res.modules;
 
         if (result == null) {
             ast = new ModuleList();
@@ -139,20 +138,5 @@ public class ModelWrapper {
             //e.printStackTrace();
         }
         return Release.DEFAULT;
-    }
-
-    private int findAvailablePort(int minPort, int maxPort) throws IOException {
-        for (int i = minPort; i < maxPort; i++) {
-            try {
-                ServerSocket serverSocket = new ServerSocket(i);
-                serverSocket.close();
-                return i;
-            } catch (IOException ex) {
-                // try next port
-            }
-        }
-
-        // if the program gets here, no port in the range was found
-        throw new IOException("no available port found");
     }
 }

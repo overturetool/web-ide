@@ -3,21 +3,36 @@ package core.runtime;
 import org.overture.webide.processor.ProcessingResult;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
 
-public class RuntimeSocketClient {
+public class RuntimeSocketClient extends Thread {
     private ObjectOutputStream out;
     private ObjectInputStream in;
+    private ServerSocket serverSocket;
     private Socket socket;
 
-    public RuntimeSocketClient(int port) throws IOException {
-        this.socket = new Socket("localhost", port);
-        this.out = new ObjectOutputStream(this.socket.getOutputStream());
-        this.in = new ObjectInputStream(this.socket.getInputStream());
+    public RuntimeSocketClient(ServerSocket serverSocket) {
+        this.serverSocket = serverSocket;
     }
 
-    public ProcessingResult send(List<File> files) {
+    @Override
+    public synchronized void run() {
+        init();
+    }
+
+    private void init() {
+        try {
+            this.socket = this.serverSocket.accept();
+            this.out = new ObjectOutputStream(this.socket.getOutputStream());
+            this.in = new ObjectInputStream(this.socket.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public synchronized ProcessingResult process(List<File> files) {
         ProcessingResult result = null;
 
         try {
@@ -37,6 +52,7 @@ public class RuntimeSocketClient {
             this.in.close();
             this.out.close();
             this.socket.close();
+            this.serverSocket.close();
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }

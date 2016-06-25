@@ -1,5 +1,6 @@
 package core.debug;
 
+import core.utilities.SocketUtils;
 import core.vfs.IVFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +42,7 @@ public class ProxyServer {
     public synchronized ProxyClient connect() {
         try {
             if (port == -1)
-                server = findAvailablePort(49152, 65535);
+                server = SocketUtils.findAvailablePort(49152, 65535);
             else
                 server = new ServerSocket(port);
 
@@ -59,18 +60,5 @@ public class ProxyServer {
         new DBGPReaderInitializer(type, host, port, key, entry, defaultName, absolutePath).start();
 
         return client;
-    }
-
-    private ServerSocket findAvailablePort(int minPort, int maxPort) throws IOException {
-        for (int i = minPort; i < maxPort; i++) {
-            try {
-                return new ServerSocket(i);
-            } catch (IOException ex) {
-                // try next port
-            }
-        }
-
-        // if the program gets here, no port in the range was found
-        throw new IOException("no available port found");
     }
 }

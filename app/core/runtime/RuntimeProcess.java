@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RuntimeProcess {
-    public boolean init(int port) {
+    public void init(int port) {
         List<String> args = new ArrayList<>();
         args.add("java");
         args.add("-cp");
@@ -22,21 +22,13 @@ public class RuntimeProcess {
             Process process = builder.start();
 
             InputStream inputStream = process.getInputStream();
-            //InputStream errorStream = process.getErrorStream();
+            InputStream errorStream = process.getErrorStream();
 
-            //new ProcessStream(inputStream).start();
-            //new ProcessStream(errorStream).start();
-
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
-            String status = bufferedReader.readLine();
-
-            if (status.equals("ready:" + port))
-                return true;
-
+            new ProcessStream(inputStream).start();
+            new ProcessStream(errorStream).start();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return false;
     }
 
     public class ProcessStream extends Thread {
