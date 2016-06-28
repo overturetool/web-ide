@@ -23,46 +23,52 @@ public class RuntimeSocketServer {
         ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
         ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
-        Object inputObject = null;
+        while (true) {
+            Object inputObject = null;
+            try {
+                inputObject = in.readObject();
+            } catch (EOFException e) {
+                // done
+            }
 
-        try {
-            inputObject = in.readObject();
-        } catch (EOFException e) {
-            // done
-        }
+            List<File> fileList = new ArrayList<File>();
 
-        List<File> fileList = new ArrayList<File>();
-
-        if (inputObject != null) {
-            if (inputObject instanceof List<?>) {
-                List<?> inputList = (List<?>) inputObject;
-                if (!inputList.isEmpty() && inputList.get(0) instanceof File) {
-                    for (Object object : inputList) {
-                        fileList.add((File) object);
+            if (inputObject != null) {
+                if (inputObject instanceof List<?>) {
+                    List<?> inputList = (List<?>) inputObject;
+                    if (!inputList.isEmpty() && inputList.get(0) instanceof File) {
+                        for (Object object : inputList) {
+                            fileList.add((File) object);
+                        }
                     }
+                } else if (inputObject instanceof String) {
+                    //System.out.println(inputObject);
+                    out.writeObject(inputObject);
+                    out.flush();
+                    continue;
                 }
             }
+
+            Settings.dialect = Dialect.VDM_SL;
+            //Settings.release = this.release;
+
+            TypeCheckResult<List<AModuleModules>> typeCheckerResult = TypeCheckerUtil.typeCheckSl(fileList, VDMJ.filecharset);
+            ParserResult<List<AModuleModules>> parserResult = typeCheckerResult.parserResult;
+
+            ProcessingResult result = new ProcessingResult();
+
+            result.setParserWarnings(parserResult.warnings);
+            result.setParserErrors(parserResult.errors);
+            result.setTypeCheckerWarnings(typeCheckerResult.warnings);
+            result.setTypeCheckerErrors(typeCheckerResult.errors);
+            result.modules = typeCheckerResult.result != null ? typeCheckerResult.result : parserResult.result;
+
+            out.writeObject(result);
+            out.flush();
         }
 
-        Settings.dialect = Dialect.VDM_SL;
-        //Settings.release = this.release;
-
-        TypeCheckResult<List<AModuleModules>> typeCheckerResult = TypeCheckerUtil.typeCheckSl(fileList, VDMJ.filecharset);
-        ParserResult<List<AModuleModules>> parserResult = typeCheckerResult.parserResult;
-
-        ProcessingResult result = new ProcessingResult();
-
-        result.setParserWarnings(parserResult.warnings);
-        result.setParserErrors(parserResult.errors);
-        result.setTypeCheckerWarnings(typeCheckerResult.warnings);
-        result.setTypeCheckerErrors(typeCheckerResult.errors);
-        result.modules = typeCheckerResult.result != null ? typeCheckerResult.result : parserResult.result;
-
-        out.writeObject(result);
-        out.flush();
-
-        out.close();
+        /*out.close();
         in.close();
-        socket.close();
+        socket.close();*/
     }
 }

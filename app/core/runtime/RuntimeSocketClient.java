@@ -32,31 +32,47 @@ public class RuntimeSocketClient extends Thread {
         }
     }
 
+    private void writeObject(Object object) throws IOException {
+        this.out.writeObject(object);
+        this.out.flush();
+    }
+
+    private Object readObject() throws IOException, ClassNotFoundException {
+        Object readObject = null;
+        try {
+            readObject = this.in.readObject();
+        } catch (EOFException e) {
+            // done
+        }
+        return readObject;
+    }
+
     public synchronized ProcessingResult process(List<File> files) {
         ProcessingResult result = null;
 
         try {
-            this.out.writeObject(files);
-            this.out.flush();
+            writeObject(files);
+            result = (ProcessingResult) readObject();
 
-            Object readObject = null;
-
-            try {
-                readObject = this.in.readObject();
-            } catch (EOFException e) {
-                // done
-            }
-
-            result = (ProcessingResult) readObject;
-
-            this.in.close();
+            /*this.in.close();
             this.out.close();
             this.socket.close();
-            this.serverSocket.close();
+            this.serverSocket.close();*/
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
 
         return result;
+    }
+
+    public synchronized boolean isProcessAlive() {
+        try {
+            String test = "isProcessAlive?";
+            writeObject(test);
+            return readObject().equals(test);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

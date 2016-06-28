@@ -2,9 +2,7 @@ package core.wrappers;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import core.runtime.RuntimeProcess;
-import core.runtime.RuntimeSocketClient;
-import core.utilities.SocketUtils;
+import core.runtime.RuntimeManager;
 import core.vfs.IVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
@@ -21,7 +19,6 @@ import org.overture.webide.processor.ProcessingResult;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ServerSocket;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -77,7 +74,9 @@ public class ModelWrapper {
         ProcessingResult res = new ProcessingResult();
         ModuleList ast;
 
-        try {
+        res = RuntimeManager.getInstance().process(this.files);
+
+        /*try {
             ServerSocket serverSocket = SocketUtils.findAvailablePort(49152, 65535);
             int port = serverSocket.getLocalPort();
 
@@ -90,7 +89,7 @@ public class ModelWrapper {
             res = runtimeClient.process(this.files);
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
 
         this.parserWarnings = res.getParserWarnings();
         this.parserErrors = res.getParserErrors();
