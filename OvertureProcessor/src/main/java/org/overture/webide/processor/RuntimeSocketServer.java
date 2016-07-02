@@ -10,18 +10,38 @@ import org.overture.typechecker.util.TypeCheckerUtil.TypeCheckResult;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class RuntimeSocketServer {
 
     public static void main(String args[]) throws IOException, ClassNotFoundException {
         int port = Integer.parseInt(args[0]);
 
-        Socket socket = new Socket("localhost", port);
+        final Socket socket = new Socket("localhost", port);
+        final ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+        final ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
-        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-        ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+        final Duration timeout = Duration.ofSeconds(30);
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+
+        Runnable runnable = new Runnable() {
+            public void run() {
+                try {
+                    out.close();
+                    in.close();
+                    socket.close();
+                    System.exit(0);
+                } catch (IOException ignored) {}
+            }
+        };
+
+        executor.schedule(runnable, timeout.toMillis(), TimeUnit.MILLISECONDS);
 
         while (true) {
             Object inputObject = null;
@@ -29,24 +49,26 @@ public class RuntimeSocketServer {
                 inputObject = in.readObject();
             } catch (EOFException e) {
                 // done
+                executor.shutdownNow();
+            } catch (SocketException ignored) {
+                // socket closed
             }
+
+            if (inputObject == null)
+                continue;
 
             List<File> fileList = new ArrayList<File>();
 
-            if (inputObject != null) {
-                if (inputObject instanceof List<?>) {
-                    List<?> inputList = (List<?>) inputObject;
-                    if (!inputList.isEmpty() && inputList.get(0) instanceof File) {
-                        for (Object object : inputList) {
-                            fileList.add((File) object);
-                        }
-                    }
-                } else if (inputObject instanceof String) {
-                    //System.out.println(inputObject);
-                    out.writeObject(inputObject);
-                    out.flush();
-                    continue;
+            if (inputObject instanceof List<?>) {
+                List<?> inputList = (List<?>) inputObject;
+                if (!inputList.isEmpty() && inputList.get(0) instanceof File) {
+                    for (Object object : inputList)
+                        fileList.add((File) object);
                 }
+            } else if (inputObject instanceof String) {
+                out.writeObject(inputObject);
+                out.flush();
+                continue;
             }
 
             Settings.dialect = Dialect.VDM_SL;
@@ -65,10 +87,7 @@ public class RuntimeSocketServer {
 
             out.writeObject(result);
             out.flush();
+            executor.schedule(runnable, timeout.toMillis(), TimeUnit.MILLISECONDS);
         }
-
-        /*out.close();
-        in.close();
-        socket.close();*/
     }
 }

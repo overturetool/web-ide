@@ -2,7 +2,10 @@ package core.runtime;
 
 import org.overture.webide.processor.ProcessingResult;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
@@ -12,6 +15,7 @@ public class RuntimeSocketClient extends Thread {
     private ObjectInputStream in;
     private ServerSocket serverSocket;
     private Socket socket;
+    private Process process;
 
     public RuntimeSocketClient(ServerSocket serverSocket) {
         this.serverSocket = serverSocket;
@@ -32,47 +36,34 @@ public class RuntimeSocketClient extends Thread {
         }
     }
 
-    private void writeObject(Object object) throws IOException {
-        this.out.writeObject(object);
-        this.out.flush();
-    }
-
-    private Object readObject() throws IOException, ClassNotFoundException {
-        Object readObject = null;
-        try {
-            readObject = this.in.readObject();
-        } catch (EOFException e) {
-            // done
-        }
-        return readObject;
-    }
-
     public synchronized ProcessingResult process(List<File> files) {
         ProcessingResult result = null;
-
         try {
-            writeObject(files);
-            result = (ProcessingResult) readObject();
-
-            /*this.in.close();
-            this.out.close();
-            this.socket.close();
-            this.serverSocket.close();*/
-        } catch (IOException | ClassNotFoundException e) {
+            this.out.writeObject(files);
+            this.out.flush();
+            result = (ProcessingResult) this.in.readObject();
+        } catch (IOException | ClassNotFoundException | NullPointerException e) {
             e.printStackTrace();
         }
-
         return result;
     }
 
-    public synchronized boolean isProcessAlive() {
+    public synchronized void close() {
         try {
-            String test = "isProcessAlive?";
-            writeObject(test);
-            return readObject().equals(test);
-        } catch (Exception e) {
+            this.in.close();
+            this.out.close();
+            this.socket.close();
+            this.serverSocket.close();
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        return false;
+    }
+
+    public synchronized boolean isProcessAlive() {
+        return this.process != null && this.process.isAlive();
+    }
+
+    public void setProcess(Process process) {
+        this.process = process;
     }
 }

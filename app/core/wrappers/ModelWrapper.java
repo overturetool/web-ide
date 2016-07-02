@@ -70,32 +70,23 @@ public class ModelWrapper {
     }
 
     public ModelWrapper init() {
-        List<AModuleModules> result;
-        ProcessingResult res = new ProcessingResult();
         ModuleList ast;
+        List<AModuleModules> result = null;
 
-        res = RuntimeManager.getInstance().process(this.files);
+        ProcessingResult res = new RuntimeManager().process(this.files);
 
-        /*try {
-            ServerSocket serverSocket = SocketUtils.findAvailablePort(49152, 65535);
-            int port = serverSocket.getLocalPort();
-
-            RuntimeSocketClient runtimeClient = new RuntimeSocketClient(serverSocket);
-            runtimeClient.start();
-
-            RuntimeProcess runtimeProcess = new RuntimeProcess();
-            runtimeProcess.init(port);
-
-            res = runtimeClient.process(this.files);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
-
-        this.parserWarnings = res.getParserWarnings();
-        this.parserErrors = res.getParserErrors();
-        this.typeCheckerWarnings = res.getTypeCheckerWarnings();
-        this.typeCheckerErrors = res.getTypeCheckerErrors();
-        result = res.modules;
+        if (res != null) {
+            this.parserWarnings = res.getParserWarnings();
+            this.parserErrors = res.getParserErrors();
+            this.typeCheckerWarnings = res.getTypeCheckerWarnings();
+            this.typeCheckerErrors = res.getTypeCheckerErrors();
+            result = res.modules;
+        } else {
+            this.parserWarnings = new ArrayList<>();
+            this.parserErrors = new ArrayList<>();
+            this.typeCheckerWarnings = new ArrayList<>();
+            this.typeCheckerErrors = new ArrayList<>();
+        }
 
         if (result == null) {
             ast = new ModuleList();
@@ -106,9 +97,7 @@ public class ModelWrapper {
 
         try {
             this.interpreter = new ModuleInterpreter(ast);
-            if (this.parserErrors.isEmpty() && this.typeCheckerErrors.isEmpty()) {
-                this.interpreter.defaultModule.setTypeChecked(true);
-            }
+            this.interpreter.defaultModule.setTypeChecked(this.parserErrors.isEmpty() && this.typeCheckerErrors.isEmpty());
         } catch (Exception e) {
             e.printStackTrace();
         }

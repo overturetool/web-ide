@@ -10,37 +10,18 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RuntimeManager {
-    public static RuntimeManager instance;
-    private final int processLimit = 3;
-    private int processCount = 0;
-
-    private Queue<RuntimeSocketClient> processQueue = new ConcurrentLinkedQueue<>();
-
-    public static RuntimeManager getInstance() {
-        if (instance == null) {
-            synchronized (RuntimeManager.class) {
-                instance = new RuntimeManager();
-            }
-        }
-        return instance;
-    }
-
-    private RuntimeManager() {}
+    private static Queue<RuntimeSocketClient> processQueue = new ConcurrentLinkedQueue<>();
 
     public ProcessingResult process(List<File> list) {
         RuntimeSocketClient runtimeClient = getProcess();
+        ProcessingResult processingResult = null;
 
-        if (runtimeClient == null)
-            return null;
-
-        if (runtimeClient.isProcessAlive()) {
-            ProcessingResult processingResult = runtimeClient.process(list);
+        if (runtimeClient != null) {
+            processingResult = runtimeClient.process(list);
             releaseProcess(runtimeClient);
-            return processingResult;
         }
 
-        processCount--;
-        return null;
+        return processingResult;
     }
 
     private RuntimeSocketClient startProcess() {
@@ -53,7 +34,8 @@ public class RuntimeManager {
             runtimeClient.start();
 
             RuntimeProcess runtimeProcess = new RuntimeProcess();
-            runtimeProcess.init(port);
+            Process process = runtimeProcess.init(port);
+            runtimeClient.setProcess(process);
 
             // await process ready
         } catch (Exception e) {
@@ -65,13 +47,17 @@ public class RuntimeManager {
     private RuntimeSocketClient getProcess() {
         RuntimeSocketClient runtimeSocketClient = processQueue.poll();
 
-        if (runtimeSocketClient == null && processCount < processLimit) {
-            runtimeSocketClient = startProcess();
-            if (runtimeSocketClient != null) {
-                processCount++;
-                return runtimeSocketClient;
+        if (runtimeSocketClient != null) {
+            if (!runtimeSocketClient.isProcessAlive()) {
+                runtimeSocketClient.close();
+                runtimeSocketClient = startProcess();
             }
+        } else {
+            runtimeSocketClient = startProcess();
         }
+
+//        if (runtimeSocketClient == null || !runtimeSocketClient.isProcessAlive())
+//            runtimeSocketClient = startProcess();
 
         return runtimeSocketClient;
     }

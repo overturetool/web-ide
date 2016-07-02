@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RuntimeProcess {
-    public void init(int port) {
+    public Process init(int port) {
         List<String> args = new ArrayList<>();
         args.add("java");
         args.add("-cp");
@@ -16,10 +16,12 @@ public class RuntimeProcess {
         args.add("org.overture.webide.processor.RuntimeSocketServer");
         args.add(port + "");
 
+        Process process = null;
+
         try {
             ProcessBuilder builder = new ProcessBuilder(args);
             builder.redirectErrorStream(true);
-            Process process = builder.start();
+            process = builder.start();
 
             InputStream inputStream = process.getInputStream();
             InputStream errorStream = process.getErrorStream();
@@ -29,6 +31,7 @@ public class RuntimeProcess {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return process;
     }
 
     public class ProcessStream extends Thread {
