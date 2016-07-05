@@ -5,7 +5,7 @@ import org.overture.ast.intf.lex.ILexLocation;
 import java.io.Serializable;
 
 public class VDMMessageSerializable implements Serializable {
-    private static final long serialVersionUID = 2L;
+    //private static final long serialVersionUID = 2L;
 
     public final int number;
     public final String message;

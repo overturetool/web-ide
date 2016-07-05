@@ -19,6 +19,9 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <outputDirectory>../lib</outputDirectory>
+        </configuration>
       </plugin>
     </plugins>
   </build>

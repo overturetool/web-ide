@@ -12,7 +12,7 @@ public class RuntimeProcess {
         List<String> args = new ArrayList<>();
         args.add("java");
         args.add("-cp");
-        args.add("OvertureProcessor/target/OvertureProcessor-1.0-SNAPSHOT.jar");
+        args.add("lib/original-OvertureProcessor-1.0-SNAPSHOT.jar");
         args.add("org.overture.webide.processor.RuntimeSocketServer");
 
         args.add("localhost");

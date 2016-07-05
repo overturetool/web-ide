@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProcessingResult implements Serializable {
-    private static final long serialVersionUID = 1L;
-
     public List<AModuleModules> modules;
     private List<VDMMessageSerializable> parserWarnings;
     private List<VDMMessageSerializable> parserErrors;
