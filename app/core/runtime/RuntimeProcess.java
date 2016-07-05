@@ -14,7 +14,10 @@ public class RuntimeProcess {
         args.add("-cp");
         args.add("OvertureProcessor/target/OvertureProcessor-1.0-SNAPSHOT.jar");
         args.add("org.overture.webide.processor.RuntimeSocketServer");
-        args.add(port + "");
+
+        args.add("localhost");
+        args.add(Integer.toString(port));
+        args.add(Integer.toString(30));
 
         Process process = null;
 
@@ -43,9 +46,8 @@ public class RuntimeProcess {
 
         @Override
         public void run() {
-            String input;
-
             try {
+                String input;
                 while ((input = bufferedReader.readLine()) != null) {
                     System.out.println(input);
                 }

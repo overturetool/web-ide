@@ -21,13 +21,15 @@ import java.util.concurrent.TimeUnit;
 public class RuntimeSocketServer {
 
     public static void main(String args[]) throws IOException, ClassNotFoundException {
-        int port = Integer.parseInt(args[0]);
+        String host = args[0];
+        int port = Integer.parseInt(args[1]);
+        int timeoutValue = Integer.parseInt(args[2]);
 
-        final Socket socket = new Socket("localhost", port);
+        final Socket socket = new Socket(host, port);
         final ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
         final ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
-        final Duration timeout = Duration.ofSeconds(30);
+        final Duration timeout = Duration.ofSeconds(timeoutValue);
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
         Runnable runnable = new Runnable() {
