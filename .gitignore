@@ -7,5 +7,6 @@ target
 /.settings
 /RUNNING_PID
 *.log
+*.iml
 
 workspace/*
