@@ -117,6 +117,9 @@ public class samples extends Application {
 
         ArrayNode arrayNode = new ObjectMapper().createArrayNode();
 
+        if (repository == null)
+            return ok(arrayNode);
+
         for (File file : repository) {
             FileOperations.filterDirectoryContent(file, new String[]{"vdmsl", "txt"});
             File readme = file.listFiles((dir, name) -> name.equals("README.txt"))[0];

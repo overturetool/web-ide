@@ -56,9 +56,6 @@ public class RuntimeManager {
             runtimeSocketClient = startProcess();
         }
 
-//        if (runtimeSocketClient == null || !runtimeSocketClient.isProcessAlive())
-//            runtimeSocketClient = startProcess();
-
         return runtimeSocketClient;
     }
 

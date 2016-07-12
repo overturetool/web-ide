@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProcessingResult implements Serializable {
-    public List<AModuleModules> modules;
+    private List<AModuleModules> modules;
     private List<VDMMessageSerializable> parserWarnings;
     private List<VDMMessageSerializable> parserErrors;
     private List<VDMMessageSerializable> typeCheckerWarnings;
@@ -39,6 +39,10 @@ public class ProcessingResult implements Serializable {
         setVDMMessage(typeCheckerErrors, this.typeCheckerErrors);
     }
 
+    public void setModules(List<AModuleModules> modules) {
+        this.modules = modules;
+    }
+
     private void setVDMMessage(List<? extends VDMMessage> source, List<VDMMessageSerializable> destination) {
         for (VDMMessage message : source) {
             destination.add(new VDMMessageSerializable(message.number, message.message, message.location));
@@ -59,6 +63,10 @@ public class ProcessingResult implements Serializable {
 
     public List<VDMError> getTypeCheckerErrors() {
         return getErrors(this.typeCheckerErrors);
+    }
+
+    public List<AModuleModules> getModules() {
+        return this.modules;
     }
 
     private List<VDMWarning> getWarnings(List<VDMMessageSerializable> list) {

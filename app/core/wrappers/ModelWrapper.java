@@ -80,7 +80,7 @@ public class ModelWrapper {
             this.parserErrors = res.getParserErrors();
             this.typeCheckerWarnings = res.getTypeCheckerWarnings();
             this.typeCheckerErrors = res.getTypeCheckerErrors();
-            result = res.modules;
+            result = res.getModules();
         } else {
             this.parserWarnings = new ArrayList<>();
             this.parserErrors = new ArrayList<>();
