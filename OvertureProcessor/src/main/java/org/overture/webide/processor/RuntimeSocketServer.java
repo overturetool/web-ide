@@ -48,22 +48,6 @@ public class RuntimeSocketServer {
         final ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
         final ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
 
-//        final Duration timeout = Duration.ofSeconds(timeoutValue);
-//        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-//
-//        Runnable runnable = new Runnable() {
-//            public void run() {
-//                try {
-//                    out.close();
-//                    in.close();
-//                    socket.close();
-//                    System.exit(0);
-//                } catch (IOException ignored) {}
-//            }
-//        };
-//
-//        executor.schedule(runnable, timeout.toMillis(), TimeUnit.MILLISECONDS);
-
         logger.info("process " + getPID() + " ready");
 
         while (true) {
@@ -98,7 +82,6 @@ public class RuntimeSocketServer {
 
             out.writeObject(result);
             out.flush();
-//            executor.schedule(runnable, timeout.toMillis(), TimeUnit.MILLISECONDS);
         }
     }
 
