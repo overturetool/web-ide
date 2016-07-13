@@ -37,7 +37,7 @@ public class RuntimeManager {
             Process process = runtimeProcess.init(port);
             runtimeClient.setProcess(process);
 
-            // await process ready
+            // TODO : await process ready?
         } catch (Exception e) {
             e.printStackTrace();
         }

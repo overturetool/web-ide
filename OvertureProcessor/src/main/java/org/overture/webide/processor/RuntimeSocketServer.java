@@ -20,10 +20,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RuntimeSocketServer {
+    private static final Logger logger = LoggerFactory.getLogger(RuntimeSocketServer.class);
 
     public static void main(String args[]) throws ClassNotFoundException, IOException {
-        final Logger logger = LoggerFactory.getLogger(RuntimeSocketServer.class);
-
         String host = null;
         int port = -1;
         int timeoutValue = -1;
@@ -56,33 +55,40 @@ public class RuntimeSocketServer {
             if (inputObject == null)
                 continue;
 
-            List<File> fileList = new ArrayList<File>();
-
-            if (inputObject instanceof List<?>) {
-                List<?> inputList = (List<?>) inputObject;
-                if (!inputList.isEmpty() && inputList.get(0) instanceof File) {
-                    for (Object object : inputList)
-                        fileList.add((File) object);
-                }
-            }
-
-            Settings.dialect = Dialect.VDM_SL;
-            //Settings.release = this.release;
-
-            TypeCheckResult<List<AModuleModules>> typeCheckerResult = TypeCheckerUtil.typeCheckSl(fileList, VDMJ.filecharset);
-            ParserResult<List<AModuleModules>> parserResult = typeCheckerResult.parserResult;
-
-            ProcessingResult result = new ProcessingResult();
-
-            result.setParserWarnings(parserResult.warnings);
-            result.setParserErrors(parserResult.errors);
-            result.setTypeCheckerWarnings(typeCheckerResult.warnings);
-            result.setTypeCheckerErrors(typeCheckerResult.errors);
-            result.setModules(typeCheckerResult.result != null ? typeCheckerResult.result : parserResult.result);
+            List<File> fileList = object2FileList(inputObject);
+            ProcessingResult result = getProcessingResult(fileList);
 
             out.writeObject(result);
             out.flush();
         }
+    }
+
+    private static ProcessingResult getProcessingResult(List<File> fileList) {
+        Settings.dialect = Dialect.VDM_SL;
+        //Settings.release = this.release;
+
+        TypeCheckResult<List<AModuleModules>> typeCheckerResult = TypeCheckerUtil.typeCheckSl(fileList, VDMJ.filecharset);
+        ParserResult<List<AModuleModules>> parserResult = typeCheckerResult.parserResult;
+
+        ProcessingResult result = new ProcessingResult();
+        result.setParserWarnings(parserResult.warnings);
+        result.setParserErrors(parserResult.errors);
+        result.setTypeCheckerWarnings(typeCheckerResult.warnings);
+        result.setTypeCheckerErrors(typeCheckerResult.errors);
+        result.setModules(typeCheckerResult.result != null ? typeCheckerResult.result : parserResult.result);
+        return result;
+    }
+
+    private static List<File> object2FileList(Object inputObject) {
+        List<File> fileList = new ArrayList<File>();
+        if (inputObject instanceof List<?>) {
+            List<?> inputList = (List<?>) inputObject;
+            if (!inputList.isEmpty() && inputList.get(0) instanceof File) {
+                for (Object object : inputList)
+                    fileList.add((File) object);
+            }
+        }
+        return fileList;
     }
 
     private static int getPID() {

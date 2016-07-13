@@ -11,6 +11,9 @@ public class RuntimeProcess {
     public Process init(int port) {
         List<String> args = new ArrayList<>();
         args.add("java");
+        args.add("-Xms4M"); // initial heap size
+        args.add("-Xmx32M"); // maximum heap size
+        args.add("-Xss1M"); // Thread stack size
         args.add("-cp");
         args.add("lib/OvertureProcessor-1.0-SNAPSHOT-jar-with-dependencies.jar");
         args.add("org.overture.webide.processor.RuntimeSocketServer");
