@@ -6,16 +6,21 @@ import core.debug.ProxyServer;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import org.apache.commons.codec.binary.StringUtils;
+import play.mvc.LegacyWebSocket;
 import play.mvc.WebSocket;
+import play.mvc.WebSocket.In;
+import play.mvc.WebSocket.Out;
 
 import java.util.Base64;
 
 public class debug extends Application {
-    public WebSocket<String> ws(String account, String path) {
+    public LegacyWebSocket<String> ws(String account, String path) {
         String type = request().getQueryString("type");
         String entryEncoded = request().getQueryString("entry");
         String entryDecoded = StringUtils.newStringUtf8(Base64.getDecoder().decode(entryEncoded));
         String defaultName = null;
+        int port = -1;
+        ProxyServer proxyServer;
 
         int containsDefault = entryDecoded.indexOf("`"); // returns -1 if the character does not occur
         if (containsDefault > 0) {
@@ -23,14 +28,10 @@ public class debug extends Application {
             defaultName = Base64.getEncoder().encodeToString(defaultName.getBytes());
         }
 
-        int port = -1;
-
         IVFS file = new CommonsVFS(account, path);
 
         if (!file.exists())
             return errorResponse("file not found");
-
-        ProxyServer proxyServer;
 
         if (file.isDirectory()) {
             if (type == null) return errorResponse("Model type was not defined");
@@ -49,7 +50,7 @@ public class debug extends Application {
             return errorResponse("Initial read failed");
         }
 
-        return new WebSocket<String>() {
+        return new LegacyWebSocket<String>() {
             // Called when the Websocket Handshake is done
             public void onReady(WebSocket.In<String> in, WebSocket.Out<String> out) {
                 String initialResponseFiltered = CommunicationFilter.ConvertPathsToRelative(initialResponse.replace("\u0000", ""));
@@ -67,10 +68,26 @@ public class debug extends Application {
                 in.onClose(proxyClient::disconnect);
             }
         };
+
+        // TODO : Switch to new WebSocket implementation
+        /*
+        return WebSocket.Text.accept(request -> {
+            // Called when the Websocket Handshake is done
+            String initialResponseFiltered = CommunicationFilter.ConvertPathsToRelative(initialResponse.replace("\u0000", ""));
+            Source.single(initialResponseFiltered);
+
+            // For each event received on the socket
+            return Flow.<String>create().map(msg -> {
+                String filteredEvent = CommunicationFilter.ConvertPathToAbsolute(msg);
+                String overtureResult = proxyClient.sendAndRead(filteredEvent).replace("\u0000", "");
+                return CommunicationFilter.ConvertPathsToRelative(overtureResult);
+            });
+        });
+        */
     }
 
-    private WebSocket<String> errorResponse(String message) {
-        return new WebSocket<String>() {
+    private LegacyWebSocket<String> errorResponse(String message) {
+        return new LegacyWebSocket<String>() {
             @Override
             public void onReady(In<String> in, Out<String> out) {
                 out.write(message);

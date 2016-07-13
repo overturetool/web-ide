@@ -7,8 +7,6 @@ import org.overture.interpreter.VDMJ;
 import org.overture.parser.util.ParserUtil.ParserResult;
 import org.overture.typechecker.util.TypeCheckerUtil;
 import org.overture.typechecker.util.TypeCheckerUtil.TypeCheckResult;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RuntimeSocketServer {
-    private static final Logger logger = LoggerFactory.getLogger(RuntimeSocketServer.class);
+    //private static final Logger logger = LoggerFactory.getLogger(RuntimeSocketServer.class);
 
     public static void main(String args[]) throws ClassNotFoundException, IOException {
         String host = null;
@@ -47,7 +45,7 @@ public class RuntimeSocketServer {
         final ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
         final ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
 
-        logger.info("process " + getPID() + " ready");
+        //logger.info("process " + getPID() + " ready");
 
         while (true) {
             Object inputObject = in.readObject();

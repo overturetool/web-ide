@@ -6,7 +6,6 @@ target
 /.project
 /.settings
 /RUNNING_PID
-*.log
 *.iml
 
 workspace/*
