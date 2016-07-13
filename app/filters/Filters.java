@@ -7,6 +7,7 @@ import play.mvc.EssentialFilter;
 import play.filters.cors.CORSFilter;
 
 public class Filters extends EssentialFilter implements HttpFilters {
+    // TODO : This implementation is a workaround due to a bug in the framework
 
     @Inject
     private CORSFilter corsFilter;
