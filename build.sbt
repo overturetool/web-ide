@@ -8,7 +8,7 @@ scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
   //javaJdbc,
-  cache,
+  //cache,
   javaWs,
   filters,
   "org.apache.commons" % "commons-vfs2" % "2.0",
@@ -16,6 +16,9 @@ libraryDependencies ++= Seq(
 
   "com.google.oauth-client" % "google-oauth-client" % "1.21.0",
   "com.google.api-client" % "google-api-client" % "1.21.0",
+
+//  "org.slf4j" % "slf4j-api" % "1.7.21",
+//  "org.slf4j" % "slf4j-log4j12" % "1.7.21",
 
   "com.jayway.restassured" % "rest-assured" % "2.8.0" % "test",
   "com.jayway.restassured" % "scala-support" % "2.8.0" % "test",

@@ -13,7 +13,7 @@ import play.mvc.WebSocket.Out;
 
 import java.util.Base64;
 
-public class debug extends Application {
+public class Debug extends Application {
     public LegacyWebSocket<String> ws(String account, String path) {
         String type = request().getQueryString("type");
         String entryEncoded = request().getQueryString("entry");

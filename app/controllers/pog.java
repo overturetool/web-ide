@@ -15,7 +15,7 @@ import play.mvc.Result;
 
 import java.util.List;
 
-public class pog extends Application {
+public class POG extends Application {
     public Result generatePog(String account, String path) {
         IVFS<FileObject> file = new CommonsVFS(account, path);
 

@@ -13,7 +13,7 @@ import play.mvc.Result;
 
 import java.util.List;
 
-public class outline extends Application {
+public class Outline extends Application {
     public Result file(String account, String path) {
         IVFS<FileObject> file = new CommonsVFS(account, path);
 

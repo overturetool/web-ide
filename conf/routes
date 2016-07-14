@@ -5,45 +5,44 @@
 # Home page
 #GET     /                                                                   controllers.Application.index()
 
-# vfs
-PUT     /vfs/appendFile/:account/*path                                      controllers.vfs.appendFile(account, path)
-GET     /vfs/readFile/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>     controllers.vfs.readFile(account, path)
-GET     /vfs/readdir/:account                                               controllers.vfs.readdir(account, path = "", depth ?= "0")
-GET     /vfs/readdir/:account/$path<[a-zA-Z0-9./_-]+>                       controllers.vfs.readdir(account, path, depth ?= "0")
-POST    /vfs/writeFile/:account/$path<[a-zA-Z0-9/_-]+([.]{1}[a-zA-Z0-9]+)?> controllers.vfs.writeFile(account, path)
-PUT     /vfs/move/:account/$path<[a-zA-Z0-9./_-]+>                          controllers.vfs.move(account, path)
-DELETE  /vfs/delete/:account/$path<[a-zA-Z0-9/._-]+>                        controllers.vfs.delete(account, path)
-PUT     /vfs/rename/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>       controllers.vfs.rename(account, path, name)
-POST    /vfs/mkdir/:account/$path<[a-zA-Z0-9/_-]*>                          controllers.vfs.mkdir(account, path)
-POST    /vfs/mkFile/:account/$path<[a-zA-Z0-9./_-]*>                        controllers.vfs.mkFile(account, path)
+# VFS
+PUT     /vfs/appendFile/:account/*path                                      controllers.VFS.appendFile(account, path)
+GET     /vfs/readFile/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>     controllers.VFS.readFile(account, path)
+GET     /vfs/readdir/:account                                               controllers.VFS.readdir(account, path = "", depth ?= "0")
+GET     /vfs/readdir/:account/$path<[a-zA-Z0-9./_-]+>                       controllers.VFS.readdir(account, path, depth ?= "0")
+POST    /vfs/writeFile/:account/$path<[a-zA-Z0-9/_-]+([.]{1}[a-zA-Z0-9]+)?> controllers.VFS.writeFile(account, path)
+PUT     /vfs/move/:account/$path<[a-zA-Z0-9./_-]+>                          controllers.VFS.move(account, path)
+DELETE  /vfs/delete/:account/$path<[a-zA-Z0-9/._-]+>                        controllers.VFS.delete(account, path)
+PUT     /vfs/rename/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>       controllers.VFS.rename(account, path, name)
+POST    /vfs/mkdir/:account/$path<[a-zA-Z0-9/_-]*>                          controllers.VFS.mkdir(account, path)
+POST    /vfs/mkFile/:account/$path<[a-zA-Z0-9./_-]*>                        controllers.VFS.mkFile(account, path)
 
-# outline
-GET     /outline/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>          controllers.outline.file(account, path)
+# Outline
+GET     /outline/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>          controllers.Outline.file(account, path)
 
-# lint
+# Lint
 GET     /lint/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>             controllers.lint.file(account, path)
 GET     /lint/:account/$path<[a-zA-Z0-9/_-]+>                               controllers.lint.file(account, path)
 
 # codecompletion
-GET     /codecompletion/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>   controllers.codecompletion.proposal(account, path)
+GET     /codecompletion/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>   controllers.CodeCompletion.proposal(account, path)
 
-# pog
-GET     /pog/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>              controllers.pog.generatePog(account, path)
+# POG
+GET     /pog/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>              controllers.POG.generatePog(account, path)
 
-# evaluate
-# GET     /eval/:input                                                        controllers.evaluate.expression(input)
-GET     /eval/:input/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>      controllers.evaluate.project(input, account, path)
+# Evaluate
+GET     /eval/:input/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>      controllers.Evaluate.project(input, account, path)
 
-# authorization
-GET     /verify                                                             controllers.auth.verify(tokenId)
-GET     /signout                                                            controllers.auth.signout()
+# Authentication
+GET     /verify                                                             controllers.Auth.verify(tokenId)
+GET     /signout                                                            controllers.Auth.signout()
 
-# project examples
-GET     /import                                                             controllers.samples.getFromLocalRepository(projectName)
-GET     /list                                                               controllers.samples.listFromLocalRepository()
+# Project examples
+GET     /import                                                             controllers.Examples.getFromLocalRepository(projectName)
+GET     /list                                                               controllers.Examples.listFromLocalRepository()
 
 # Web Socket management
-GET     /debug/:account/$path<[a-zA-Z0-9/_-]+.*>                            controllers.debug.ws(account, path)
+GET     /debug/:account/$path<[a-zA-Z0-9/_-]+.*>                            controllers.Debug.ws(account, path)
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                                                       controllers.Assets.versioned(path="/public", file: Asset)
