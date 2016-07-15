@@ -39,7 +39,7 @@ public class ModelWrapper {
     public List<VDMError> typeCheckerErrors;
 
     public ModelWrapper(IVFS<FileObject> file) {
-        this.files = preprocessFiles(file);
+        this.files = filterFileList(file);
         this.dialect = getDialect(file);
         this.release = getRelease(file);
     }
@@ -66,7 +66,7 @@ public class ModelWrapper {
         return new ProofObligationList();
     }
 
-    private List<File> preprocessFiles(IVFS<FileObject> file) {
+    private List<File> filterFileList(IVFS<FileObject> file) {
         List<File> files = file.getProjectAsIOFile();
         List<File> filteredFiles = Collections.synchronizedList(new ArrayList<>());
         filteredFiles.addAll(files.stream().filter(f -> f.getName().endsWith(".vdmsl")).collect(Collectors.toList()));
