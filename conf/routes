@@ -21,8 +21,8 @@ POST    /vfs/mkFile/:account/$path<[a-zA-Z0-9./_-]*>                        cont
 GET     /outline/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>          controllers.Outline.file(account, path)
 
 # Lint
-GET     /lint/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>             controllers.lint.file(account, path)
-GET     /lint/:account/$path<[a-zA-Z0-9/_-]+>                               controllers.lint.file(account, path)
+GET     /lint/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>             controllers.Lint.file(account, path)
+GET     /lint/:account/$path<[a-zA-Z0-9/_-]+>                               controllers.Lint.file(account, path)
 
 # codecompletion
 GET     /codecompletion/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>   controllers.CodeCompletion.proposal(account, path)
