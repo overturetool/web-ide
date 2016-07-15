@@ -30,6 +30,7 @@ public class ModelWrapper {
     private ModuleInterpreter interpreter;
 
     private List<File> files;
+    private Dialect dialect;
     private Release release;
 
     public List<VDMWarning> parserWarnings;
@@ -39,6 +40,7 @@ public class ModelWrapper {
 
     public ModelWrapper(IVFS<FileObject> file) {
         this.files = preprocessFiles(file);
+        this.dialect = getDialect(file);
         this.release = getRelease(file);
     }
 
@@ -75,7 +77,7 @@ public class ModelWrapper {
         ModuleList ast;
         List<AModuleModules> result = null;
 
-        ProcessingJob job = new ProcessingJob(this.files, Dialect.VDM_SL, this.release);
+        ProcessingJob job = new ProcessingJob(this.files, this.dialect, this.release);
         ProcessingResult res = new RuntimeManager().process(job);
 
         if (res != null) {
@@ -128,5 +130,34 @@ public class ModelWrapper {
         } catch (IOException e) {
             return Release.DEFAULT;
         }
+    }
+
+    private Dialect getDialect(IVFS<FileObject> file) {
+        try {
+            String attribute = "dialect";
+            FileObject projectRoot = file.getProjectRoot();
+            if (projectRoot == null)
+                return Dialect.VDM_PP;
+
+            FileObject projectFile = projectRoot.getChild(".project");
+            if (projectFile == null)
+                return Dialect.VDM_PP;
+
+            InputStream content = projectFile.getContent().getInputStream();
+            JsonNode node = new ObjectMapper().readTree(content);
+
+            if (node == null || !node.hasNonNull(attribute))
+                return Dialect.VDM_PP;
+
+            String dialect = node.get(attribute).textValue().replaceAll("-", "");
+
+            if (dialect.equalsIgnoreCase("vdmpp"))
+                return Dialect.VDM_PP;
+            else if (dialect.equalsIgnoreCase("vdmrt"))
+                return Dialect.VDM_RT;
+            else if (dialect.equalsIgnoreCase("vdmsl"))
+                return Dialect.VDM_SL;
+        } catch (IOException | NullPointerException e) {}
+        return Dialect.VDM_PP;
     }
 }
