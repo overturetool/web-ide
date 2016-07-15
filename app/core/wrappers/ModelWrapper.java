@@ -53,14 +53,14 @@ public class ModelWrapper {
         return this.interpreter.getDefaultName();
     }
 
-    public ModuleList getAst() {
+    public ModuleList getAST() {
         if (this.interpreter != null)
             return this.interpreter.getModules();
         else
             return new ModuleList();
     }
 
-    public IProofObligationList getPog() throws AnalysisException {
+    public IProofObligationList getPOG() throws AnalysisException {
         if (this.interpreter != null && this.interpreter.defaultModule.getTypeChecked())
             return this.interpreter.getProofObligations();
         return new ProofObligationList();

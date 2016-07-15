@@ -22,7 +22,7 @@ public class Outline extends Application {
 
         ModelWrapper modelWrapper = new ModelWrapper(file).init();
 
-        ModuleList ast = modelWrapper.getAst();
+        ModuleList ast = modelWrapper.getAST();
         OutlineTreeContentProvider outlineProvider = new OutlineTreeContentProvider(ast);
         List<Object> list = outlineProvider.getContent();
         List<ObjectNode> jsonList = outlineProvider.toJSON(list, file.getName());

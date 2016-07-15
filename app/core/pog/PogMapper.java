@@ -11,10 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class PogMapper {
+public class POGMapper {
     private IProofObligationList pog;
 
-    public PogMapper(IProofObligationList pog) {
+    public POGMapper(IProofObligationList pog) {
         this.pog = pog;
     }
 

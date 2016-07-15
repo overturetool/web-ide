@@ -3,7 +3,7 @@ package controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.StatusCode;
-import core.pog.PogMapper;
+import core.pog.POGMapper;
 import core.vfs.IVFS;
 import core.vfs.commons_vfs2.CommonsVFS;
 import core.wrappers.ModelWrapper;
@@ -26,12 +26,12 @@ public class POG extends Application {
 
         IProofObligationList pog = new ProofObligationList();
         try {
-            pog = modelWrapper.getPog();
+            pog = modelWrapper.getPOG();
         } catch (AnalysisException e) {
             e.printStackTrace();
         }
 
-        PogMapper pogMapper = new PogMapper(pog);
+        POGMapper pogMapper = new POGMapper(pog);
         List<ObjectNode> jsonList = pogMapper.toJson();
 
         return ok(new ObjectMapper().createArrayNode().addAll(jsonList));
