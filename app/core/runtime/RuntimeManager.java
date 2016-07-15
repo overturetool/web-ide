@@ -1,23 +1,22 @@
 package core.runtime;
 
 import core.utilities.SocketUtils;
+import org.overture.webide.processor.ProcessingJob;
 import org.overture.webide.processor.ProcessingResult;
 
-import java.io.File;
 import java.net.ServerSocket;
-import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RuntimeManager {
     private static Queue<RuntimeSocketClient> processQueue = new ConcurrentLinkedQueue<>();
 
-    public ProcessingResult process(List<File> list) {
+    public ProcessingResult process(ProcessingJob job) {
         RuntimeSocketClient runtimeClient = getProcess();
         ProcessingResult processingResult = null;
 
         if (runtimeClient != null) {
-            processingResult = runtimeClient.process(list);
+            processingResult = runtimeClient.process(job);
             releaseProcess(runtimeClient);
         }
 

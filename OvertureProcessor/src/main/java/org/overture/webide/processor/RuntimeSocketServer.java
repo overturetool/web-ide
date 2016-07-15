@@ -2,6 +2,7 @@ package org.overture.webide.processor;
 
 import org.overture.ast.lex.Dialect;
 import org.overture.ast.modules.AModuleModules;
+import org.overture.config.Release;
 import org.overture.config.Settings;
 import org.overture.interpreter.VDMJ;
 import org.overture.parser.util.ParserUtil.ParserResult;
@@ -53,17 +54,18 @@ public class RuntimeSocketServer {
             if (inputObject == null)
                 continue;
 
-            List<File> fileList = object2FileList(inputObject);
-            ProcessingResult result = getProcessingResult(fileList);
+            ProcessingJob job = (ProcessingJob) inputObject;
+            List<File> fileList = object2FileList(job.getFileList());
+            ProcessingResult result = getProcessingResult(fileList, job.getDialect(), job.getRelease());
 
             out.writeObject(result);
             out.flush();
         }
     }
 
-    private static ProcessingResult getProcessingResult(List<File> fileList) {
-        Settings.dialect = Dialect.VDM_SL;
-        //Settings.release = this.release;
+    private static ProcessingResult getProcessingResult(List<File> fileList, Dialect dialect, Release release) {
+        Settings.dialect = dialect;
+        Settings.release = release;
 
         TypeCheckResult<List<AModuleModules>> typeCheckerResult = TypeCheckerUtil.typeCheckSl(fileList, VDMJ.filecharset);
         ParserResult<List<AModuleModules>> parserResult = typeCheckerResult.parserResult;

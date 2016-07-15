@@ -1,14 +1,13 @@
 package core.runtime;
 
+import org.overture.webide.processor.ProcessingJob;
 import org.overture.webide.processor.ProcessingResult;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.List;
 
 public class RuntimeSocketClient extends Thread {
     private ObjectOutputStream out;
@@ -36,10 +35,10 @@ public class RuntimeSocketClient extends Thread {
         }
     }
 
-    public synchronized ProcessingResult process(List<File> files) {
+    public synchronized ProcessingResult process(ProcessingJob job) {
         ProcessingResult result = null;
         try {
-            this.out.writeObject(files);
+            this.out.writeObject(job);
             this.out.flush();
             result = (ProcessingResult) this.in.readObject();
         } catch (IOException | ClassNotFoundException | NullPointerException e) {

@@ -6,6 +6,7 @@ import core.runtime.RuntimeManager;
 import core.vfs.IVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
+import org.overture.ast.lex.Dialect;
 import org.overture.ast.modules.AModuleModules;
 import org.overture.ast.util.modules.ModuleList;
 import org.overture.config.Release;
@@ -14,6 +15,7 @@ import org.overture.parser.messages.VDMError;
 import org.overture.parser.messages.VDMWarning;
 import org.overture.pog.obligation.ProofObligationList;
 import org.overture.pog.pub.IProofObligationList;
+import org.overture.webide.processor.ProcessingJob;
 import org.overture.webide.processor.ProcessingResult;
 
 import java.io.File;
@@ -37,7 +39,7 @@ public class ModelWrapper {
 
     public ModelWrapper(IVFS<FileObject> file) {
         this.files = preprocessFiles(file);
-        //this.release = getRelease(file);
+        this.release = getRelease(file);
     }
 
     public String evaluate(String input) {
@@ -73,7 +75,8 @@ public class ModelWrapper {
         ModuleList ast;
         List<AModuleModules> result = null;
 
-        ProcessingResult res = new RuntimeManager().process(this.files);
+        ProcessingJob job = new ProcessingJob(this.files, Dialect.VDM_SL, this.release);
+        ProcessingResult res = new RuntimeManager().process(job);
 
         if (res != null) {
             this.parserWarnings = res.getParserWarnings();
@@ -123,8 +126,7 @@ public class ModelWrapper {
 
             return release != null ? release : Release.DEFAULT;
         } catch (IOException e) {
-            //e.printStackTrace();
+            return Release.DEFAULT;
         }
-        return Release.DEFAULT;
     }
 }
