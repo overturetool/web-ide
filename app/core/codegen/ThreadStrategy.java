@@ -32,8 +32,6 @@ public class ThreadStrategy implements ICodeGenStrategy {
     @Override
     public boolean generate() {
         ModuleList ast = this.modelWrapper.getAST();
-        Settings.dialect = this.modelWrapper.getDialect();
-        Settings.release = this.modelWrapper.getRelease();
 
         String rootPackage = Paths.get(this.file.getRelativePath()).getName(0).toString();
         Path output = Paths.get(this.file.getAbsolutePath(), "generated");
@@ -60,6 +58,8 @@ public class ThreadStrategy implements ICodeGenStrategy {
 
             synchronized (ThreadStrategy.class) {
                 Logger.setLog(logger);
+                Settings.dialect = this.modelWrapper.getDialect();
+                Settings.release = this.modelWrapper.getRelease();
                 GeneratedData data = codeGen.generate(CodeGenBase.getNodes(ast));
                 JavaCodeGenMain.processData(false, output.toFile(), codeGen, data, true);
                 // TODO : Use logger data

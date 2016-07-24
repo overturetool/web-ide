@@ -2,21 +2,28 @@ package core.runtime;
 
 import core.ServerConfigurations;
 import org.overture.webide.processor.ProcessArguments;
+import org.overture.webide.processor.RuntimeSocketServer;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 public class RuntimeProcess {
     public Process init(int port) {
+        String javaHome = System.getProperty("java.home");
+        String javaBin = Paths.get(javaHome, "bin", "java").toString();
+        String classPath = Paths.get("lib", "OvertureProcessor-1.0-SNAPSHOT-jar-with-dependencies.jar").toString();
+        String className = RuntimeSocketServer.class.getCanonicalName();
+
         List<String> args = new ArrayList<>();
-        args.add("java");
+        args.add(javaBin);
         args.add("-Xms4M"); // initial heap size
         args.add("-Xmx32M"); // maximum heap size
         args.add("-Xss1M"); // Thread stack size
         args.add("-cp");
-        args.add("lib/OvertureProcessor-1.0-SNAPSHOT-jar-with-dependencies.jar");
-        args.add("org.overture.webide.processor.RuntimeSocketServer");
+        args.add(classPath);
+        args.add(className);
 
         // Program arguments
         args.add(ProcessArguments.Identifiers.Host);
@@ -27,7 +34,6 @@ public class RuntimeProcess {
         args.add(Integer.toString(30));
 
         Process process = null;
-
         try {
             ProcessBuilder builder = new ProcessBuilder(args);
             builder.redirectErrorStream(true);

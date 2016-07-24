@@ -20,7 +20,7 @@ public class CodeGenProcess {
         String javaHome = System.getProperty("java.home");
         String javaBin = Paths.get(javaHome, "bin", "java").toString();
         String className = JavaCodeGenMain.class.getCanonicalName();
-        String classPath = Paths.get("lib", "codegen", "*").toString();
+        String classPath = Paths.get("lib", "*").toString();
 
         List<String> args = new ArrayList<>();
         args.add(javaBin);

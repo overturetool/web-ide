@@ -57,7 +57,7 @@ public class ProxyServer {
         ProxyClient client = new ProxyClient(server);
         client.start();
 
-        new DBGPReaderInitializer(type, host, port, key, entry, defaultName, absolutePath).start();
+        new DebugProcess(type, host, port, key, entry, defaultName, absolutePath).start();
 
         return client;
     }
