@@ -7,8 +7,6 @@ lazy val root = (project in file(".")).enablePlugins(PlayJava)
 scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
-  //javaJdbc,
-  //cache,
   javaWs,
   filters,
   "org.apache.commons" % "commons-vfs2" % "2.0",

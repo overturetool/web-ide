@@ -53,6 +53,14 @@ public class ModelWrapper {
         return this.interpreter.getDefaultName();
     }
 
+    public Dialect getDialect() {
+        return this.dialect;
+    }
+
+    public Release getRelease() {
+        return this.release;
+    }
+
     public ModuleList getAST() {
         if (this.interpreter != null)
             return this.interpreter.getModules();
