@@ -53,6 +53,8 @@ public class RuntimeSocketClient extends Thread {
             this.out.close();
             this.socket.close();
             this.serverSocket.close();
+            if (this.process != null)
+                this.process.destroy();
         } catch (IOException e) {
             e.printStackTrace();
         }

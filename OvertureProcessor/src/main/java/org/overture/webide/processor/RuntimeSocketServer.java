@@ -9,13 +9,13 @@ import org.overture.parser.util.ParserUtil.ParserResult;
 import org.overture.typechecker.util.TypeCheckerUtil;
 import org.overture.typechecker.util.TypeCheckerUtil.TypeCheckResult;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.net.Socket;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 public class RuntimeSocketServer {
     private static boolean printInfo;
@@ -53,14 +53,18 @@ public class RuntimeSocketServer {
         print("process " + getPID() + " ready");
 
         while (true) {
-            Object inputObject = in.readObject();
+            Object inputObject = null;
+
+            try {
+                inputObject = in.readObject();
+            } catch (EOFException e) { /* ignored */ }
 
             if (inputObject == null)
                 continue;
 
-            ProcessingTask job = (ProcessingTask) inputObject;
-            List<File> fileList = object2FileList(job.getFileList());
-            ProcessingResult result = getProcessingResult(fileList, job.getDialect(), job.getRelease());
+            ProcessingTask task = (ProcessingTask) inputObject;
+            List<File> fileList = object2FileList(task.getFileList());
+            ProcessingResult result = getProcessingResult(fileList, task.getDialect(), task.getRelease());
 
             out.writeObject(result);
             out.flush();
