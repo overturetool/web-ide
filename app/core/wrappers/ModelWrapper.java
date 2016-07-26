@@ -9,6 +9,8 @@ import org.overture.ast.analysis.AnalysisException;
 import org.overture.ast.lex.Dialect;
 import org.overture.ast.modules.AModuleModules;
 import org.overture.ast.util.modules.ModuleList;
+import org.overture.codegen.utils.GeneralCodeGenUtils;
+import org.overture.codegen.vdm2java.JavaCodeGenMain;
 import org.overture.config.Release;
 import org.overture.interpreter.runtime.ModuleInterpreter;
 import org.overture.parser.messages.VDMError;
@@ -39,7 +41,8 @@ public class ModelWrapper {
     public List<VDMError> typeCheckerErrors;
 
     public ModelWrapper(IVFS<FileObject> file) {
-        this.files = filterFileList(file);
+        //this.files = filterFileList(file);
+        this.files = JavaCodeGenMain.filterFiles(file.getProjectAsIOFile());
         this.dialect = getDialect(file);
         this.release = getRelease(file);
     }
@@ -71,13 +74,14 @@ public class ModelWrapper {
     public IProofObligationList getPOG() throws AnalysisException {
         if (this.interpreter != null && this.interpreter.defaultModule.getTypeChecked())
             return this.interpreter.getProofObligations();
-        return new ProofObligationList();
+        else
+            return new ProofObligationList();
     }
 
     private List<File> filterFileList(IVFS<FileObject> file) {
         List<File> files = file.getProjectAsIOFile();
         List<File> filteredFiles = Collections.synchronizedList(new ArrayList<>());
-        filteredFiles.addAll(files.stream().filter(f -> f.getName().endsWith(".vdmsl")).collect(Collectors.toList()));
+        filteredFiles.addAll(files.stream().filter(GeneralCodeGenUtils::isVdmSourceFile).collect(Collectors.toList()));
         return filteredFiles;
     }
 
@@ -165,7 +169,7 @@ public class ModelWrapper {
                 return Dialect.VDM_RT;
             else if (dialect.equalsIgnoreCase("vdmsl"))
                 return Dialect.VDM_SL;
-        } catch (IOException | NullPointerException e) {}
+        } catch (IOException | NullPointerException e) { /* ignored */ }
         return Dialect.VDM_PP;
     }
 }
