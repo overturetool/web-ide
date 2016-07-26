@@ -1,8 +1,8 @@
 package core.runtime;
 
 import core.utilities.SocketUtils;
-import org.overture.webide.processor.ProcessingJob;
 import org.overture.webide.processor.ProcessingResult;
+import org.overture.webide.processor.ProcessingTask;
 
 import java.net.ServerSocket;
 import java.util.Queue;
@@ -11,19 +11,19 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class RuntimeManager {
     private static Queue<RuntimeSocketClient> processQueue = new ConcurrentLinkedQueue<>();
 
-    public ProcessingResult process(ProcessingJob job) {
-        RuntimeSocketClient runtimeClient = getProcess();
+    public ProcessingResult process(ProcessingTask task) {
+        RuntimeSocketClient runtimeClient = acquireProcess();
         ProcessingResult processingResult = null;
 
         if (runtimeClient != null) {
-            processingResult = runtimeClient.process(job);
+            processingResult = runtimeClient.process(task);
             releaseProcess(runtimeClient);
         }
 
         return processingResult;
     }
 
-    private RuntimeSocketClient startProcess() {
+    private RuntimeSocketClient startNewProcess() {
         RuntimeSocketClient runtimeClient = null;
         try {
             ServerSocket serverSocket = SocketUtils.findAvailablePort(49152, 65535);
@@ -43,16 +43,16 @@ public class RuntimeManager {
         return runtimeClient;
     }
 
-    private RuntimeSocketClient getProcess() {
+    private RuntimeSocketClient acquireProcess() {
         RuntimeSocketClient runtimeSocketClient = processQueue.poll();
 
         if (runtimeSocketClient != null) {
             if (!runtimeSocketClient.isProcessAlive()) {
                 runtimeSocketClient.close();
-                runtimeSocketClient = startProcess();
+                runtimeSocketClient = startNewProcess();
             }
         } else {
-            runtimeSocketClient = startProcess();
+            runtimeSocketClient = startNewProcess();
         }
 
         return runtimeSocketClient;

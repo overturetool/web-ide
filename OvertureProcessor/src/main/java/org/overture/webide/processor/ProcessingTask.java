@@ -7,12 +7,12 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.List;
 
-public class ProcessingJob implements Serializable {
+public class ProcessingTask implements Serializable {
     private List<File> fileList;
     private Dialect dialect;
     private Release release;
 
-    public ProcessingJob(List<File> fileList, Dialect dialect, Release release) {
+    public ProcessingTask(List<File> fileList, Dialect dialect, Release release) {
         this.fileList = fileList;
         this.dialect = dialect;
         this.release = release;

@@ -5,5 +5,6 @@ public class ProcessArguments {
         public static final String Host = "-h";
         public static final String Port = "-p";
         public static final String Timeout = "-timeout";
+        public static final String PrintInfo = "-printInfo";
     }
 }

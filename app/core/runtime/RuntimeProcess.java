@@ -32,6 +32,7 @@ public class RuntimeProcess {
         args.add(Integer.toString(port));
         args.add(ProcessArguments.Identifiers.Timeout);
         args.add(Integer.toString(30));
+        args.add(ProcessArguments.Identifiers.PrintInfo);
 
         Process process = null;
         try {

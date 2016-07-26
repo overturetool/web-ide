@@ -17,8 +17,8 @@ import org.overture.parser.messages.VDMError;
 import org.overture.parser.messages.VDMWarning;
 import org.overture.pog.obligation.ProofObligationList;
 import org.overture.pog.pub.IProofObligationList;
-import org.overture.webide.processor.ProcessingJob;
 import org.overture.webide.processor.ProcessingResult;
+import org.overture.webide.processor.ProcessingTask;
 
 import java.io.File;
 import java.io.IOException;
@@ -89,8 +89,8 @@ public class ModelWrapper {
         ModuleList ast;
         List<AModuleModules> result = null;
 
-        ProcessingJob job = new ProcessingJob(this.files, this.dialect, this.release);
-        ProcessingResult res = new RuntimeManager().process(job);
+        ProcessingTask task = new ProcessingTask(this.files, this.dialect, this.release);
+        ProcessingResult res = new RuntimeManager().process(task);
 
         if (res != null) {
             this.parserWarnings = res.getParserWarnings();

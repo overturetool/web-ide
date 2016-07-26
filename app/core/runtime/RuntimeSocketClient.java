@@ -1,7 +1,7 @@
 package core.runtime;
 
-import org.overture.webide.processor.ProcessingJob;
 import org.overture.webide.processor.ProcessingResult;
+import org.overture.webide.processor.ProcessingTask;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -35,10 +35,10 @@ public class RuntimeSocketClient extends Thread {
         }
     }
 
-    public synchronized ProcessingResult process(ProcessingJob job) {
+    public synchronized ProcessingResult process(ProcessingTask task) {
         ProcessingResult result = null;
         try {
-            this.out.writeObject(job);
+            this.out.writeObject(task);
             this.out.flush();
             result = (ProcessingResult) this.in.readObject();
         } catch (IOException | ClassNotFoundException | NullPointerException e) {

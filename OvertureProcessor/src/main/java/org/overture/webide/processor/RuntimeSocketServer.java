@@ -15,38 +15,42 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.management.ManagementFactory;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class RuntimeSocketServer {
-    //private static final Logger logger = LoggerFactory.getLogger(RuntimeSocketServer.class);
+    private static boolean printInfo;
 
     public static void main(String args[]) throws ClassNotFoundException, IOException {
         String host = null;
         int port = -1;
         int timeoutValue = -1;
+        printInfo = false;
 
-        String id;
-        String val;
-        int len = args.length;
+        Iterator<String> i = Arrays.asList(args).iterator();
 
-        for (int i = 0; i < len - 1 && (id = args[i]) != null && (val = args[i + 1]) != null; i = i + 2) {
-            if (id.equalsIgnoreCase(ProcessArguments.Identifiers.Host)) {
-                host = val;
-            } else if (id.equalsIgnoreCase(ProcessArguments.Identifiers.Port)) {
-                port = Integer.parseInt(val);
-            } else if (id.equalsIgnoreCase(ProcessArguments.Identifiers.Timeout)) {
-                timeoutValue = Integer.parseInt(val);
+        while(i.hasNext()) {
+            String arg = i.next();
+            if (arg.equalsIgnoreCase(ProcessArguments.Identifiers.Host) && i.hasNext()) {
+                host = i.next();
+            } else if (arg.equalsIgnoreCase(ProcessArguments.Identifiers.Port)  && i.hasNext()) {
+                port = Integer.parseInt(i.next());
+            } else if (arg.equalsIgnoreCase(ProcessArguments.Identifiers.Timeout) && i.hasNext()) {
+                timeoutValue = Integer.parseInt(i.next());
+            } else if (arg.equalsIgnoreCase(ProcessArguments.Identifiers.PrintInfo)) {
+                printInfo = true;
             } else {
-                throw new IllegalArgumentException("Unknown argument id: " + id);
+                throw new IllegalArgumentException("Unknown argument: " + arg);
             }
         }
+
+        if (host == null || port == -1)
+            throw new IllegalArgumentException("Missing required arguments: host and/or port");
 
         final Socket socket = new Socket(host, port);
         final ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
         final ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
 
-        //logger.info("process " + getPID() + " ready");
+        print("process " + getPID() + " ready");
 
         while (true) {
             Object inputObject = in.readObject();
@@ -54,7 +58,7 @@ public class RuntimeSocketServer {
             if (inputObject == null)
                 continue;
 
-            ProcessingJob job = (ProcessingJob) inputObject;
+            ProcessingTask job = (ProcessingTask) inputObject;
             List<File> fileList = object2FileList(job.getFileList());
             ProcessingResult result = getProcessingResult(fileList, job.getDialect(), job.getRelease());
 
@@ -97,6 +101,12 @@ public class RuntimeSocketServer {
             return Integer.parseInt(pidStr);
         } catch (Exception e) {
             return -1;
+        }
+    }
+
+    private static void print(String s) {
+        if (printInfo) {
+            System.out.println(s);
         }
     }
 }
