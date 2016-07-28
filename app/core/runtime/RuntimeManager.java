@@ -5,14 +5,10 @@ import org.overture.webide.processor.ProcessingResult;
 import org.overture.webide.processor.ProcessingTask;
 
 import java.net.ServerSocket;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class RuntimeManager {
-    private static final int processLimit = 2;
-    private static AtomicInteger processCount = new AtomicInteger(0);
-    private static ArrayBlockingQueue<RuntimeSocketClient> processQueue = new ArrayBlockingQueue<>(processLimit, true);
+    private static final int capacity = 2;
+    private static RuntimeProcessQueue processQueue = new RuntimeProcessQueue(capacity, true);
 
     public ProcessingResult process(ProcessingTask task) {
         RuntimeSocketClient runtimeClient = acquireProcess();
@@ -27,17 +23,11 @@ public class RuntimeManager {
     }
 
     private RuntimeSocketClient startNewProcess() {
-        if (processCount.incrementAndGet() > processLimit) {
-            processCount.decrementAndGet();
-            return null;
-        }
-
-        RuntimeSocketClient runtimeClient = null;
         try {
             ServerSocket serverSocket = SocketUtils.findAvailablePort(49152, 65535);
             int port = serverSocket.getLocalPort();
 
-            runtimeClient = new RuntimeSocketClient(serverSocket);
+            RuntimeSocketClient runtimeClient = new RuntimeSocketClient(serverSocket);
             runtimeClient.start();
 
             RuntimeProcess runtimeProcess = new RuntimeProcess();
@@ -45,36 +35,25 @@ public class RuntimeManager {
             runtimeClient.setProcess(process);
 
             // TODO : await process ready?
+            return runtimeClient;
         } catch (Exception e) {
-            processCount.decrementAndGet();
             e.printStackTrace();
         }
-        return runtimeClient;
+        return null;
     }
 
     private RuntimeSocketClient acquireProcess() {
-        RuntimeSocketClient runtimeSocketClient = null;
+        RuntimeSocketClient runtimeSocketClient = processQueue.acquire();
 
-        try {
-            runtimeSocketClient = processQueue.poll(3, TimeUnit.SECONDS);
-        } catch (InterruptedException e) { /* ignored */ }
-
-        if (runtimeSocketClient == null) {
+        if (runtimeSocketClient == null && processQueue.size() < capacity) {
             runtimeSocketClient = startNewProcess();
-        } else if (!runtimeSocketClient.isProcessAlive()) {
-            runtimeSocketClient.close();
-            processCount.decrementAndGet();
-            runtimeSocketClient = startNewProcess();
+            processQueue.addBusyProcess(runtimeSocketClient);
         }
 
         return runtimeSocketClient;
     }
 
     private void releaseProcess(RuntimeSocketClient runtimeClient) {
-        try {
-            processQueue.add(runtimeClient);
-        } catch (IllegalStateException e) {
-            runtimeClient.close();
-        } catch (NullPointerException e) { /* ignored */ }
+        processQueue.release(runtimeClient);
     }
 }
