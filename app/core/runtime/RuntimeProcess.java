@@ -18,9 +18,9 @@ public class RuntimeProcess {
 
         List<String> args = new ArrayList<>();
         args.add(javaBin);
-        args.add("-Xms4M"); // initial heap size
-        args.add("-Xmx32M"); // maximum heap size
-        args.add("-Xss1M"); // Thread stack size
+        args.add("-Xms4M");     // initial heap size
+        args.add("-Xmx32M");    // maximum heap size
+        args.add("-Xss1M");     // thread stack size
         args.add("-cp");
         args.add(classPath);
         args.add(className);

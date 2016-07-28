@@ -8,7 +8,7 @@ import java.net.ServerSocket;
 
 public class RuntimeManager {
     private static final int capacity = 2;
-    private static RuntimeProcessQueue processQueue = new RuntimeProcessQueue(capacity, true);
+    private static RuntimeProcessQueue processQueue = new RuntimeProcessQueue(capacity, true, 5000);
 
     public ProcessingResult process(ProcessingTask task) {
         RuntimeSocketClient runtimeClient = acquireProcess();
@@ -27,14 +27,15 @@ public class RuntimeManager {
             ServerSocket serverSocket = SocketUtils.findAvailablePort(49152, 65535);
             int port = serverSocket.getLocalPort();
 
-            RuntimeSocketClient runtimeClient = new RuntimeSocketClient(serverSocket);
+            RuntimeSocketClient runtimeClient = new RuntimeSocketClient(serverSocket, 5000);
             runtimeClient.start();
 
             RuntimeProcess runtimeProcess = new RuntimeProcess();
             Process process = runtimeProcess.init(port);
+
+            runtimeClient.awaitConnection();
             runtimeClient.setProcess(process);
 
-            // TODO : await process ready?
             return runtimeClient;
         } catch (Exception e) {
             e.printStackTrace();

@@ -15,9 +15,13 @@ public class RuntimeSocketClient extends Thread {
     private ServerSocket serverSocket;
     private Socket socket;
     private Process process;
+    private long timeout;
 
-    public RuntimeSocketClient(ServerSocket serverSocket) {
+    private static final Object lock = new Object();
+
+    public RuntimeSocketClient(ServerSocket serverSocket, long timeout) {
         this.serverSocket = serverSocket;
+        this.timeout = timeout;
     }
 
     @Override
@@ -32,6 +36,10 @@ public class RuntimeSocketClient extends Thread {
             this.in = new ObjectInputStream(this.socket.getInputStream());
         } catch (IOException e) {
             e.printStackTrace();
+        } finally {
+            synchronized (lock) {
+                lock.notify();
+            }
         }
     }
 
@@ -66,5 +74,15 @@ public class RuntimeSocketClient extends Thread {
 
     public void setProcess(Process process) {
         this.process = process;
+    }
+
+    public void awaitConnection() {
+        synchronized (lock) {
+            try {
+                lock.wait(this.timeout);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

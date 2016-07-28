@@ -5,16 +5,18 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class RuntimeProcessQueue {
-    private ArrayBlockingQueue<RuntimeSocketClient> availableProcesses;
     private LinkedList<RuntimeSocketClient> busyProcesses = new LinkedList<>();
+    private ArrayBlockingQueue<RuntimeSocketClient> availableProcesses;
+    private long timeout;
 
     // Locks for making the associated methods atomic, but not mutual exclusive
     private static final Object acquireLock = new Object();
     private static final Object releaseLock = new Object();
     private static final Object sizeLock = new Object();
 
-    public RuntimeProcessQueue(int capacity, boolean fair) {
+    public RuntimeProcessQueue(int capacity, boolean fair, long timeout) {
         this.availableProcesses = new ArrayBlockingQueue<>(capacity, fair);
+        this.timeout = timeout;
     }
 
     public RuntimeSocketClient acquire() {
@@ -22,7 +24,7 @@ public class RuntimeProcessQueue {
             RuntimeSocketClient runtimeSocketClient;
 
             try {
-                runtimeSocketClient = this.availableProcesses.poll(5, TimeUnit.SECONDS);
+                runtimeSocketClient = this.availableProcesses.poll(this.timeout, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
                 return null;
             }
