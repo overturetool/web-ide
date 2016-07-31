@@ -17,8 +17,8 @@ import play.mvc.Result;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
-public class auth extends Controller {
-    private final Logger logger = LoggerFactory.getLogger(auth.class);
+public class Auth extends Controller {
+    private final Logger logger = LoggerFactory.getLogger(Auth.class);
 
     public Result verify(String tokenId) {
         String accessToken = ServerUtils.extractAccessToken(request());

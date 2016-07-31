@@ -9,19 +9,9 @@ import play.mvc.Result;
 
 import java.util.Base64;
 
-public class evaluate extends Application {
-
-//    public Result expression(String input) {
-//        String inputDecoded = new String(Base64.getDecoder().decode(input));
-//
-//        ModelWrapper modelWrapper = new ModelWrapper();
-//
-//        return ok(modelWrapper.evaluate(inputDecoded));
-//    }
-
+public class Evaluate extends Application {
     public Result project(String input, String account, String path) {
         String inputDecoded = new String(Base64.getDecoder().decode(input));
-
         IVFS<FileObject> file = new CommonsVFS(account, path);
 
         if (!file.exists())

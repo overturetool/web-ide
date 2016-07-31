@@ -1,23 +1,25 @@
 package core.debug;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.overture.interpreter.debug.DBGPReaderV2;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DBGPReaderInitializer {
-    private List<String> args;
-    private final Logger logger = LoggerFactory.getLogger(DBGPReaderInitializer.class);
+public class DebugProcess {
+    private List<String> args = new ArrayList<>();
 
-    public DBGPReaderInitializer(String type, String host, int port, String key, String entry, String defaultName, String file) {
-        args = new ArrayList<>();
+    public DebugProcess(String type, String host, int port, String key, String entry, String defaultName, String file) {
+        String javaHome = System.getProperty("java.home");
+        String javaBin = Paths.get(javaHome, "bin", "java").toString();
+        String classPath = Paths.get("lib", "Overture-2.3.6.jar").toString();
+        String className = DBGPReaderV2.class.getCanonicalName();
 
-        args.add("java");
+        args.add(javaBin);
         args.add("-cp");
-        args.add("lib/Overture-2.3.6.jar");
-        args.add("org.overture.interpreter.debug.DBGPReaderV2");
+        args.add(classPath);
+        args.add(className);
 
         if (type != null) {
             args.add("-" + type);
@@ -49,7 +51,6 @@ public class DBGPReaderInitializer {
         }
 
         args.add("-w"); // turn off warnings
-
         args.add(file);
     }
 
@@ -57,7 +58,7 @@ public class DBGPReaderInitializer {
         try {
             new ProcessBuilder(args).start();
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            e.printStackTrace();
         }
     }
 }

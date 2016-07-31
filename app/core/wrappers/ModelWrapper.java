@@ -1,28 +1,24 @@
 package core.wrappers;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import core.runtime.RuntimeManager;
 import core.vfs.IVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
 import org.overture.ast.lex.Dialect;
 import org.overture.ast.modules.AModuleModules;
 import org.overture.ast.util.modules.ModuleList;
+import org.overture.codegen.utils.GeneralCodeGenUtils;
+import org.overture.codegen.vdm2java.JavaCodeGenMain;
 import org.overture.config.Release;
-import org.overture.config.Settings;
-import org.overture.interpreter.VDMJ;
 import org.overture.interpreter.runtime.ModuleInterpreter;
 import org.overture.parser.messages.VDMError;
 import org.overture.parser.messages.VDMWarning;
-import org.overture.parser.util.ParserUtil.ParserResult;
 import org.overture.pog.obligation.ProofObligationList;
 import org.overture.pog.pub.IProofObligationList;
-import org.overture.typechecker.util.TypeCheckerUtil;
-import org.overture.typechecker.util.TypeCheckerUtil.TypeCheckResult;
+import org.overture.webide.processor.ProcessingResult;
+import org.overture.webide.processor.ProcessingTask;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -32,9 +28,8 @@ public class ModelWrapper {
     private ModuleInterpreter interpreter;
 
     private List<File> files;
+    private Dialect dialect;
     private Release release;
-
-    private static final Object lock = new Object();
 
     public List<VDMWarning> parserWarnings;
     public List<VDMWarning> typeCheckerWarnings;
@@ -42,8 +37,10 @@ public class ModelWrapper {
     public List<VDMError> typeCheckerErrors;
 
     public ModelWrapper(IVFS<FileObject> file) {
-        this.files = preprocessFiles(file);
-        this.release = getRelease(file);
+        ConfigParser configParser = new ConfigParser(file);
+        this.dialect = configParser.getDialect();
+        this.release = configParser.getRelease();
+        this.files = JavaCodeGenMain.filterFiles(file.getProjectAsIOFile());
     }
 
     public String evaluate(String input) {
@@ -55,43 +52,53 @@ public class ModelWrapper {
         return this.interpreter.getDefaultName();
     }
 
-    public ModuleList getAst() {
+    public Dialect getDialect() {
+        return this.dialect;
+    }
+
+    public Release getRelease() {
+        return this.release;
+    }
+
+    public ModuleList getAST() {
         if (this.interpreter != null)
             return this.interpreter.getModules();
         else
             return new ModuleList();
     }
 
-    public IProofObligationList getPog() throws AnalysisException {
+    public IProofObligationList getPOG() throws AnalysisException {
         if (this.interpreter != null && this.interpreter.defaultModule.getTypeChecked())
             return this.interpreter.getProofObligations();
-        return new ProofObligationList();
+        else
+            return new ProofObligationList();
     }
 
-    private List<File> preprocessFiles(IVFS<FileObject> file) {
+    private List<File> filterFileList(IVFS<FileObject> file) {
         List<File> files = file.getProjectAsIOFile();
         List<File> filteredFiles = Collections.synchronizedList(new ArrayList<>());
-        filteredFiles.addAll(files.stream().filter(f -> f.getName().endsWith(".vdmsl")).collect(Collectors.toList()));
+        filteredFiles.addAll(files.stream().filter(GeneralCodeGenUtils::isVdmSourceFile).collect(Collectors.toList()));
         return filteredFiles;
     }
 
     public ModelWrapper init() {
-        List<AModuleModules> result;
         ModuleList ast;
+        List<AModuleModules> result = null;
 
-        synchronized (lock) {
-            Settings.dialect = Dialect.VDM_SL;
-            Settings.release = this.release;
+        ProcessingTask task = new ProcessingTask(this.files, this.dialect, this.release);
+        ProcessingResult res = new RuntimeManager().processSync(task);
 
-            TypeCheckResult<List<AModuleModules>> typeCheckerResult = TypeCheckerUtil.typeCheckSl(this.files, VDMJ.filecharset);
-            ParserResult<List<AModuleModules>> parserResult = typeCheckerResult.parserResult;
-
-            this.parserWarnings = parserResult.warnings;
-            this.parserErrors = parserResult.errors;
-            this.typeCheckerWarnings = typeCheckerResult.warnings;
-            this.typeCheckerErrors = typeCheckerResult.errors;
-
-            result = typeCheckerResult.result != null ? typeCheckerResult.result : parserResult.result;
+        if (res != null) {
+            this.parserWarnings = res.getParserWarnings();
+            this.parserErrors = res.getParserErrors();
+            this.typeCheckerWarnings = res.getTypeCheckerWarnings();
+            this.typeCheckerErrors = res.getTypeCheckerErrors();
+            result = res.getModules();
+        } else {
+            this.parserWarnings = new ArrayList<>();
+            this.parserErrors = new ArrayList<>();
+            this.typeCheckerWarnings = new ArrayList<>();
+            this.typeCheckerErrors = new ArrayList<>();
         }
 
         if (result == null) {
@@ -103,36 +110,10 @@ public class ModelWrapper {
 
         try {
             this.interpreter = new ModuleInterpreter(ast);
-            if (this.parserErrors.isEmpty() && this.typeCheckerErrors.isEmpty()) {
-                this.interpreter.defaultModule.setTypeChecked(true);
-            }
+            this.interpreter.defaultModule.setTypeChecked(this.parserErrors.isEmpty() && this.typeCheckerErrors.isEmpty());
         } catch (Exception e) {
             e.printStackTrace();
         }
         return this;
-    }
-
-    private Release getRelease(IVFS<FileObject> file) {
-        try {
-            String attribute = "release";
-            FileObject projectRoot = file.getProjectRoot();
-            if (projectRoot == null)
-                return Release.DEFAULT;
-
-            FileObject projectFile = projectRoot.getChild(".project");
-            if (projectFile == null)
-                return Release.DEFAULT;
-
-            InputStream content = projectFile.getContent().getInputStream();
-            JsonNode node = new ObjectMapper().readTree(content);
-            Release release = null;
-            if (node != null && node.hasNonNull(attribute))
-                release = Release.lookup(node.get(attribute).textValue());
-
-            return release != null ? release : Release.DEFAULT;
-        } catch (IOException e) {
-            //e.printStackTrace();
-        }
-        return Release.DEFAULT;
     }
 }

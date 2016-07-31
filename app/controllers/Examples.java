@@ -23,7 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
 
-public class samples extends Application {
+public class Examples extends Application {
     public Result getFromGithubApi(String projectUrl) {
         String accessToken = ServerUtils.extractAccessToken(request());
         String userId = SessionStore.getInstance().get(accessToken);
@@ -116,6 +116,9 @@ public class samples extends Application {
         File[] repository = vfs.getIOFile().listFiles((dir, name) -> !name.startsWith("."));
 
         ArrayNode arrayNode = new ObjectMapper().createArrayNode();
+
+        if (repository == null)
+            return ok(arrayNode);
 
         for (File file : repository) {
             FileOperations.filterDirectoryContent(file, new String[]{"vdmsl", "txt"});

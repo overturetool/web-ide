@@ -13,7 +13,7 @@ import play.mvc.Result;
 
 import java.util.List;
 
-public class outline extends Application {
+public class Outline extends Application {
     public Result file(String account, String path) {
         IVFS<FileObject> file = new CommonsVFS(account, path);
 
@@ -22,7 +22,7 @@ public class outline extends Application {
 
         ModelWrapper modelWrapper = new ModelWrapper(file).init();
 
-        ModuleList ast = modelWrapper.getAst();
+        ModuleList ast = modelWrapper.getAST();
         OutlineTreeContentProvider outlineProvider = new OutlineTreeContentProvider(ast);
         List<Object> list = outlineProvider.getContent();
         List<ObjectNode> jsonList = outlineProvider.toJSON(list, file.getName());

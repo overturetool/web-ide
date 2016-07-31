@@ -4,19 +4,19 @@ version := "1.0-SNAPSHOT"
 
 lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
-scalaVersion := "2.11.6"
+scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
-  //javaJdbc,
-  cache,
   javaWs,
   filters,
   "org.apache.commons" % "commons-vfs2" % "2.0",
   "commons-io" % "commons-io" % "2.4",
-  //"org.overturetool.core" % "interpreter" % "2.3.2",
 
   "com.google.oauth-client" % "google-oauth-client" % "1.21.0",
   "com.google.api-client" % "google-api-client" % "1.21.0",
+
+//  "org.slf4j" % "slf4j-api" % "1.7.21",
+//  "org.slf4j" % "slf4j-log4j12" % "1.7.21",
 
   "com.jayway.restassured" % "rest-assured" % "2.8.0" % "test",
   "com.jayway.restassured" % "scala-support" % "2.8.0" % "test",
