@@ -1,60 +1,43 @@
 package core.runtime;
 
-import core.utilities.SocketUtils;
+import core.runtime.ClassLoaders.ClassLoaderManager;
 import org.overture.webide.processor.ProcessingResult;
 import org.overture.webide.processor.ProcessingTask;
-
-import java.net.ServerSocket;
+import org.overture.webide.processor.RuntimeSocketServer;
 
 public class RuntimeManager {
-    private static final int capacity = 2;
-    private static RuntimeProcessQueue processQueue = new RuntimeProcessQueue(capacity, true, 5000);
+    public ProcessingResult processAsync(ProcessingTask task) {
+        ProcessManager processManager = new ProcessManager();
 
-    public ProcessingResult process(ProcessingTask task) {
-        RuntimeSocketClient runtimeClient = acquireProcess();
+        RuntimeSocketClient runtimeClient = processManager.acquireProcess();
 
         if (runtimeClient == null)
             return null;
 
         ProcessingResult processingResult = runtimeClient.process(task);
-        releaseProcess(runtimeClient);
+        processManager.releaseProcess(runtimeClient);
 
         return processingResult;
     }
 
-    private RuntimeSocketClient startNewProcess() {
-        try {
-            ServerSocket serverSocket = SocketUtils.findAvailablePort(49152, 65535);
-            int port = serverSocket.getLocalPort();
-
-            RuntimeSocketClient runtimeClient = new RuntimeSocketClient(serverSocket, 5000);
-            runtimeClient.start();
-
-            RuntimeProcess runtimeProcess = new RuntimeProcess();
-            Process process = runtimeProcess.init(port);
-
-            runtimeClient.awaitConnection();
-            runtimeClient.setProcess(process);
-
-            return runtimeClient;
-        } catch (Exception e) {
-            e.printStackTrace();
+    public ProcessingResult processSync(ProcessingTask task) {
+        synchronized (RuntimeManager.class) {
+            return RuntimeSocketServer.getProcessingResult(task.getFileList(), task.getDialect(), task.getRelease());
         }
-        return null;
     }
 
-    private RuntimeSocketClient acquireProcess() {
-        RuntimeSocketClient runtimeSocketClient = processQueue.acquire();
-
-        if (runtimeSocketClient == null && processQueue.size() < capacity) {
-            runtimeSocketClient = startNewProcess();
-            processQueue.addBusyProcess(runtimeSocketClient);
-        }
-
-        return runtimeSocketClient;
+    public ProcessingResult processClassLoader0(ProcessingTask task) {
+        ClassLoaderManager classLoaderManager = new ClassLoaderManager();
+        return classLoaderManager.processClassLoader0(task);
     }
 
-    private void releaseProcess(RuntimeSocketClient runtimeClient) {
-        processQueue.release(runtimeClient);
+    public ProcessingResult processClassLoader1(ProcessingTask task) {
+        ClassLoaderManager classLoaderManager = new ClassLoaderManager();
+        return classLoaderManager.processClassLoader1(task);
+    }
+
+    public ProcessingResult processClassLoader2(ProcessingTask task) {
+        ClassLoaderManager classLoaderManager = new ClassLoaderManager();
+        return classLoaderManager.processClassLoader2(task);
     }
 }

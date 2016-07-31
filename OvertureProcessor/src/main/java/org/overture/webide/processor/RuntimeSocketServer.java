@@ -17,8 +17,14 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-public class RuntimeSocketServer {
+public class RuntimeSocketServer implements IRuntimeTest, Serializable {
     private static boolean printInfo;
+
+    public static int test = 9;
+
+    public int getTest() {
+        return test;
+    }
 
     public static void main(String args[]) throws ClassNotFoundException, IOException {
         String host = null;
@@ -71,7 +77,7 @@ public class RuntimeSocketServer {
         }
     }
 
-    private static ProcessingResult getProcessingResult(List<File> fileList, Dialect dialect, Release release) {
+    public static ProcessingResult getProcessingResult(List<File> fileList, Dialect dialect, Release release) {
         Settings.dialect = dialect;
         Settings.release = release;
 
@@ -112,5 +118,9 @@ public class RuntimeSocketServer {
         if (printInfo) {
             System.out.println(s);
         }
+    }
+
+    public ProcessingResult getProcessingResultNonStatic(List<File> fileList, Dialect dialect, Release release) {
+        return RuntimeSocketServer.getProcessingResult(fileList, dialect, release);
     }
 }

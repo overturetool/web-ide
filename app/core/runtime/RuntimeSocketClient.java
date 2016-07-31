@@ -50,7 +50,7 @@ public class RuntimeSocketClient extends Thread {
             this.out.flush();
             result = (ProcessingResult) this.in.readObject();
         } catch (IOException | ClassNotFoundException | NullPointerException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
         return result;
     }

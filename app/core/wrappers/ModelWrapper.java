@@ -1,7 +1,5 @@
 package core.wrappers;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import core.runtime.RuntimeManager;
 import core.vfs.IVFS;
 import org.apache.commons.vfs2.FileObject;
@@ -21,8 +19,6 @@ import org.overture.webide.processor.ProcessingResult;
 import org.overture.webide.processor.ProcessingTask;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -41,10 +37,10 @@ public class ModelWrapper {
     public List<VDMError> typeCheckerErrors;
 
     public ModelWrapper(IVFS<FileObject> file) {
-        //this.files = filterFileList(file);
+        ConfigParser configParser = new ConfigParser(file);
+        this.dialect = configParser.getDialect();
+        this.release = configParser.getRelease();
         this.files = JavaCodeGenMain.filterFiles(file.getProjectAsIOFile());
-        this.dialect = getDialect(file);
-        this.release = getRelease(file);
     }
 
     public String evaluate(String input) {
@@ -90,7 +86,7 @@ public class ModelWrapper {
         List<AModuleModules> result = null;
 
         ProcessingTask task = new ProcessingTask(this.files, this.dialect, this.release);
-        ProcessingResult res = new RuntimeManager().process(task);
+        ProcessingResult res = new RuntimeManager().processSync(task);
 
         if (res != null) {
             this.parserWarnings = res.getParserWarnings();
@@ -119,57 +115,5 @@ public class ModelWrapper {
             e.printStackTrace();
         }
         return this;
-    }
-
-    private Release getRelease(IVFS<FileObject> file) {
-        try {
-            String attribute = "release";
-            FileObject projectRoot = file.getProjectRoot();
-            if (projectRoot == null)
-                return Release.DEFAULT;
-
-            FileObject projectFile = projectRoot.getChild(".project");
-            if (projectFile == null)
-                return Release.DEFAULT;
-
-            InputStream content = projectFile.getContent().getInputStream();
-            JsonNode node = new ObjectMapper().readTree(content);
-            Release release = null;
-            if (node != null && node.hasNonNull(attribute))
-                release = Release.lookup(node.get(attribute).textValue());
-
-            return release != null ? release : Release.DEFAULT;
-        } catch (IOException e) {
-            return Release.DEFAULT;
-        }
-    }
-
-    private Dialect getDialect(IVFS<FileObject> file) {
-        try {
-            String attribute = "dialect";
-            FileObject projectRoot = file.getProjectRoot();
-            if (projectRoot == null)
-                return Dialect.VDM_PP;
-
-            FileObject projectFile = projectRoot.getChild(".project");
-            if (projectFile == null)
-                return Dialect.VDM_PP;
-
-            InputStream content = projectFile.getContent().getInputStream();
-            JsonNode node = new ObjectMapper().readTree(content);
-
-            if (node == null || !node.hasNonNull(attribute))
-                return Dialect.VDM_PP;
-
-            String dialect = node.get(attribute).textValue().replaceAll("-", "");
-
-            if (dialect.equalsIgnoreCase("vdmpp"))
-                return Dialect.VDM_PP;
-            else if (dialect.equalsIgnoreCase("vdmrt"))
-                return Dialect.VDM_RT;
-            else if (dialect.equalsIgnoreCase("vdmsl"))
-                return Dialect.VDM_SL;
-        } catch (IOException | NullPointerException e) { /* ignored */ }
-        return Dialect.VDM_PP;
     }
 }
