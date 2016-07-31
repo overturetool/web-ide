@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.StatusCode;
 import core.outline.OutlineTreeContentProvider;
 import core.vfs.IVFS;
-import core.vfs.commons_vfs2.CommonsVFS;
+import core.vfs.commons.vfs2.CommonsVFS;
 import core.wrappers.ModelWrapper;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.util.modules.ModuleList;

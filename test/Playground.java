@@ -1,6 +1,6 @@
 import core.vfs.CollisionPolicy;
 import core.vfs.IVFS;
-import core.vfs.commons_vfs2.CommonsVFS;
+import core.vfs.commons.vfs2.CommonsVFS;
 import core.wrappers.ModelWrapper;
 import org.junit.Test;
 

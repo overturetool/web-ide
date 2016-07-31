@@ -8,7 +8,7 @@ import core.codecompletion.proposal.mapper.ProposalToJsonMapper;
 import core.codecompletion.resources.Document;
 import core.codecompletion.resources.ICompletionProposal;
 import core.vfs.IVFS;
-import core.vfs.commons_vfs2.CommonsVFS;
+import core.vfs.commons.vfs2.CommonsVFS;
 import org.overture.interpreter.util.ExitStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

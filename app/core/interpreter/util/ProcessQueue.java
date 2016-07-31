@@ -1,12 +1,12 @@
-package core.runtime;
+package core.interpreter.util;
 
 import java.util.LinkedList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-public class RuntimeProcessQueue {
-    private LinkedList<RuntimeSocketClient> busyProcesses = new LinkedList<>();
-    private ArrayBlockingQueue<RuntimeSocketClient> availableProcesses;
+public class ProcessQueue {
+    private LinkedList<ProcessClient> busyProcesses = new LinkedList<>();
+    private ArrayBlockingQueue<ProcessClient> availableProcesses;
     private long timeout;
 
     // Locks for making the associated methods atomic, but not mutual exclusive
@@ -14,38 +14,38 @@ public class RuntimeProcessQueue {
     private static final Object releaseLock = new Object();
     private static final Object sizeLock = new Object();
 
-    public RuntimeProcessQueue(int capacity, boolean fair, long timeout) {
+    public ProcessQueue(int capacity, boolean fair, long timeout) {
         this.availableProcesses = new ArrayBlockingQueue<>(capacity, fair);
         this.timeout = timeout;
     }
 
-    public RuntimeSocketClient acquire() {
+    public ProcessClient acquire() {
         synchronized (acquireLock) {
-            RuntimeSocketClient runtimeSocketClient;
+            ProcessClient processClient;
 
             try {
-                runtimeSocketClient = this.availableProcesses.poll(this.timeout, TimeUnit.MILLISECONDS);
+                processClient = this.availableProcesses.poll(this.timeout, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
                 return null;
             }
 
-            if (runtimeSocketClient != null && runtimeSocketClient.isProcessAlive()) {
-                this.busyProcesses.add(runtimeSocketClient);
-                return runtimeSocketClient;
+            if (processClient != null && processClient.isProcessAlive()) {
+                this.busyProcesses.add(processClient);
+                return processClient;
             } else {
                 return null;
             }
         }
     }
 
-    public void release(RuntimeSocketClient runtimeClient) {
+    public void release(ProcessClient processClient) {
         synchronized (releaseLock) {
             try {
-                this.availableProcesses.add(runtimeClient);
+                this.availableProcesses.add(processClient);
             } catch (IllegalStateException e) {
-                runtimeClient.close();
+                processClient.close();
             } catch (NullPointerException e) { /* ignored */ }
-            this.busyProcesses.remove(runtimeClient);
+            this.busyProcesses.remove(processClient);
         }
     }
 
@@ -55,7 +55,7 @@ public class RuntimeProcessQueue {
         }
     }
 
-    public void addBusyProcess(RuntimeSocketClient runtimeClient) {
-        this.busyProcesses.add(runtimeClient);
+    public void addBusyProcess(ProcessClient processClient) {
+        this.busyProcesses.add(processClient);
     }
 }

@@ -8,7 +8,7 @@ import core.auth.GoogleAuthentication;
 import core.auth.SessionStore;
 import core.utilities.ServerUtils;
 import core.vfs.IVFS;
-import core.vfs.commons_vfs2.CommonsVFS;
+import core.vfs.commons.vfs2.CommonsVFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.mvc.Controller;

@@ -4,7 +4,7 @@ import core.debug.CommunicationFilter;
 import core.debug.ProxyClient;
 import core.debug.ProxyServer;
 import core.vfs.IVFS;
-import core.vfs.commons_vfs2.CommonsVFS;
+import core.vfs.commons.vfs2.CommonsVFS;
 import org.apache.commons.codec.binary.StringUtils;
 import play.mvc.LegacyWebSocket;
 import play.mvc.WebSocket;

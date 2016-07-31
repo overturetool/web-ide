@@ -1,6 +1,6 @@
 package core.wrappers;
 
-import core.runtime.RuntimeManager;
+import core.interpreter.util.InterpreterManager;
 import core.vfs.IVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
@@ -15,8 +15,8 @@ import org.overture.parser.messages.VDMError;
 import org.overture.parser.messages.VDMWarning;
 import org.overture.pog.obligation.ProofObligationList;
 import org.overture.pog.pub.IProofObligationList;
-import org.overture.webide.processor.ProcessingResult;
-import org.overture.webide.processor.ProcessingTask;
+import org.overture.webide.interpreter_util.Result;
+import org.overture.webide.interpreter_util.Task;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -83,17 +83,17 @@ public class ModelWrapper {
 
     public ModelWrapper init() {
         ModuleList ast;
-        List<AModuleModules> result = null;
+        List<AModuleModules> moduleModules = null;
 
-        ProcessingTask task = new ProcessingTask(this.files, this.dialect, this.release);
-        ProcessingResult res = new RuntimeManager().processSync(task);
+        Task task = new Task(this.files, this.dialect, this.release);
+        Result result = new InterpreterManager().getResultAsync(task);
 
-        if (res != null) {
-            this.parserWarnings = res.getParserWarnings();
-            this.parserErrors = res.getParserErrors();
-            this.typeCheckerWarnings = res.getTypeCheckerWarnings();
-            this.typeCheckerErrors = res.getTypeCheckerErrors();
-            result = res.getModules();
+        if (result != null) {
+            this.parserWarnings = result.getParserWarnings();
+            this.parserErrors = result.getParserErrors();
+            this.typeCheckerWarnings = result.getTypeCheckerWarnings();
+            this.typeCheckerErrors = result.getTypeCheckerErrors();
+            moduleModules = result.getModules();
         } else {
             this.parserWarnings = new ArrayList<>();
             this.parserErrors = new ArrayList<>();
@@ -101,10 +101,10 @@ public class ModelWrapper {
             this.typeCheckerErrors = new ArrayList<>();
         }
 
-        if (result == null) {
+        if (moduleModules == null) {
             ast = new ModuleList();
         } else {
-            ast = new ModuleList(result);
+            ast = new ModuleList(moduleModules);
             ast.combineDefaults();
         }
 

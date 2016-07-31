@@ -1,9 +1,6 @@
-package core.runtime.ClassLoaders;
+package core.interpreter.util.classloaders;
 
-import org.overture.webide.processor.IRuntimeTest;
-import org.overture.webide.processor.ProcessingResult;
-import org.overture.webide.processor.ProcessingTask;
-import org.overture.webide.processor.RuntimeSocketServer;
+import org.overture.webide.interpreter_util.*;
 
 import java.io.*;
 import java.net.URL;
@@ -13,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ClassLoaderManager {
-    public ProcessingResult processClassLoader0(ProcessingTask task) {
+    public Result getResultClassLoader0(Task task) {
         Set<String> changedClasses = new HashSet<>();
         changedClasses.add("org.overture.webide.processor.IRuntimeTest");
         changedClasses.add("org.overture.config.Settings");
@@ -27,38 +24,38 @@ public class ClassLoaderManager {
             DynamicClassLoader classLoader = new DynamicClassLoader(changedClasses);
             Class cls = classLoader.dynamicallyLoadClass("org.overture.webide.processor.RuntimeSocketServer");
             Object newInstance = cls.newInstance();
-            IRuntimeTest runtime = (IRuntimeTest) newInstance;
-            return runtime.getProcessingResultNonStatic(task.getFileList(), task.getDialect(), task.getRelease());
+            IInterpreterUtil runtime = (IInterpreterUtil) newInstance;
+            return runtime.getResult(task.getFileList(), task.getDialect(), task.getRelease());
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public ProcessingResult processClassLoader1(ProcessingTask task) {
+    public Result getResultClassLoader1(Task task) {
         try {
             ClassLoader parentClassLoader = CustomClassLoader.class.getClassLoader();
             CustomClassLoader classLoader = new CustomClassLoader(parentClassLoader);
             Class cls = classLoader.loadClass("org.overture.webide.processor.RuntimeSocketServer");
 
             Object newInstance = cls.newInstance();
-            IRuntimeTest runtime = (IRuntimeTest) newInstance;
+            IInterpreterUtil runtime = (IInterpreterUtil) newInstance;
 
 //            RuntimeSocketServer.test = 10;
 //            System.out.println(runtime.getTest());
 //            System.out.println(RuntimeSocketServer.test);
 //            System.out.println();
 
-            return runtime.getProcessingResultNonStatic(task.getFileList(), task.getDialect(), task.getRelease());
+            return runtime.getResult(task.getFileList(), task.getDialect(), task.getRelease());
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public ProcessingResult processClassLoader2(ProcessingTask task) {
+    public Result getResultClassLoader2(Task task) {
         String classPath = Paths.get("lib", "OvertureProcessor-1.0-SNAPSHOT-jar-with-dependencies.jar").toAbsolutePath().toString();
-        String className = RuntimeSocketServer.class.getCanonicalName();
+        String className = InterpreterUtil.class.getCanonicalName();
 
         try {
             URL[] url = new URL[] { new URL("file:" + classPath) };
@@ -70,14 +67,14 @@ public class ClassLoaderManager {
 //            IRuntimeTest runtime = (IRuntimeTest) newInstance;
 //            Gson gson = new Gson();
 //            IRuntimeTest runtime = gson.fromJson(gson.toJson(newInstance), IRuntimeTest.class);
-            RuntimeSocketServer runtime = (RuntimeSocketServer) toObject(toByteArray(newInstance));
+            IInterpreterUtil runtime = (IInterpreterUtil) toObject(toByteArray(newInstance));
 
 //            RuntimeSocketServer.test = 10;
 //            System.out.println(runtime.getTest());
 //            System.out.println(RuntimeSocketServer.test);
 //            System.out.println();
 //
-            ProcessingResult result = runtime.getProcessingResultNonStatic(task.getFileList(), task.getDialect(), task.getRelease());
+            Result result = runtime.getResult(task.getFileList(), task.getDialect(), task.getRelease());
             clsLoader.close();
 
             return result;

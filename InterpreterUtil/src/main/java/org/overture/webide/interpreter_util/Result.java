@@ -1,4 +1,4 @@
-package org.overture.webide.processor;
+package org.overture.webide.interpreter_util;
 
 import org.overture.ast.modules.AModuleModules;
 import org.overture.parser.messages.VDMError;
@@ -9,14 +9,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ProcessingResult implements Serializable {
+public class Result implements Serializable {
     private List<AModuleModules> modules;
     private List<VDMMessageSerializable> parserWarnings;
     private List<VDMMessageSerializable> parserErrors;
     private List<VDMMessageSerializable> typeCheckerWarnings;
     private List<VDMMessageSerializable> typeCheckerErrors;
 
-    public ProcessingResult() {
+    public Result() {
         this.parserWarnings = new ArrayList<VDMMessageSerializable>();
         this.parserErrors = new ArrayList<VDMMessageSerializable>();
         this.typeCheckerWarnings = new ArrayList<VDMMessageSerializable>();

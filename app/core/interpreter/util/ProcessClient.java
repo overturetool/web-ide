@@ -1,7 +1,7 @@
-package core.runtime;
+package core.interpreter.util;
 
-import org.overture.webide.processor.ProcessingResult;
-import org.overture.webide.processor.ProcessingTask;
+import org.overture.webide.interpreter_util.Result;
+import org.overture.webide.interpreter_util.Task;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -9,7 +9,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class RuntimeSocketClient extends Thread {
+public class ProcessClient extends Thread {
     private ObjectOutputStream out;
     private ObjectInputStream in;
     private ServerSocket serverSocket;
@@ -19,7 +19,7 @@ public class RuntimeSocketClient extends Thread {
 
     private static final Object lock = new Object();
 
-    public RuntimeSocketClient(ServerSocket serverSocket, long timeout) {
+    public ProcessClient(ServerSocket serverSocket, long timeout) {
         this.serverSocket = serverSocket;
         this.timeout = timeout;
     }
@@ -43,12 +43,12 @@ public class RuntimeSocketClient extends Thread {
         }
     }
 
-    public synchronized ProcessingResult process(ProcessingTask task) {
-        ProcessingResult result = null;
+    public synchronized Result process(Task task) {
+        Result result = null;
         try {
             this.out.writeObject(task);
             this.out.flush();
-            result = (ProcessingResult) this.in.readObject();
+            result = (Result) this.in.readObject();
         } catch (IOException | ClassNotFoundException | NullPointerException e) {
             //e.printStackTrace();
         }

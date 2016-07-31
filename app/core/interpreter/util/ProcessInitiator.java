@@ -1,20 +1,20 @@
-package core.runtime;
+package core.interpreter.util;
 
 import core.ServerConfigurations;
-import org.overture.webide.processor.ProcessArguments;
-import org.overture.webide.processor.RuntimeSocketServer;
+import org.overture.webide.interpreter_util.InterpreterArguments;
+import org.overture.webide.interpreter_util.InterpreterUtilMain;
 
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RuntimeProcess {
+public class ProcessInitiator {
     public Process init(int port) {
         String javaHome = System.getProperty("java.home");
         String javaBin = Paths.get(javaHome, "bin", "java").toString();
-        String classPath = Paths.get("lib", "OvertureProcessor-1.0-SNAPSHOT-jar-with-dependencies.jar").toString();
-        String className = RuntimeSocketServer.class.getCanonicalName();
+        String classPath = Paths.get("lib", "interpreter-util-1.0-SNAPSHOT-jar-with-dependencies.jar").toString();
+        String className = InterpreterUtilMain.class.getCanonicalName();
 
         List<String> args = new ArrayList<>();
         args.add(javaBin);
@@ -26,13 +26,11 @@ public class RuntimeProcess {
         args.add(className);
 
         // Program arguments
-        args.add(ProcessArguments.Identifiers.Host);
+        args.add(InterpreterArguments.Identifiers.Host);
         args.add(ServerConfigurations.localhostByName);
-        args.add(ProcessArguments.Identifiers.Port);
+        args.add(InterpreterArguments.Identifiers.Port);
         args.add(Integer.toString(port));
-        args.add(ProcessArguments.Identifiers.Timeout);
-        args.add(Integer.toString(30));
-        args.add(ProcessArguments.Identifiers.PrintInfo);
+        args.add(InterpreterArguments.Identifiers.PrintInfo);
 
         Process process = null;
         try {

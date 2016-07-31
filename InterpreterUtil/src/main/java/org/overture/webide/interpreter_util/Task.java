@@ -1,4 +1,4 @@
-package org.overture.webide.processor;
+package org.overture.webide.interpreter_util;
 
 import org.overture.ast.lex.Dialect;
 import org.overture.config.Release;
@@ -7,12 +7,12 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.List;
 
-public class ProcessingTask implements Serializable {
+public class Task implements Serializable {
     private List<File> fileList;
     private Dialect dialect;
     private Release release;
 
-    public ProcessingTask(List<File> fileList, Dialect dialect, Release release) {
+    public Task(List<File> fileList, Dialect dialect, Release release) {
         this.fileList = fileList;
         this.dialect = dialect;
         this.release = release;

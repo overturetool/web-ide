@@ -1,13 +1,4 @@
-package org.overture.webide.processor;
-
-import org.overture.ast.lex.Dialect;
-import org.overture.ast.modules.AModuleModules;
-import org.overture.config.Release;
-import org.overture.config.Settings;
-import org.overture.interpreter.VDMJ;
-import org.overture.parser.util.ParserUtil.ParserResult;
-import org.overture.typechecker.util.TypeCheckerUtil;
-import org.overture.typechecker.util.TypeCheckerUtil.TypeCheckResult;
+package org.overture.webide.interpreter_util;
 
 import java.io.*;
 import java.lang.management.ManagementFactory;
@@ -17,32 +8,23 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-public class RuntimeSocketServer implements IRuntimeTest, Serializable {
+public class InterpreterUtilMain {
     private static boolean printInfo;
-
-    public static int test = 9;
-
-    public int getTest() {
-        return test;
-    }
 
     public static void main(String args[]) throws ClassNotFoundException, IOException {
         String host = null;
         int port = -1;
-        int timeoutValue = -1;
         printInfo = false;
 
         Iterator<String> i = Arrays.asList(args).iterator();
 
         while(i.hasNext()) {
             String arg = i.next();
-            if (arg.equalsIgnoreCase(ProcessArguments.Identifiers.Host) && i.hasNext()) {
+            if (arg.equalsIgnoreCase(InterpreterArguments.Identifiers.Host) && i.hasNext()) {
                 host = i.next();
-            } else if (arg.equalsIgnoreCase(ProcessArguments.Identifiers.Port)  && i.hasNext()) {
+            } else if (arg.equalsIgnoreCase(InterpreterArguments.Identifiers.Port)  && i.hasNext()) {
                 port = Integer.parseInt(i.next());
-            } else if (arg.equalsIgnoreCase(ProcessArguments.Identifiers.Timeout) && i.hasNext()) {
-                timeoutValue = Integer.parseInt(i.next());
-            } else if (arg.equalsIgnoreCase(ProcessArguments.Identifiers.PrintInfo)) {
+            } else if (arg.equalsIgnoreCase(InterpreterArguments.Identifiers.PrintInfo)) {
                 printInfo = true;
             } else {
                 throw new IllegalArgumentException("Unknown argument: " + arg);
@@ -68,29 +50,13 @@ public class RuntimeSocketServer implements IRuntimeTest, Serializable {
             if (inputObject == null)
                 continue;
 
-            ProcessingTask task = (ProcessingTask) inputObject;
+            Task task = (Task) inputObject;
             List<File> fileList = object2FileList(task.getFileList());
-            ProcessingResult result = getProcessingResult(fileList, task.getDialect(), task.getRelease());
+            Result result = new InterpreterUtil().getResult(fileList, task.getDialect(), task.getRelease());
 
             out.writeObject(result);
             out.flush();
         }
-    }
-
-    public static ProcessingResult getProcessingResult(List<File> fileList, Dialect dialect, Release release) {
-        Settings.dialect = dialect;
-        Settings.release = release;
-
-        TypeCheckResult<List<AModuleModules>> typeCheckerResult = TypeCheckerUtil.typeCheckSl(fileList, VDMJ.filecharset);
-        ParserResult<List<AModuleModules>> parserResult = typeCheckerResult.parserResult;
-
-        ProcessingResult result = new ProcessingResult();
-        result.setParserWarnings(parserResult.warnings);
-        result.setParserErrors(parserResult.errors);
-        result.setTypeCheckerWarnings(typeCheckerResult.warnings);
-        result.setTypeCheckerErrors(typeCheckerResult.errors);
-        result.setModules(typeCheckerResult.result != null ? typeCheckerResult.result : parserResult.result);
-        return result;
     }
 
     private static List<File> object2FileList(Object inputObject) {
@@ -118,9 +84,5 @@ public class RuntimeSocketServer implements IRuntimeTest, Serializable {
         if (printInfo) {
             System.out.println(s);
         }
-    }
-
-    public ProcessingResult getProcessingResultNonStatic(List<File> fileList, Dialect dialect, Release release) {
-        return RuntimeSocketServer.getProcessingResult(fileList, dialect, release);
     }
 }

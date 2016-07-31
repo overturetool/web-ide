@@ -1,6 +1,6 @@
-package org.overture.webide.processor;
+package org.overture.webide.interpreter_util;
 
-public class ProcessArguments {
+public class InterpreterArguments {
     public static class Identifiers {
         public static final String Host = "-h";
         public static final String Port = "-p";

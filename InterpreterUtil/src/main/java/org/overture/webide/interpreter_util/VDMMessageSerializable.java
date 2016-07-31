@@ -1,4 +1,4 @@
-package org.overture.webide.processor;
+package org.overture.webide.interpreter_util;
 
 import org.overture.ast.intf.lex.ILexLocation;
 

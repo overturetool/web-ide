@@ -1,7 +1,7 @@
 package controllers;
 
 import core.vfs.IVFS;
-import core.vfs.commons_vfs2.CommonsVFS;
+import core.vfs.commons.vfs2.CommonsVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.interpreter.runtime.LatexSourceFile;
 import org.overture.interpreter.runtime.SourceFile;

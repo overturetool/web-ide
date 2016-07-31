@@ -1,4 +1,4 @@
-package core.runtime.ClassLoaders;
+package core.interpreter.util.classloaders;
 
 import java.io.DataInputStream;
 import java.io.File;

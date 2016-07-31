@@ -3,7 +3,7 @@ package Endpoints;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.response.ValidatableResponse;
 import core.vfs.IVFS;
-import core.vfs.commons_vfs2.CommonsVFS;
+import core.vfs.commons.vfs2.CommonsVFS;
 import org.junit.Test;
 
 import static com.jayway.restassured.RestAssured.*;

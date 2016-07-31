@@ -1,4 +1,4 @@
-package core.vfs.commons_vfs2;
+package core.vfs.commons.vfs2;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.vfs.IVFS;

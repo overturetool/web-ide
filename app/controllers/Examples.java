@@ -12,8 +12,8 @@ import core.utilities.HttpUtils;
 import core.utilities.ServerUtils;
 import core.utilities.StringContentParser;
 import core.vfs.IVFS;
-import core.vfs.commons_vfs2.CommonsVFS;
-import core.vfs.commons_vfs2.CommonsVFSUnsafe;
+import core.vfs.commons.vfs2.CommonsVFS;
+import core.vfs.commons.vfs2.CommonsVFSUnsafe;
 import org.apache.commons.vfs2.FileObject;
 import play.mvc.Result;
 
