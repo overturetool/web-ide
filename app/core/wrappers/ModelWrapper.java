@@ -1,6 +1,6 @@
 package core.wrappers;
 
-import core.interpreter.util.InterpreterManager;
+import core.processing.ProcessingManager;
 import core.vfs.IVFS;
 import org.apache.commons.vfs2.FileObject;
 import org.overture.ast.analysis.AnalysisException;
@@ -15,8 +15,8 @@ import org.overture.parser.messages.VDMError;
 import org.overture.parser.messages.VDMWarning;
 import org.overture.pog.obligation.ProofObligationList;
 import org.overture.pog.pub.IProofObligationList;
-import org.overture.webide.interpreter_util.Result;
-import org.overture.webide.interpreter_util.Task;
+import org.overture.webide.processing.Result;
+import org.overture.webide.processing.Task;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -86,7 +86,7 @@ public class ModelWrapper {
         List<AModuleModules> moduleModules = null;
 
         Task task = new Task(this.files, this.dialect, this.release);
-        Result result = new InterpreterManager().getResultAsync(task);
+        Result result = new ProcessingManager().getResultSync(task);
 
         if (result != null) {
             this.parserWarnings = result.getParserWarnings();
