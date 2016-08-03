@@ -1,4 +1,4 @@
-package core.processing;
+package core.processing.clients;
 
 import org.overture.webide.processing.Result;
 import org.overture.webide.processing.Task;

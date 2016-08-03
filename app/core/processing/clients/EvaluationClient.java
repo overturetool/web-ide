@@ -1,4 +1,4 @@
-package core.processing;
+package core.processing.clients;
 
 import java.io.*;
 import java.net.ServerSocket;

@@ -1,6 +1,7 @@
 package core.processing;
 
 import core.processing.classloaders.ClassLoaderManager;
+import core.processing.clients.TypeCheckClient;
 import org.overture.webide.processing.Processing;
 import org.overture.webide.processing.Result;
 import org.overture.webide.processing.Task;

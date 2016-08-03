@@ -1,7 +1,7 @@
 package controllers;
 
-import core.processing.EvaluationClient;
-import core.processing.EvaluationProcess;
+import core.processing.clients.EvaluationClient;
+import core.processing.processes.EvaluationProcess;
 import core.utilities.SocketUtils;
 import core.vfs.IVFS;
 import core.vfs.commons.vfs2.CommonsVFS;
@@ -29,8 +29,8 @@ public class Evaluate extends Application {
             client = new EvaluationClient(serverSocket, 5000);
             client.start();
 
-            EvaluationProcess process = new EvaluationProcess(port);
-            process.start(file.getAbsolutePath());
+            EvaluationProcess process = new EvaluationProcess(port, file.getAbsolutePath());
+            process.start();
 
             client.awaitConnection();
         } catch (IOException e) {

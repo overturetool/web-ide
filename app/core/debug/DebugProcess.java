@@ -1,25 +1,14 @@
 package core.debug;
 
+import core.processing.processes.AbstractProcess;
 import org.overture.interpreter.debug.DBGPReaderV2;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
-public class DebugProcess {
-    private List<String> args = new ArrayList<>();
-
+public class DebugProcess extends AbstractProcess {
     public DebugProcess(String type, String host, int port, String key, String entry, String defaultName, String file) {
-        String javaHome = System.getProperty("java.home");
-        String javaBin = Paths.get(javaHome, "bin", "java").toString();
-        String classPath = Paths.get("lib", "Overture-2.3.6.jar").toString();
-        String className = DBGPReaderV2.class.getCanonicalName();
-
-        args.add(javaBin);
-        args.add("-cp");
-        args.add(classPath);
-        args.add(className);
+        super(Paths.get("lib", "Overture-2.3.6.jar").toString(), DBGPReaderV2.class.getCanonicalName());
 
         if (type != null) {
             args.add("-" + type);
@@ -54,11 +43,13 @@ public class DebugProcess {
         args.add(file);
     }
 
-    public void start() {
+    @Override
+    public Process start() {
         try {
             new ProcessBuilder(args).start();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
     }
 }

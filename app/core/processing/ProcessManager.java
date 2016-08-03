@@ -1,5 +1,7 @@
 package core.processing;
 
+import core.processing.clients.TypeCheckClient;
+import core.processing.processes.TypeCheckProcess;
 import core.utilities.SocketUtils;
 
 import java.net.ServerSocket;
@@ -31,8 +33,8 @@ public class ProcessManager {
             TypeCheckClient processClient = new TypeCheckClient(serverSocket, 5000);
             processClient.start();
 
-            TypeCheckProcess processInitiator = new TypeCheckProcess();
-            Process process = processInitiator.init(port);
+            TypeCheckProcess processInitiator = new TypeCheckProcess(port);
+            Process process = processInitiator.start();
 
             processClient.awaitConnection();
             processClient.setProcess(process);

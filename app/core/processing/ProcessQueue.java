@@ -1,5 +1,7 @@
 package core.processing;
 
+import core.processing.clients.TypeCheckClient;
+
 import java.util.LinkedList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
