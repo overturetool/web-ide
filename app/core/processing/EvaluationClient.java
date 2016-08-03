@@ -5,7 +5,7 @@ import java.net.ServerSocket;
 
 public class EvaluationClient extends AbstractClient<BufferedReader, PrintWriter> {
     public EvaluationClient(ServerSocket serverSocket, long timeout) {
-        super(serverSocket, timeout, new Object());
+        super(serverSocket, timeout);
     }
 
     @Override
@@ -14,7 +14,7 @@ public class EvaluationClient extends AbstractClient<BufferedReader, PrintWriter
         this.out = new PrintWriter(this.socket.getOutputStream(), true);
     }
 
-    public String evaluate(String s) {
+    public synchronized String evaluate(String s) {
         try {
             this.out.println(s);
             return this.in.readLine();

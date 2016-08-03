@@ -12,12 +12,11 @@ public abstract class AbstractClient<T0 extends Closeable, T1 extends Closeable>
     protected Socket socket;
     protected Process process;
     protected long timeout;
-    private final Object lock;
+    private final Object lock = new Object();
 
-    public AbstractClient(ServerSocket serverSocket, long timeout, Object lock) {
+    public AbstractClient(ServerSocket serverSocket, long timeout) {
         this.serverSocket = serverSocket;
         this.timeout = timeout;
-        this.lock = lock;
     }
 
     @Override

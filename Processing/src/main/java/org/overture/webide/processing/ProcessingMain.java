@@ -77,8 +77,8 @@ public class ProcessingMain {
 
     @SuppressWarnings("all")
     private static void typeCheckLoop(Socket socket) throws IOException, ClassNotFoundException {
-        final ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
         final ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+        final ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
         while (true) {
             Object inputObject = null;

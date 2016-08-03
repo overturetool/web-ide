@@ -10,7 +10,7 @@ import java.net.ServerSocket;
 
 public class TypeCheckClient extends AbstractClient<ObjectInputStream, ObjectOutputStream> {
     public TypeCheckClient(ServerSocket serverSocket, long timeout) {
-        super(serverSocket, timeout, new Object());
+        super(serverSocket, timeout);
     }
 
     @Override
