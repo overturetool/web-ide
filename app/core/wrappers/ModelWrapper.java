@@ -43,11 +43,6 @@ public class ModelWrapper {
         this.files = JavaCodeGenMain.filterFiles(file.getProjectAsIOFile());
     }
 
-    public String evaluate(String input) {
-        Evaluator evaluator = new Evaluator(this.interpreter);
-        return evaluator.evaluate(input);
-    }
-
     public String getTargetModuleName() {
         return this.interpreter.getDefaultName();
     }

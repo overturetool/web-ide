@@ -9,7 +9,7 @@ public class ProcessingManager {
     public Result getResultAsync(Task task) {
         ProcessManager processManager = new ProcessManager();
 
-        ProcessClient processClient = processManager.acquireProcess();
+        TypeCheckClient processClient = processManager.acquireProcess();
 
         if (processClient == null)
             return null;

@@ -1,4 +1,4 @@
-package core.wrappers;
+package org.overture.webide.processing;
 
 import org.overture.ast.definitions.AValueDefinition;
 import org.overture.ast.definitions.PDefinition;

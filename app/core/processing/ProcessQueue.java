@@ -5,8 +5,8 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 public class ProcessQueue {
-    private LinkedList<ProcessClient> busyProcesses = new LinkedList<>();
-    private ArrayBlockingQueue<ProcessClient> availableProcesses;
+    private LinkedList<TypeCheckClient> busyProcesses = new LinkedList<>();
+    private ArrayBlockingQueue<TypeCheckClient> availableProcesses;
     private long timeout;
 
     // Locks for making the associated methods atomic, but not mutual exclusive
@@ -19,9 +19,9 @@ public class ProcessQueue {
         this.timeout = timeout;
     }
 
-    public ProcessClient acquire() {
+    public TypeCheckClient acquire() {
         synchronized (acquireLock) {
-            ProcessClient processClient;
+            TypeCheckClient processClient;
 
             try {
                 processClient = this.availableProcesses.poll(this.timeout, TimeUnit.MILLISECONDS);
@@ -38,7 +38,7 @@ public class ProcessQueue {
         }
     }
 
-    public void release(ProcessClient processClient) {
+    public void release(TypeCheckClient processClient) {
         synchronized (releaseLock) {
             try {
                 this.availableProcesses.add(processClient);
@@ -55,7 +55,7 @@ public class ProcessQueue {
         }
     }
 
-    public void addBusyProcess(ProcessClient processClient) {
+    public void addBusyProcess(TypeCheckClient processClient) {
         this.busyProcesses.add(processClient);
     }
 }

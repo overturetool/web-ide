@@ -1,39 +1,30 @@
 package core.processing;
 
-import org.overture.webide.processing.Result;
-import org.overture.webide.processing.Task;
-
+import java.io.Closeable;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class ProcessClient extends Thread {
-    private ObjectOutputStream out;
-    private ObjectInputStream in;
-    private ServerSocket serverSocket;
-    private Socket socket;
-    private Process process;
-    private long timeout;
+public abstract class AbstractClient<T0 extends Closeable, T1 extends Closeable> extends Thread {
+    protected T0 in;
+    protected T1 out;
+    protected ServerSocket serverSocket;
+    protected Socket socket;
+    protected Process process;
+    protected long timeout;
+    private final Object lock;
 
-    private static final Object lock = new Object();
-
-    public ProcessClient(ServerSocket serverSocket, long timeout) {
+    public AbstractClient(ServerSocket serverSocket, long timeout, Object lock) {
         this.serverSocket = serverSocket;
         this.timeout = timeout;
+        this.lock = lock;
     }
 
     @Override
     public synchronized void run() {
-        init();
-    }
-
-    private void init() {
         try {
             this.socket = this.serverSocket.accept();
-            this.out = new ObjectOutputStream(this.socket.getOutputStream());
-            this.in = new ObjectInputStream(this.socket.getInputStream());
+            init();
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -43,17 +34,7 @@ public class ProcessClient extends Thread {
         }
     }
 
-    public synchronized Result process(Task task) {
-        Result result = null;
-        try {
-            this.out.writeObject(task);
-            this.out.flush();
-            result = (Result) this.in.readObject();
-        } catch (IOException | ClassNotFoundException | NullPointerException e) {
-            //e.printStackTrace();
-        }
-        return result;
-    }
+    protected abstract void init() throws IOException;
 
     public synchronized void close() {
         try {
@@ -61,8 +42,7 @@ public class ProcessClient extends Thread {
             this.out.close();
             this.socket.close();
             this.serverSocket.close();
-            if (this.process != null)
-                this.process.destroy();
+            if (this.process != null) this.process.destroy();
         } catch (IOException e) {
             e.printStackTrace();
         }

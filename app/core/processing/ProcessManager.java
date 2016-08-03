@@ -8,8 +8,8 @@ public class ProcessManager {
     private static final int capacity = 10;
     private static ProcessQueue processQueue = new ProcessQueue(capacity, true, 1000);
 
-    public ProcessClient acquireProcess() {
-        ProcessClient processClient = processQueue.acquire();
+    public TypeCheckClient acquireProcess() {
+        TypeCheckClient processClient = processQueue.acquire();
 
         if (processClient == null && processQueue.size() < capacity) {
             processClient = startNewProcess();
@@ -19,19 +19,19 @@ public class ProcessManager {
         return processClient;
     }
 
-    public void releaseProcess(ProcessClient processClient) {
+    public void releaseProcess(TypeCheckClient processClient) {
         processQueue.release(processClient);
     }
 
-    private ProcessClient startNewProcess() {
+    private TypeCheckClient startNewProcess() {
         try {
             ServerSocket serverSocket = SocketUtils.findAvailablePort(49152, 65535);
             int port = serverSocket.getLocalPort();
 
-            ProcessClient processClient = new ProcessClient(serverSocket, 5000);
+            TypeCheckClient processClient = new TypeCheckClient(serverSocket, 5000);
             processClient.start();
 
-            ProcessInitiator processInitiator = new ProcessInitiator();
+            TypeCheckProcess processInitiator = new TypeCheckProcess();
             Process process = processInitiator.init(port);
 
             processClient.awaitConnection();

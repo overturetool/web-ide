@@ -1,25 +1,64 @@
 package controllers;
 
-import core.StatusCode;
+import core.processing.EvaluationClient;
+import core.processing.EvaluationProcess;
+import core.utilities.SocketUtils;
 import core.vfs.IVFS;
 import core.vfs.commons.vfs2.CommonsVFS;
-import core.wrappers.ModelWrapper;
 import org.apache.commons.vfs2.FileObject;
-import play.mvc.Result;
+import play.mvc.LegacyWebSocket;
+import play.mvc.WebSocket;
 
+import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.Base64;
 
 public class Evaluate extends Application {
-    public Result project(String input, String account, String path) {
-        String inputDecoded = new String(Base64.getDecoder().decode(input));
+    public LegacyWebSocket<String> project(String account, String path) {
         IVFS<FileObject> file = new CommonsVFS(account, path);
 
         if (!file.exists())
-            return status(StatusCode.UnprocessableEntity, "File not found");
+            return errorResponse("File not found");
 
-        ModelWrapper modelWrapper = new ModelWrapper(file).init();
-        String result = modelWrapper.evaluate(inputDecoded);
+        EvaluationClient client;
 
-        return ok(result != null ? result : "?");
+        try {
+            ServerSocket serverSocket = SocketUtils.findAvailablePort(49152, 65535);
+            int port = serverSocket.getLocalPort();
+
+            client = new EvaluationClient(serverSocket, 5000);
+            client.start();
+
+            EvaluationProcess process = new EvaluationProcess(port);
+            process.start(file.getAbsolutePath());
+
+            client.awaitConnection();
+        } catch (IOException e) {
+            return errorResponse("Exception occurred");
+        }
+
+        return new LegacyWebSocket<String>() {
+            @Override
+            public void onReady(WebSocket.In<String> in, WebSocket.Out<String> out) {
+                in.onMessage(event -> {
+                    String inputDecoded = new String(Base64.getDecoder().decode(event));
+                    String result = client.evaluate(inputDecoded);
+                    out.write(result != null ? result : "?");
+                });
+
+                // When the socket is closed
+                in.onClose(client::close);
+            }
+        };
+    }
+
+    private LegacyWebSocket<String> errorResponse(String message) {
+        return new LegacyWebSocket<String>() {
+            @Override
+            public void onReady(WebSocket.In<String> in, WebSocket.Out<String> out) {
+                out.write(message);
+                out.close();
+            }
+        };
     }
 }
