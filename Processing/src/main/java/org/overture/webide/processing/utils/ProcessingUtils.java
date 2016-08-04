@@ -1,4 +1,4 @@
-package org.overture.webide.processing;
+package org.overture.webide.processing.utils;
 
 import org.overture.config.Settings;
 

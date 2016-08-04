@@ -7,6 +7,7 @@ import java.util.List;
 
 public abstract class AbstractProcess {
     protected List<String> args = new ArrayList<>();
+    protected boolean doJVMOptimization = false;
 
     protected AbstractProcess(String classPath, String className) {
         String javaHome = System.getProperty("java.home");
@@ -14,12 +15,12 @@ public abstract class AbstractProcess {
 
         args.add(javaBin);
         args.add("-cp");
-//        args.add("-Xms4M");     // initial heap size
-//        args.add("-Xmx32M");    // maximum heap size
-//        args.add("-Xss1M");     // thread stack size
+
+        if (doJVMOptimization)
+            doJVMOptimization();
+
         args.add(classPath);
         args.add(className);
-
     }
 
     public Process start() {
@@ -35,5 +36,11 @@ public abstract class AbstractProcess {
             e.printStackTrace();
         }
         return process;
+    }
+
+    protected void doJVMOptimization() {
+        args.add("-Xms4M");     // initial heap size
+        args.add("-Xmx32M");    // maximum heap size
+        args.add("-Xss1M");     // thread stack size
     }
 }

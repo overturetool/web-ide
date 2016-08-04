@@ -1,4 +1,4 @@
-package org.overture.webide.processing;
+package org.overture.webide.processing.models;
 
 import org.overture.ast.lex.Dialect;
 import org.overture.config.Release;

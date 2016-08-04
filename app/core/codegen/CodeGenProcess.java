@@ -1,5 +1,6 @@
 package core.codegen;
 
+import core.processing.processes.AbstractProcess;
 import core.vfs.IVFS;
 import core.wrappers.ModelWrapper;
 import org.apache.commons.vfs2.FileObject;
@@ -15,20 +16,10 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CodeGenProcess {
-    public int init(IVFS<FileObject> file, ModelWrapper modelWrapper) {
-        String javaHome = System.getProperty("java.home");
-        String javaBin = Paths.get(javaHome, "bin", "java").toString();
-        String className = JavaCodeGenMain.class.getCanonicalName();
-        String classPath = Paths.get("lib", "*").toString();
+public class CodeGenProcess extends AbstractProcess {
+    public CodeGenProcess(IVFS<FileObject> file, ModelWrapper modelWrapper) {
+        super(Paths.get("lib", "*").toString(), JavaCodeGenMain.class.getCanonicalName());
 
-        List<String> args = new ArrayList<>();
-        args.add(javaBin);
-        args.add("-cp");
-        args.add(classPath);
-        args.add(className);
-
-        // Program arguments
         String path = file.getAbsolutePath();
         String rootPackage = Paths.get(file.getRelativePath()).getName(0).toString();
         Dialect dialect = modelWrapper.getDialect();
@@ -45,7 +36,9 @@ public class CodeGenProcess {
 
         args.add("-output");
         args.add(Paths.get(path, "generated").toString());
+    }
 
+    public Process start() {
         try {
             ProcessBuilder builder = new ProcessBuilder(args);
             Process process = builder.start();
@@ -57,15 +50,15 @@ public class CodeGenProcess {
 
             process.waitFor();
 
+            // TODO : use lists information
             List<String> inputList = processInputStream.getList();
             List<String> errorList = processErrorStream.getList();
 
-            return process.exitValue();
+            return process;
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
-
-        return -1;
+        return null;
     }
 
     public class ProcessStream extends Thread {

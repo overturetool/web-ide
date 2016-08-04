@@ -15,6 +15,8 @@ public class ProcessStrategy implements ICodeGenStrategy {
 
     @Override
     public boolean generate() {
-        return new CodeGenProcess().init(this.file, this.modelWrapper) == 0;
+        CodeGenProcess codeGenProcess = new CodeGenProcess(this.file, this.modelWrapper);
+        Process process = codeGenProcess.start();
+        return process != null && process.exitValue() == 0;
     }
 }

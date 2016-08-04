@@ -9,6 +9,12 @@ import org.overture.interpreter.VDMJ;
 import org.overture.interpreter.runtime.ModuleInterpreter;
 import org.overture.typechecker.util.TypeCheckerUtil;
 import org.overture.typechecker.util.TypeCheckerUtil.TypeCheckResult;
+import org.overture.webide.processing.features.Evaluator;
+import org.overture.webide.processing.features.TypeChecker;
+import org.overture.webide.processing.models.Result;
+import org.overture.webide.processing.models.Task;
+import org.overture.webide.processing.utils.Arguments;
+import org.overture.webide.processing.utils.ProcessingUtils;
 
 import java.io.*;
 import java.net.Socket;
@@ -19,7 +25,7 @@ import java.util.List;
 
 public class ProcessingMain {
     public static void main(String args[]) throws Exception {
-        String action;
+        String action = null;
         String host = null;
         int port = -1;
         boolean printInfo = false;
@@ -29,15 +35,11 @@ public class ProcessingMain {
 
         Iterator<String> i = Arrays.asList(args).iterator();
 
-        if (i.hasNext()) {
-            action = i.next();
-        } else {
-            throw new IllegalArgumentException("Missing action argument");
-        }
-
         while(i.hasNext()) {
             String arg = i.next();
-            if (arg.equals(Arguments.Identifiers.Host) && i.hasNext()) {
+            if (arg.equals(Arguments.Actions.Evaluate) || arg.equals(Arguments.Actions.TypeCheck)) {
+                action = arg;
+            } else if (arg.equals(Arguments.Identifiers.Host) && i.hasNext()) {
                 host = i.next();
             } else if (arg.equals(Arguments.Identifiers.Port) && i.hasNext()) {
                 port = Integer.parseInt(i.next());
@@ -62,6 +64,9 @@ public class ProcessingMain {
 
         if (host == null || port == -1)
             throw new IllegalArgumentException("Missing required arguments: host and/or port");
+
+        if (action == null)
+            throw new IllegalArgumentException("Missing action argument");
 
         final Socket socket = new Socket(host, port);
 
@@ -92,7 +97,7 @@ public class ProcessingMain {
 
             Task task = (Task) inputObject;
             List<File> fileList = task.getFileList();
-            Result result = new Processing().getResult(fileList, task.getDialect(), task.getRelease());
+            Result result = new TypeChecker().getResult(fileList, task.getDialect(), task.getRelease());
 
             out.writeObject(result);
             out.flush();

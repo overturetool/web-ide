@@ -1,4 +1,4 @@
-package org.overture.webide.processing;
+package org.overture.webide.processing.utils;
 
 public class Arguments {
     public static class Actions {

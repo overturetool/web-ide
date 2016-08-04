@@ -1,4 +1,4 @@
-package org.overture.webide.processing;
+package org.overture.webide.processing.features;
 
 import org.overture.ast.definitions.AValueDefinition;
 import org.overture.ast.definitions.PDefinition;
