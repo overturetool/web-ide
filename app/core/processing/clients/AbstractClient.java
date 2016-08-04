@@ -12,7 +12,7 @@ public abstract class AbstractClient<T0 extends Closeable, T1 extends Closeable>
     protected Socket socket;
     protected Process process;
     protected long timeout;
-    private final Object lock = new Object();
+    protected final Object lock = new Object();
 
     public AbstractClient(ServerSocket serverSocket, long timeout) {
         this.serverSocket = serverSocket;

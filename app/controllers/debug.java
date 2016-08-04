@@ -1,8 +1,8 @@
 package controllers;
 
-import core.debug.CommunicationFilter;
-import core.debug.ProxyClient;
-import core.debug.ProxyServer;
+import core.debug.DebugFilters;
+import core.debug.DebugClient;
+import core.debug.DebugManager;
 import core.vfs.IVFS;
 import core.vfs.commons.vfs2.CommonsVFS;
 import org.apache.commons.codec.binary.StringUtils;
@@ -19,8 +19,7 @@ public class Debug extends Application {
         String entryEncoded = request().getQueryString("entry");
         String entryDecoded = StringUtils.newStringUtf8(Base64.getDecoder().decode(entryEncoded));
         String defaultName = null;
-        int port = -1;
-        ProxyServer proxyServer;
+        DebugManager proxyServer;
 
         int containsDefault = entryDecoded.indexOf("`"); // returns -1 if the character does not occur
         if (containsDefault > 0) {
@@ -35,37 +34,43 @@ public class Debug extends Application {
 
         if (file.isDirectory()) {
             if (type == null) return errorResponse("Model type was not defined");
-            proxyServer = new ProxyServer(port, entryDecoded, type, defaultName, file);
+            proxyServer = new DebugManager(entryDecoded, type, defaultName, file);
         } else {
-            proxyServer = new ProxyServer(port, entryDecoded, defaultName, file);
+            proxyServer = new DebugManager(entryDecoded, defaultName, file);
         }
 
-        ProxyClient proxyClient = proxyServer.connect();
+        DebugClient proxyClient = proxyServer.connect();
         if (proxyClient == null)
             return errorResponse("Error occurred while initiating connection");
 
         String initialResponse = proxyClient.read();
         if (initialResponse == null) {
-            proxyClient.disconnect();
+            proxyClient.close();
             return errorResponse("Initial read failed");
         }
 
         return new LegacyWebSocket<String>() {
             // Called when the Websocket Handshake is done
             public void onReady(WebSocket.In<String> in, WebSocket.Out<String> out) {
-                String initialResponseFiltered = CommunicationFilter.ConvertPathsToRelative(initialResponse.replace("\u0000", ""));
+                String initialResponseFiltered = DebugFilters.ConvertPathsToRelative(initialResponse.replace("\u0000", ""));
                 out.write(initialResponseFiltered);
 
                 // For each event received on the socket
-                in.onMessage(event -> {
-                    String filteredEvent = CommunicationFilter.ConvertPathToAbsolute(event);
-                    String overtureResult = proxyClient.sendAndRead(filteredEvent).replace("\u0000", "");
-                    String filteredOvertureResult = CommunicationFilter.ConvertPathsToRelative(overtureResult);
-                    out.write(filteredOvertureResult);
+                in.onMessage(request -> {
+                    String filteredRequest = DebugFilters.ConvertPathToAbsolute(request);
+                    String response = proxyClient.writeRead(filteredRequest);
+
+                    if (response != null)
+                        response = response.replace("\u0000", "");
+                    else
+                        response = ""; // TODO : return something else?
+
+                    String filteredResponse = DebugFilters.ConvertPathsToRelative(response);
+                    out.write(filteredResponse);
                 });
 
                 // When the socket is closed
-                in.onClose(proxyClient::disconnect);
+                in.onClose(proxyClient::close);
             }
         };
 
@@ -73,14 +78,14 @@ public class Debug extends Application {
         /*
         return WebSocket.Text.accept(request -> {
             // Called when the Websocket Handshake is done
-            String initialResponseFiltered = CommunicationFilter.ConvertPathsToRelative(initialResponse.replace("\u0000", ""));
+            String initialResponseFiltered = DebugFilters.ConvertPathsToRelative(initialResponse.replace("\u0000", ""));
             Source.single(initialResponseFiltered);
 
             // For each event received on the socket
             return Flow.<String>create().map(msg -> {
-                String filteredEvent = CommunicationFilter.ConvertPathToAbsolute(msg);
-                String overtureResult = proxyClient.sendAndRead(filteredEvent).replace("\u0000", "");
-                return CommunicationFilter.ConvertPathsToRelative(overtureResult);
+                String filteredEvent = DebugFilters.ConvertPathToAbsolute(msg);
+                String overtureResult = proxyClient.writeRead(filteredEvent).replace("\u0000", "");
+                return DebugFilters.ConvertPathsToRelative(overtureResult);
             });
         });
         */

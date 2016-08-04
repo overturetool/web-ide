@@ -1,5 +1,6 @@
 package core.debug;
 
+import core.ServerConfigurations;
 import core.processing.processes.AbstractProcess;
 import org.overture.interpreter.debug.DBGPReaderV2;
 
@@ -7,27 +8,19 @@ import java.io.IOException;
 import java.nio.file.Paths;
 
 public class DebugProcess extends AbstractProcess {
-    public DebugProcess(String type, String host, int port, String key, String entry, String defaultName, String file) {
+    public DebugProcess(int port, String type, String entry, String defaultName, String file) {
         super(Paths.get("lib", "Overture-2.3.6.jar").toString(), DBGPReaderV2.class.getCanonicalName());
 
         if (type != null) {
             args.add("-" + type);
         }
 
-        if (host != null) {
-            args.add("-h");
-            args.add(host);
-        }
-
-        if (port != -1) {
-            args.add("-p");
-            args.add(Integer.toString(port));
-        }
-
-        if (key != null) {
-            args.add("-k");
-            args.add(key);
-        }
+        args.add("-h");
+        args.add(ServerConfigurations.localhostByName);
+        args.add("-p");
+        args.add(Integer.toString(port));
+        args.add("-k");
+        args.add(ServerConfigurations.dbgpKey);
 
         if (entry != null) {
             args.add("-e");
