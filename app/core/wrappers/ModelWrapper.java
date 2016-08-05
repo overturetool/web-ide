@@ -15,8 +15,8 @@ import org.overture.parser.messages.VDMError;
 import org.overture.parser.messages.VDMWarning;
 import org.overture.pog.obligation.ProofObligationList;
 import org.overture.pog.pub.IProofObligationList;
-import org.overture.webide.processing.Result;
-import org.overture.webide.processing.Task;
+import org.overture.webide.processing.models.Result;
+import org.overture.webide.processing.models.Task;
 
 import java.io.File;
 import java.util.ArrayList;

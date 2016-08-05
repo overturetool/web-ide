@@ -4,6 +4,7 @@ public class Arguments {
     public static class Actions {
         public static final String TypeCheck = "-typeCheck";
         public static final String Evaluate = "-evaluate";
+        public static final String JavaCodeGen = "-javaCodeGen";
     }
 
     public static class Dialects {
@@ -17,7 +18,7 @@ public class Arguments {
         public static final String Port = "-p";
         public static final String Timeout = "-timeout";
         public static final String PrintInfo = "-printInfo";
-        public static final String Dir = "-dir";
+        public static final String BaseDir = "-baseDir";
     }
 
     public static class Release {

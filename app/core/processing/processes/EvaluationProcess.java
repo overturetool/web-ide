@@ -1,8 +1,8 @@
 package core.processing.processes;
 
 import core.ServerConfigurations;
-import org.overture.webide.processing.Arguments;
 import org.overture.webide.processing.ProcessingMain;
+import org.overture.webide.processing.utils.Arguments;
 
 import java.nio.file.Paths;
 
@@ -18,7 +18,6 @@ public class EvaluationProcess extends AbstractProcess {
         args.add(Arguments.Dialects.VDM_SL);
         args.add(Arguments.Release.VDM_10);
         args.add(Arguments.Identifiers.PrintInfo);
-        args.add(Arguments.Identifiers.Dir);
         args.add(absolutePath);
     }
 }

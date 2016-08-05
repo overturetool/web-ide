@@ -2,9 +2,9 @@ package core.processing;
 
 import core.processing.classloaders.ClassLoaderManager;
 import core.processing.clients.TypeCheckClient;
-import org.overture.webide.processing.Processing;
-import org.overture.webide.processing.Result;
-import org.overture.webide.processing.Task;
+import org.overture.webide.processing.features.TypeChecker;
+import org.overture.webide.processing.models.Result;
+import org.overture.webide.processing.models.Task;
 
 public class ProcessingManager {
     public Result getResultAsync(Task task) {
@@ -23,7 +23,7 @@ public class ProcessingManager {
 
     public Result getResultSync(Task task) {
         synchronized (ProcessingManager.class) {
-            return new Processing().getResult(task.getFileList(), task.getDialect(), task.getRelease());
+            return new TypeChecker().getResult(task.getFileList(), task.getDialect(), task.getRelease());
         }
     }
 

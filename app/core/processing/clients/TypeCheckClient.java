@@ -1,7 +1,7 @@
 package core.processing.clients;
 
-import org.overture.webide.processing.Result;
-import org.overture.webide.processing.Task;
+import org.overture.webide.processing.models.Result;
+import org.overture.webide.processing.models.Task;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

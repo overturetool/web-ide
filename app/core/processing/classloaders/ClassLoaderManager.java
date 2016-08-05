@@ -1,8 +1,8 @@
 package core.processing.classloaders;
 
-import org.overture.webide.processing.IProcessing;
-import org.overture.webide.processing.Result;
-import org.overture.webide.processing.Task;
+import org.overture.webide.processing.features.ITypeChecker;
+import org.overture.webide.processing.models.Result;
+import org.overture.webide.processing.models.Task;
 
 import java.io.*;
 import java.net.URL;
@@ -26,7 +26,7 @@ public class ClassLoaderManager {
             DynamicClassLoader classLoader = new DynamicClassLoader(changedClasses);
             Class cls = classLoader.dynamicallyLoadClass("org.overture.webide.processor.RuntimeSocketServer");
             Object newInstance = cls.newInstance();
-            IProcessing runtime = (IProcessing) newInstance;
+            ITypeChecker runtime = (ITypeChecker) newInstance;
             return runtime.getResult(task.getFileList(), task.getDialect(), task.getRelease());
         } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
@@ -41,7 +41,7 @@ public class ClassLoaderManager {
             Class cls = classLoader.loadClass("org.overture.webide.processor.RuntimeSocketServer");
 
             Object newInstance = cls.newInstance();
-            IProcessing runtime = (IProcessing) newInstance;
+            ITypeChecker runtime = (ITypeChecker) newInstance;
 
 //            RuntimeSocketServer.test = 10;
 //            System.out.println(runtime.getTest());
@@ -57,7 +57,7 @@ public class ClassLoaderManager {
 
     public Result getResultClassLoader2(Task task) {
         String classPath = Paths.get("lib", "OvertureProcessor-1.0-SNAPSHOT-jar-with-dependencies.jar").toAbsolutePath().toString();
-        String className = IProcessing.class.getCanonicalName();
+        String className = ITypeChecker.class.getCanonicalName();
 
         try {
             URL[] url = new URL[] { new URL("file:" + classPath) };
@@ -69,7 +69,7 @@ public class ClassLoaderManager {
 //            IRuntimeTest runtime = (IRuntimeTest) newInstance;
 //            Gson gson = new Gson();
 //            IRuntimeTest runtime = gson.fromJson(gson.toJson(newInstance), IRuntimeTest.class);
-            IProcessing runtime = (IProcessing) toObject(toByteArray(newInstance));
+            ITypeChecker runtime = (ITypeChecker) toObject(toByteArray(newInstance));
 
 //            RuntimeSocketServer.test = 10;
 //            System.out.println(runtime.getTest());

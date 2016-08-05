@@ -10,6 +10,7 @@ import org.overture.interpreter.runtime.ModuleInterpreter;
 import org.overture.typechecker.util.TypeCheckerUtil;
 import org.overture.typechecker.util.TypeCheckerUtil.TypeCheckResult;
 import org.overture.webide.processing.features.Evaluator;
+import org.overture.webide.processing.features.JavaCodeGenerator;
 import org.overture.webide.processing.features.TypeChecker;
 import org.overture.webide.processing.models.Result;
 import org.overture.webide.processing.models.Task;
@@ -27,9 +28,11 @@ public class ProcessingMain {
     public static void main(String args[]) throws Exception {
         String action = null;
         String host = null;
+        String baseDir = null;
         int port = -1;
         boolean printInfo = false;
         List<File> fileList = new ArrayList<>();
+        File baseDirFile = null;
         Settings.dialect = Dialect.VDM_PP;
         Settings.release = Release.VDM_10;
 
@@ -37,14 +40,18 @@ public class ProcessingMain {
 
         while(i.hasNext()) {
             String arg = i.next();
-            if (arg.equals(Arguments.Actions.Evaluate) || arg.equals(Arguments.Actions.TypeCheck)) {
+            if (arg.equals(Arguments.Actions.Evaluate) ||
+                arg.equals(Arguments.Actions.TypeCheck) ||
+                arg.equals(Arguments.Actions.JavaCodeGen)) {
                 action = arg;
             } else if (arg.equals(Arguments.Identifiers.Host) && i.hasNext()) {
                 host = i.next();
             } else if (arg.equals(Arguments.Identifiers.Port) && i.hasNext()) {
                 port = Integer.parseInt(i.next());
-            } else if (arg.equals(Arguments.Identifiers.Dir) && i.hasNext()) {
-                fileList.addAll(ProcessingUtils.handleFiles(i.next()));
+            } else if (arg.equals(Arguments.Identifiers.BaseDir) && i.hasNext()) {
+                baseDir = i.next();
+                baseDirFile = new File(baseDir);
+                ProcessingUtils.validateBaseDir(baseDirFile);
             } else if (arg.equals(Arguments.Identifiers.PrintInfo)) {
                 printInfo = true;
             } else if (arg.equals(Arguments.Dialects.VDM_PP)) {
@@ -58,30 +65,32 @@ public class ProcessingMain {
             } else if (arg.equals(Arguments.Release.CLASSIC)) {
                 Settings.release = Release.CLASSIC;
             } else {
-                throw new IllegalArgumentException("Unknown argument: " + arg);
+                fileList.addAll(ProcessingUtils.handleFiles(arg));
             }
         }
-
-        if (host == null || port == -1)
-            throw new IllegalArgumentException("Missing required arguments: host and/or port");
 
         if (action == null)
             throw new IllegalArgumentException("Missing action argument");
 
-        final Socket socket = new Socket(host, port);
-
         if (printInfo)
             System.out.println("process " + ProcessingUtils.getPID() + " ready");
 
-        if (action.equals(Arguments.Actions.TypeCheck)) {
-            typeCheckLoop(socket);
-        } else if (action.equals(Arguments.Actions.Evaluate)) {
-            evaluateLoop(socket, fileList);
+        switch (action) {
+            case Arguments.Actions.TypeCheck:
+                typeCheckLoop(host, port);
+                break;
+            case Arguments.Actions.Evaluate:
+                evaluateLoop(host, port, fileList);
+                break;
+            case Arguments.Actions.JavaCodeGen:
+                codeGen(fileList, baseDir);
+                break;
         }
     }
 
     @SuppressWarnings("all")
-    private static void typeCheckLoop(Socket socket) throws IOException, ClassNotFoundException {
+    private static void typeCheckLoop(String host, int port) throws IOException, ClassNotFoundException {
+        final Socket socket = ProcessingUtils.getSocket(host, port);
         final ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
         final ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
@@ -104,7 +113,8 @@ public class ProcessingMain {
         }
     }
 
-    private static void evaluateLoop(Socket socket, List<File> fileList) throws Exception {
+    private static void evaluateLoop(String host, int port, List<File> fileList) throws Exception {
+        Socket socket = ProcessingUtils.getSocket(host, port);
         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
@@ -125,5 +135,16 @@ public class ProcessingMain {
                 out.println(evaluator.evaluate(input));
             }
         }
+    }
+
+    private static void codeGen(List<File> fileList, String baseDir) throws Exception {
+        TypeCheckResult<List<AModuleModules>> typeCheckerResult = TypeCheckerUtil.typeCheckSl(fileList, VDMJ.filecharset);
+        ModuleList ast = new ModuleList(typeCheckerResult.result);
+        ast.combineDefaults();
+
+        JavaCodeGenerator codeGenerator = new JavaCodeGenerator(ast, baseDir);
+
+        if (!codeGenerator.generate())
+            throw new Exception("Error occurred during code generation");
     }
 }

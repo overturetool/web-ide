@@ -1,8 +1,8 @@
 package core.processing.processes;
 
 import core.ServerConfigurations;
-import org.overture.webide.processing.Arguments;
 import org.overture.webide.processing.ProcessingMain;
+import org.overture.webide.processing.utils.Arguments;
 
 import java.nio.file.Paths;
 

@@ -23,6 +23,11 @@
             <artifactId>root</artifactId>
             <version>2.3.6</version>
         </dependency>
+        <dependency>
+            <groupId>org.overturetool.core.codegen</groupId>
+            <artifactId>javagen</artifactId>
+            <version>2.3.8</version>
+        </dependency>
         <!--<dependency>-->
             <!--<groupId>org.slf4j</groupId>-->
             <!--<artifactId>slf4j-api</artifactId>-->
