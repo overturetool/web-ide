@@ -12,11 +12,15 @@ import java.nio.file.Paths;
 public class CodeGenProcessV2 extends AbstractProcess {
     protected CodeGenProcessV2(IVFS<FileObject> file, ModelWrapper modelWrapper) {
         super(Paths.get("lib", "processing-1.0-SNAPSHOT-jar-with-dependencies.jar").toString(), JavaCodeGenMain.class.getCanonicalName());
-        args.add(Arguments.Identifiers.PrintInfo);
+
         args.add(Arguments.Identifiers.BaseDir);
         args.add(file.getAbsolutePath());
+
+        args.add(Arguments.Identifiers.Release);
+        args.add(modelWrapper.getRelease().toString());
+
+        args.add(Arguments.Identifiers.PrintInfo);
         args.add(modelWrapper.getDialect().getArgstring());
-        args.add("-" + modelWrapper.getRelease().toString());
         args.add(file.getAbsolutePath());
     }
 }

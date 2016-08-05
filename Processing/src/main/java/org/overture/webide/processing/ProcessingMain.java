@@ -21,6 +21,7 @@ public abstract class ProcessingMain {
     public static List<File> fileList = new ArrayList<>();
 
     protected static Class<? extends ProcessingMain> instanceClass;
+    protected abstract void execute() throws Exception;
 
     public static void main(String[] args) throws Exception {
         Settings.dialect = Dialect.VDM_PP;
@@ -34,6 +35,8 @@ public abstract class ProcessingMain {
                 host = i.next();
             } else if (arg.equals(Arguments.Identifiers.Port) && i.hasNext()) {
                 port = Integer.parseInt(i.next());
+            } else if (arg.equals(Arguments.Identifiers.Release) && i.hasNext()) {
+                Settings.release = Release.lookup(i.next());
             } else if (arg.equals(Arguments.Identifiers.BaseDir) && i.hasNext()) {
                 baseDir = i.next();
                 baseDirFile = new File(baseDir);
@@ -46,10 +49,6 @@ public abstract class ProcessingMain {
                 Settings.dialect = Dialect.VDM_RT;
             } else if (arg.equals(Arguments.Dialects.VDM_SL)) {
                 Settings.dialect = Dialect.VDM_SL;
-            } else if (arg.equals(Arguments.Release.VDM_10)) {
-                Settings.release = Release.VDM_10;
-            } else if (arg.equals(Arguments.Release.CLASSIC)) {
-                Settings.release = Release.CLASSIC;
             } else {
                 fileList.addAll(ProcessingUtils.handleFiles(arg));
             }
@@ -61,6 +60,4 @@ public abstract class ProcessingMain {
         ProcessingMain p = instanceClass.newInstance();
         p.execute();
     }
-
-    abstract void execute() throws Exception;
 }

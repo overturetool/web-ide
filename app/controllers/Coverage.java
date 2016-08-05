@@ -1,35 +1,30 @@
 package controllers;
 
+import core.StatusCode;
+import core.processing.processes.CoverageProcess;
 import core.vfs.IVFS;
 import core.vfs.commons.vfs2.CommonsVFS;
+import core.wrappers.ModelWrapper;
 import org.apache.commons.vfs2.FileObject;
-import org.overture.interpreter.runtime.LatexSourceFile;
-import org.overture.interpreter.runtime.SourceFile;
 import play.mvc.Result;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 public class Coverage extends Application {
     public Result coverage(String account, String path) {
         IVFS<FileObject> file = new CommonsVFS(account, path);
+        ModelWrapper modelWrapper = new ModelWrapper(file);
 
-        String coverage = "/Users/kaspersaaby/Documents/projects/iha/playframework/overture_webide/workspace/111425625270532893915/BOMSL/generated/coverage.txt";
-        File des = new File("workspace/111425625270532893915/BOMSL/generated/coverage.txt");
-        StringWriter writer = new StringWriter();
+        CoverageProcess coverageProcess = new CoverageProcess(file, modelWrapper);
+        Process process = coverageProcess.start();
+
         try {
-            SourceFile sourceFile = new SourceFile(file.getIOFile());
-            PrintWriter printWriter = new PrintWriter(writer);
-            sourceFile.writeCoverage(printWriter);
-            LatexSourceFile latex = new LatexSourceFile(sourceFile);
-            latex.print(printWriter, true, true, true, true);
-        } catch (IOException e) {
+            process.waitFor();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
-        System.out.print(writer);
+        int exitValue = process.exitValue();
+        if (exitValue != 0)
+            return status(StatusCode.UnprocessableEntity, "Error occurred during coverage generation");
 
         return ok();
     }

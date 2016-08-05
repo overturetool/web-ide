@@ -13,10 +13,6 @@ public class Arguments {
         public static final String Timeout = "-timeout";
         public static final String PrintInfo = "-printInfo";
         public static final String BaseDir = "-baseDir";
-    }
-
-    public static class Release {
-        public static final String VDM_10 = "-vdm10";
-        public static final String CLASSIC = "-classic";
+        public static final String Release = "-release";
     }
 }
