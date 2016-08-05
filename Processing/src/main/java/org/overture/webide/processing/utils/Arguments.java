@@ -1,12 +1,6 @@
 package org.overture.webide.processing.utils;
 
 public class Arguments {
-    public static class Actions {
-        public static final String TypeCheck = "-typeCheck";
-        public static final String Evaluate = "-evaluate";
-        public static final String JavaCodeGen = "-javaCodeGen";
-    }
-
     public static class Dialects {
         public static final String VDM_SL = "-vdmsl";
         public static final String VDM_PP = "-vdmpp";
