@@ -16,7 +16,7 @@ public class CodeGenIntegrationTest {
     @Test
     public void CodeGen2() {
         CodeGen codeGenController = new CodeGen();
-        Result result = codeGenController.codeGen2("111425625270532893915", "barSL");
+        Result result = codeGenController.codeGen2("111425625270532893915", "looseSL");
         assertEquals(200, result.status());
     }
 }

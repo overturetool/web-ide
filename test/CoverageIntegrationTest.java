@@ -6,9 +6,9 @@ import static org.junit.Assert.assertEquals;
 
 public class CoverageIntegrationTest {
     @Test
-    public void CodeGen() {
+    public void Coverage() {
         Coverage controller = new Coverage();
-        Result result = controller.coverage("111425625270532893915", "barSL");
+        Result result = controller.coverage("111425625270532893915", "looseSL");
         assertEquals(200, result.status());
     }
 }

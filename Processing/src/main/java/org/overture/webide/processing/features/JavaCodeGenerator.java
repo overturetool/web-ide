@@ -28,7 +28,7 @@ public class JavaCodeGenerator {
 
     public boolean generate() {
         String rootPackage = absolutePath.getFileName().toString();
-        File output = new File(absolutePath.toString(), "generated");
+        File output = new File(absolutePath.toString(), "generated/java");
 
         try {
             IRSettings irSettings = new IRSettings();
