@@ -55,12 +55,13 @@ public abstract class AbstractClient<T0 extends Closeable, T1 extends Closeable>
         this.process = process;
     }
 
-    public void awaitConnection() {
+    public boolean awaitConnection() {
         synchronized (lock) {
             try {
                 lock.wait(this.timeout);
+                return in != null && out != null;
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                return false;
             }
         }
     }

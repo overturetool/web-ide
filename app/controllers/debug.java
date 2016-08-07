@@ -41,7 +41,7 @@ public class Debug extends Application {
             manager = new DebugManager(entryDecoded, defaultName, file, coverage);
         }
 
-        DebugClient client = manager.connect();
+        DebugClient client = manager.start();
         if (client == null)
             return errorResponse("Error occurred while initiating connection");
 

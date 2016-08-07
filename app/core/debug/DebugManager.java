@@ -28,21 +28,22 @@ public class DebugManager {
         this.coverage = coverage;
     }
 
-    public synchronized DebugClient connect() {
+    public synchronized DebugClient start() {
         try {
             ServerSocket serverSocket = SocketUtils.findAvailablePort(49152, 65535);
             int port = serverSocket.getLocalPort();
             //serverSocket.setSoTimeout(10000);
             //server.setReuseAddress(true);
 
-            DebugClient client = new DebugClient(serverSocket, 50000);
+            DebugClient client = new DebugClient(serverSocket, 5000);
             client.start();
 
-            DebugProcess process = new DebugProcess(port, type, entry, defaultName, file, coverage);
-            process.start();
+            DebugProcess debugProcess = new DebugProcess(port, type, entry, defaultName, file, coverage);
+            debugProcess.start();
 
-            client.awaitConnection();
-            return client;
+            if (client.awaitConnection())
+                return client;
+
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }

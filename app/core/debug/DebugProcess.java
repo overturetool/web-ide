@@ -51,14 +51,4 @@ public class DebugProcess extends AbstractProcess {
         args.add("-w"); // turn off warnings
         args.add(file.getAbsoluteUrl());
     }
-
-//    @Override
-//    public Process start() {
-//        try {
-//            new ProcessBuilder(args).start();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
 }
