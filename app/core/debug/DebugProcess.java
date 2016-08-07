@@ -2,13 +2,14 @@ package core.debug;
 
 import core.ServerConfigurations;
 import core.processing.processes.AbstractProcess;
+import core.vfs.IVFS;
 import org.overture.interpreter.debug.DBGPReaderV2;
 
 import java.io.IOException;
 import java.nio.file.Paths;
 
 public class DebugProcess extends AbstractProcess {
-    public DebugProcess(int port, String type, String entry, String defaultName, String file) {
+    public DebugProcess(int port, String type, String entry, String defaultName, IVFS file, boolean coverage) throws IOException {
         super(Paths.get("lib", "Overture-2.3.6.jar").toString(), DBGPReaderV2.class.getCanonicalName());
 
         if (type != null) {
@@ -32,17 +33,30 @@ public class DebugProcess extends AbstractProcess {
             args.add(defaultName);
         }
 
+//        if (coverage) {
+//            LocalDateTime dateTime = LocalDateTime.now();
+//            String time = dateTime.toLocalDate().toString().replaceAll("-", "_") + "_";
+//            time += dateTime.toLocalTime().toString().substring(0, 8).replaceAll(":", "_");
+//            File outputDir = Paths.get(file.getAbsolutePath(), "generated", time).toFile();
+//
+//            if (!outputDir.exists())
+//                outputDir.mkdirs();
+//
+//            args.add("-coverage");
+//            args.add("file:" + outputDir.getAbsolutePath());
+//        }
+
         args.add("-w"); // turn off warnings
-        args.add(file);
+        args.add(file.getAbsoluteUrl());
     }
 
-    @Override
-    public Process start() {
-        try {
-            new ProcessBuilder(args).start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+//    @Override
+//    public Process start() {
+//        try {
+//            new ProcessBuilder(args).start();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
 }

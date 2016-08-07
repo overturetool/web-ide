@@ -9,26 +9,23 @@ import java.io.IOException;
 import java.net.ServerSocket;
 
 public class DebugManager {
+    private final Logger logger = LoggerFactory.getLogger(DebugManager.class);
     private String entry;
     private String type;
     private String defaultName;
-    private String absolutePath;
+    private IVFS file;
+    private boolean coverage;
 
-    private final Logger logger = LoggerFactory.getLogger(DebugManager.class);
-
-    public DebugManager(String entry, String defaultName, IVFS file) {
-        this(entry, file.getExtension(), defaultName, file.getAbsoluteUrl());
+    public DebugManager(String entry, String defaultName, IVFS file, boolean coverage) {
+        this(entry, file.getExtension(), defaultName, file, coverage);
     }
 
-    public DebugManager(String entry, String type, String defaultName, IVFS dir) {
-        this(entry, type, defaultName, dir.getAbsoluteUrl());
-    }
-
-    public DebugManager(String entry, String type, String defaultName, String absolutePath) {
+    public DebugManager(String entry, String type, String defaultName, IVFS file, boolean coverage) {
         this.entry = entry;
         this.type = type;
         this.defaultName = defaultName;
-        this.absolutePath = absolutePath;
+        this.file = file;
+        this.coverage = coverage;
     }
 
     public synchronized DebugClient connect() {
@@ -38,10 +35,10 @@ public class DebugManager {
             //serverSocket.setSoTimeout(10000);
             //server.setReuseAddress(true);
 
-            DebugClient client = new DebugClient(serverSocket, 5000);
+            DebugClient client = new DebugClient(serverSocket, 50000);
             client.start();
 
-            DebugProcess process = new DebugProcess(port, type, entry, defaultName, absolutePath);
+            DebugProcess process = new DebugProcess(port, type, entry, defaultName, file, coverage);
             process.start();
 
             client.awaitConnection();

@@ -18,8 +18,10 @@ public class Debug extends Application {
         String type = request().getQueryString("type");
         String entryEncoded = request().getQueryString("entry");
         String entryDecoded = StringUtils.newStringUtf8(Base64.getDecoder().decode(entryEncoded));
+        String coverageString = request().getQueryString("coverage");
+        boolean coverage = true;//Boolean.parseBoolean(coverageString);
         String defaultName = null;
-        DebugManager proxyServer;
+        DebugManager manager;
 
         int containsDefault = entryDecoded.indexOf("`"); // returns -1 if the character does not occur
         if (containsDefault > 0) {
@@ -34,18 +36,18 @@ public class Debug extends Application {
 
         if (file.isDirectory()) {
             if (type == null) return errorResponse("Model type was not defined");
-            proxyServer = new DebugManager(entryDecoded, type, defaultName, file);
+            manager = new DebugManager(entryDecoded, type, defaultName, file, coverage);
         } else {
-            proxyServer = new DebugManager(entryDecoded, defaultName, file);
+            manager = new DebugManager(entryDecoded, defaultName, file, coverage);
         }
 
-        DebugClient proxyClient = proxyServer.connect();
-        if (proxyClient == null)
+        DebugClient client = manager.connect();
+        if (client == null)
             return errorResponse("Error occurred while initiating connection");
 
-        String initialResponse = proxyClient.read();
+        String initialResponse = client.read();
         if (initialResponse == null) {
-            proxyClient.close();
+            client.close();
             return errorResponse("Initial read failed");
         }
 
@@ -58,7 +60,7 @@ public class Debug extends Application {
                 // For each event received on the socket
                 in.onMessage(request -> {
                     String filteredRequest = DebugFilters.ConvertPathToAbsolute(request);
-                    String response = proxyClient.writeRead(filteredRequest);
+                    String response = client.writeRead(filteredRequest);
 
                     if (response != null)
                         response = response.replace("\u0000", "");
@@ -70,7 +72,7 @@ public class Debug extends Application {
                 });
 
                 // When the socket is closed
-                in.onClose(proxyClient::close);
+                in.onClose(client::close);
             }
         };
 
