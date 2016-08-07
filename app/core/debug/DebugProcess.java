@@ -3,6 +3,7 @@ package core.debug;
 import core.ServerConfigurations;
 import core.processing.processes.AbstractProcess;
 import core.vfs.IVFS;
+import org.overture.interpreter.VDMJ;
 import org.overture.interpreter.debug.DBGPReaderV2;
 
 import java.io.File;
@@ -36,19 +37,26 @@ public class DebugProcess extends AbstractProcess {
         }
 
         if (coverage) {
-            LocalDateTime dateTime = LocalDateTime.now();
-            String time = dateTime.toLocalDate().toString().replaceAll("-", "_") + "_";
-            time += dateTime.toLocalTime().toString().substring(0, 8).replaceAll(":", "_");
-            File outputDir = Paths.get(file.getAbsolutePath(), "generated", time).toFile();
-
-            if (!outputDir.exists())
-                outputDir.mkdirs();
-
             args.add("-coverage");
-            args.add("file:" + outputDir.getAbsolutePath());
+            args.add("file:" + mkOutputDir(file).getAbsolutePath());
         }
 
         args.add("-w"); // turn off warnings
+        args.add("-q"); // quiet
+        args.add("-c");
+        args.add(VDMJ.filecharset);
         args.add(file.getAbsoluteUrl());
+    }
+
+    private File mkOutputDir(IVFS file) {
+        LocalDateTime dateTime = LocalDateTime.now();
+        String time = dateTime.toLocalDate().toString().replaceAll("-", "_") + "_";
+        time += dateTime.toLocalTime().toString().substring(0, 8).replaceAll(":", "_");
+        File outputDir = Paths.get(file.getAbsolutePath(), "generated", time).toFile();
+
+        if (!outputDir.exists())
+            outputDir.mkdirs();
+
+        return outputDir;
     }
 }

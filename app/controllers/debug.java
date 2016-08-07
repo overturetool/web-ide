@@ -1,11 +1,13 @@
 package controllers;
 
-import core.debug.DebugFilters;
 import core.debug.DebugClient;
+import core.debug.DebugFilters;
 import core.debug.DebugManager;
 import core.vfs.IVFS;
 import core.vfs.commons.vfs2.CommonsVFS;
+import core.wrappers.ModelWrapper;
 import org.apache.commons.codec.binary.StringUtils;
+import org.apache.commons.vfs2.FileObject;
 import play.mvc.LegacyWebSocket;
 import play.mvc.WebSocket;
 import play.mvc.WebSocket.In;
@@ -29,19 +31,23 @@ public class Debug extends Application {
             defaultName = Base64.getEncoder().encodeToString(defaultName.getBytes());
         }
 
-        IVFS file = new CommonsVFS(account, path);
+        IVFS<FileObject> file = new CommonsVFS(account, path);
 
         if (!file.exists())
             return errorResponse("file not found");
 
-        if (file.isDirectory()) {
-            if (type == null) return errorResponse("Model type was not defined");
-            manager = new DebugManager(entryDecoded, type, defaultName, file, coverage);
-        } else {
-            manager = new DebugManager(entryDecoded, defaultName, file, coverage);
+        if (type == null) {
+            ModelWrapper modelWrapper = new ModelWrapper(file);
+            type = modelWrapper.getDialect().toString().replace("_", "").toLowerCase();
         }
 
+        if (file.isDirectory())
+            manager = new DebugManager(entryDecoded, type, defaultName, file, coverage);
+        else
+            manager = new DebugManager(entryDecoded, defaultName, file, coverage);
+
         DebugClient client = manager.start();
+
         if (client == null)
             return errorResponse("Error occurred while initiating connection");
 
