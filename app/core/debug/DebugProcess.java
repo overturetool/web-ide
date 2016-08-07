@@ -5,8 +5,10 @@ import core.processing.processes.AbstractProcess;
 import core.vfs.IVFS;
 import org.overture.interpreter.debug.DBGPReaderV2;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 
 public class DebugProcess extends AbstractProcess {
     public DebugProcess(int port, String type, String entry, String defaultName, IVFS file, boolean coverage) throws IOException {
@@ -33,18 +35,18 @@ public class DebugProcess extends AbstractProcess {
             args.add(defaultName);
         }
 
-//        if (coverage) {
-//            LocalDateTime dateTime = LocalDateTime.now();
-//            String time = dateTime.toLocalDate().toString().replaceAll("-", "_") + "_";
-//            time += dateTime.toLocalTime().toString().substring(0, 8).replaceAll(":", "_");
-//            File outputDir = Paths.get(file.getAbsolutePath(), "generated", time).toFile();
-//
-//            if (!outputDir.exists())
-//                outputDir.mkdirs();
-//
-//            args.add("-coverage");
-//            args.add("file:" + outputDir.getAbsolutePath());
-//        }
+        if (coverage) {
+            LocalDateTime dateTime = LocalDateTime.now();
+            String time = dateTime.toLocalDate().toString().replaceAll("-", "_") + "_";
+            time += dateTime.toLocalTime().toString().substring(0, 8).replaceAll(":", "_");
+            File outputDir = Paths.get(file.getAbsolutePath(), "generated", time).toFile();
+
+            if (!outputDir.exists())
+                outputDir.mkdirs();
+
+            args.add("-coverage");
+            args.add("file:" + outputDir.getAbsolutePath());
+        }
 
         args.add("-w"); // turn off warnings
         args.add(file.getAbsoluteUrl());

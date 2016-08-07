@@ -19,7 +19,7 @@ public class Debug extends Application {
         String entryEncoded = request().getQueryString("entry");
         String entryDecoded = StringUtils.newStringUtf8(Base64.getDecoder().decode(entryEncoded));
         String coverageString = request().getQueryString("coverage");
-        boolean coverage = true;//Boolean.parseBoolean(coverageString);
+        boolean coverage = Boolean.parseBoolean(coverageString);
         String defaultName = null;
         DebugManager manager;
 
