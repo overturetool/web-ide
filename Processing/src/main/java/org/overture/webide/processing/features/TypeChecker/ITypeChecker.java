@@ -1,4 +1,4 @@
-package org.overture.webide.processing.features;
+package org.overture.webide.processing.features.TypeChecker;
 
 import org.overture.ast.lex.Dialect;
 import org.overture.config.Release;

@@ -1,6 +1,6 @@
 package org.overture.webide.processing;
 
-import org.overture.webide.processing.features.TypeChecker;
+import org.overture.webide.processing.features.TypeChecker.TypeChecker;
 import org.overture.webide.processing.models.Result;
 import org.overture.webide.processing.models.Task;
 import org.overture.webide.processing.utils.ProcessingUtils;
