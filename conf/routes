@@ -25,7 +25,7 @@ GET     /lint/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>             cont
 GET     /lint/:account/$path<[a-zA-Z0-9/_-]+>                               controllers.Lint.file(account, path)
 
 # codecompletion
-GET     /codecompletion/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>   controllers.CC.proposal(account, path)
+GET     /codecompletion/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>   controllers.CodeCompletion.proposal(account, path)
 
 # POG
 GET     /pog/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>              controllers.POG.generatePog(account, path)
