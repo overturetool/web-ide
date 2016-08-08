@@ -3,18 +3,20 @@ package controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import core.StatusCode;
-import core.outline.OutlineTreeContentProvider;
+import core.pog.POGMapper;
 import core.vfs.IVFS;
 import core.vfs.commons.vfs2.CommonsVFS;
 import core.wrappers.ModelWrapper;
 import org.apache.commons.vfs2.FileObject;
-import org.overture.ast.util.modules.ModuleList;
+import org.overture.ast.analysis.AnalysisException;
+import org.overture.pog.obligation.ProofObligationList;
+import org.overture.pog.pub.IProofObligationList;
 import play.mvc.Result;
 
 import java.util.List;
 
-public class Outliner extends Application {
-    public Result file(String account, String path) {
+public class POG extends Application {
+    public Result generatePog(String account, String path) {
         IVFS<FileObject> file = new CommonsVFS(account, path);
 
         if (!file.exists())
@@ -22,10 +24,15 @@ public class Outliner extends Application {
 
         ModelWrapper modelWrapper = new ModelWrapper(file).init();
 
-        ModuleList ast = modelWrapper.getAST();
-        OutlineTreeContentProvider outlineProvider = new OutlineTreeContentProvider(ast);
-        List<Object> list = outlineProvider.getContent();
-        List<ObjectNode> jsonList = outlineProvider.toJSON(list, file.getName());
+        IProofObligationList pog = new ProofObligationList();
+        try {
+            pog = modelWrapper.getPOG();
+        } catch (AnalysisException e) {
+            e.printStackTrace();
+        }
+
+        POGMapper pogMapper = new POGMapper(pog);
+        List<ObjectNode> jsonList = pogMapper.toJson();
 
         return ok(new ObjectMapper().createArrayNode().addAll(jsonList));
     }

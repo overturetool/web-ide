@@ -1,4 +1,4 @@
-import controllers.Linting;
+import controllers.Lint;
 import org.junit.Test;
 import play.mvc.Result;
 
@@ -8,7 +8,7 @@ public class LintIntegrationTest {
 
     @Test
     public void Lint() {
-        Linting controller = new Linting();
+        Lint controller = new Lint();
         Result result = controller.file("111425625270532893915", "BOMSL");
         assertEquals(200, result.status());
     }

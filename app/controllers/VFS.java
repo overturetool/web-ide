@@ -12,7 +12,7 @@ import play.mvc.Result;
 
 import java.util.List;
 
-public class FS extends Application {
+public class VFS extends Application {
     public Result appendFile(String account, String path) {
         Http.RequestBody body = request().body();
 

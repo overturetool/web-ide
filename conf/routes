@@ -5,30 +5,30 @@
 # Home page
 #GET     /                                                                   controllers.Application.index()
 
-# FS
-PUT     /vfs/appendFile/:account/*path                                      controllers.FS.appendFile(account, path)
-GET     /vfs/readFile/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>     controllers.FS.readFile(account, path)
-GET     /vfs/readdir/:account                                               controllers.FS.readdir(account, path = "", depth ?= "0")
-GET     /vfs/readdir/:account/$path<[a-zA-Z0-9./_-]+>                       controllers.FS.readdir(account, path, depth ?= "0")
-POST    /vfs/writeFile/:account/$path<[a-zA-Z0-9/_-]+([.]{1}[a-zA-Z0-9]+)?> controllers.FS.writeFile(account, path)
-PUT     /vfs/move/:account/$path<[a-zA-Z0-9./_-]+>                          controllers.FS.move(account, path)
-DELETE  /vfs/delete/:account/$path<[a-zA-Z0-9/._-]+>                        controllers.FS.delete(account, path)
-PUT     /vfs/rename/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>       controllers.FS.rename(account, path, name)
-POST    /vfs/mkdir/:account/$path<[a-zA-Z0-9/_-]*>                          controllers.FS.mkdir(account, path)
-POST    /vfs/mkFile/:account/$path<[a-zA-Z0-9./_-]*>                        controllers.FS.mkFile(account, path)
+# VFS
+PUT     /vfs/appendFile/:account/*path                                      controllers.VFS.appendFile(account, path)
+GET     /vfs/readFile/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>     controllers.VFS.readFile(account, path)
+GET     /vfs/readdir/:account                                               controllers.VFS.readdir(account, path = "", depth ?= "0")
+GET     /vfs/readdir/:account/$path<[a-zA-Z0-9./_-]+>                       controllers.VFS.readdir(account, path, depth ?= "0")
+POST    /vfs/writeFile/:account/$path<[a-zA-Z0-9/_-]+([.]{1}[a-zA-Z0-9]+)?> controllers.VFS.writeFile(account, path)
+PUT     /vfs/move/:account/$path<[a-zA-Z0-9./_-]+>                          controllers.VFS.move(account, path)
+DELETE  /vfs/delete/:account/$path<[a-zA-Z0-9/._-]+>                        controllers.VFS.delete(account, path)
+PUT     /vfs/rename/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>       controllers.VFS.rename(account, path, name)
+POST    /vfs/mkdir/:account/$path<[a-zA-Z0-9/_-]*>                          controllers.VFS.mkdir(account, path)
+POST    /vfs/mkFile/:account/$path<[a-zA-Z0-9./_-]*>                        controllers.VFS.mkFile(account, path)
 
-# Outliner
-GET     /outline/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>          controllers.Outliner.file(account, path)
+# Outline
+GET     /outline/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>          controllers.Outline.file(account, path)
 
-# Linting
-GET     /lint/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>             controllers.Linting.file(account, path)
-GET     /lint/:account/$path<[a-zA-Z0-9/_-]+>                               controllers.Linting.file(account, path)
+# Lint
+GET     /lint/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>             controllers.Lint.file(account, path)
+GET     /lint/:account/$path<[a-zA-Z0-9/_-]+>                               controllers.Lint.file(account, path)
 
 # codecompletion
 GET     /codecompletion/:account/$path<[a-zA-Z0-9/_-]+[.]{1}[a-zA-Z0-9]+>   controllers.CodeCompletion.proposal(account, path)
 
-# POGr
-GET     /pog/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>              controllers.POGr.generatePog(account, path)
+# POG
+GET     /pog/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>              controllers.POG.generatePog(account, path)
 
 # Evaluate
 GET     /eval/:account/$path<[a-zA-Z0-9/_-]+([.][a-zA-Z0-9]+)?>             controllers.Evaluate.project(account, path)
