@@ -10,7 +10,7 @@ import core.wrappers.ModelWrapper;
 import org.apache.commons.vfs2.FileObject;
 import play.mvc.Result;
 
-public class Lint extends Application {
+public class Linting extends Application {
     public Result file(String account, String path) {
         IVFS<FileObject> file = new CommonsVFS(account, path);
 
