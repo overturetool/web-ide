@@ -16,8 +16,8 @@ import play.mvc.Result;
 
 import java.util.List;
 
-public class CodeCompletion extends Application {
-    private final Logger logger = LoggerFactory.getLogger(CodeCompletion.class);
+public class CC extends Application {
+    private final Logger logger = LoggerFactory.getLogger(CC.class);
 
     public Result proposal(String account, String path) {
         String lineStr = request().getQueryString("line");
