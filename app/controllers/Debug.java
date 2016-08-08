@@ -15,7 +15,7 @@ import play.mvc.WebSocket;
 
 import java.util.Base64;
 
-public class DBGP extends Application {
+public class Debug extends Application {
     public WebSocket ws(String account, String path) {
         String type = request().getQueryString("type");
         String entry = request().getQueryString("entry");
