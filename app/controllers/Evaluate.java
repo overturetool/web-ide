@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.Base64;
 
-public class Eval extends Application {
+public class Evaluate extends Application {
     public WebSocket project(String account, String path) {
         IVFS<FileObject> file = new CommonsVFS(account, path);
 
